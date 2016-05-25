@@ -1,0 +1,135 @@
+@CHARSET "utf-8";
+
+html td.mxPopupMenuItem {
+	padding: 3px 20px; font-size: 12px; font-family: '宋体'; 
+}
+
+div.mxPopupMenu tr {
+	background-color: #ffffff;
+}
+
+div.mxPopupMenu tr.mxPopupMenuItemHover {
+	background-color: #000066;
+}
+
+.expense-high {
+    background-color: #e4765c;
+}
+
+.x-check-group-alt {
+    background: #D1DDEF;
+    border-top:1px dotted #B5B8C8;
+    border-bottom:1px dotted #B5B8C8;
+    margin-left: 22px;
+    padding: 5px 0px;
+}
+
+.x-check-group-clt {
+    background: #D1DDEF;
+    border-top:1px dotted #B5B8C8;
+    border-bottom:1px dotted #B5B8C8;
+    padding: 5px 0px;
+}
+
+.add {
+	background-image:url(../images/add.png) !important;
+}
+
+.delete {
+	background-image:url(../images/delete.png) !important;
+}
+
+.folder {
+	background-image:url(../images/arrow.png) !important;
+}
+
+.run {
+	background-image:url(../images/run.png) !important;
+}
+.pause {
+	background-image:url(../images/pause.png) !important;
+}
+.stop {
+	background-image:url(../images/stop.png) !important;
+}
+.preview {
+	background-image:url(../images/preview.png) !important;
+}
+.debug {
+	background-image:url(../images/debug.png) !important;
+}
+.replay {
+	background-image:url(../images/replay.png) !important;
+}
+
+.check {
+	background-image:url(../images/check.png) !important;
+}
+.impact {
+	background-image:url(../images/impact.png) !important;
+}
+.SQLbutton {
+	background-image:url(../images/SQLbutton.png) !important;
+}
+.exploredb {
+	background-image:url(../images/exploredb.png) !important;
+}
+.show-results {
+	background-image:url(../images/show-results.png) !important;
+}
+
+
+#loading-mask{
+	position:absolute;
+	left:0;
+	top:0;
+    width:100%;
+    height:100%;
+    z-index:20000;
+    background-color:white;
+}
+#loading{
+	position:absolute;
+	left:45%;
+	top:40%;
+	padding:2px;
+	z-index:20001;
+    height:auto;
+}
+#loading img {
+    margin-bottom:5px;
+}
+#loading .loading-indicator{
+	background:white;
+	color:#555;
+	font:bold 13px helvetica,arial,tahoma,sans-serif;
+	padding:10px;
+	margin:0;
+    text-align:center;
+    height:auto;
+}
+
+/**
+左侧菜单树
+*/
+
+.x-tree-node div.nav-node {
+    background:#eee url(../images/cmp-bg.gif) repeat-x;
+    margin-top:1px;
+    border-top:1px solid #ddd;
+    border-bottom:1px solid #ccc;
+    padding-top:2px;
+    padding-bottom:1px;
+}
+
+.nav-node .x-tree-node-icon {
+    display:none;
+}
+
+.nav {
+    border: 1px solid #fff;
+    margin: 3px;
+}
+.nav .x-tree-ec-icon {
+    display: none;
+}
