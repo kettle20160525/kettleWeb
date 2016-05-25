@@ -43,6 +43,9 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 	background-image:url(../images/arrow.png) !important;
 }
 
+.save {
+	background-image:url(../images/save.png) !important;
+}
 .run {
 	background-image:url(../images/run.png) !important;
 }
@@ -78,6 +81,19 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 	background-image:url(../images/show-results.png) !important;
 }
 
+.job {
+	background-image:url(../images/job.png) !important;
+}
+.trans {
+	background-image:url(../images/transformation.png) !important;
+}
+
+.job_tree {
+	background-image:url(../images/job_tree.png) !important;
+}
+.trans_tree {
+	background-image:url(../images/transformation_tree.png) !important;
+}
 
 #loading-mask{
 	position:absolute;
@@ -120,10 +136,6 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
     border-bottom:1px solid #ccc;
     padding-top:2px;
     padding-bottom:1px;
-}
-
-.nav-node .x-tree-node-icon {
-    display:none;
 }
 
 .nav {

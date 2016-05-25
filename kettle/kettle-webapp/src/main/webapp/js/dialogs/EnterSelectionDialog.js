@@ -7,33 +7,22 @@ EnterSelectionDialog = Ext.extend(Ext.Window, {
 	modal: true,
 	bodyStyle: 'padding: 5px;',
 	
+	valueField: 'name',
+	displayField: 'name',
+	
 	initComponent: function() {
-		var me = this, graph = getActiveTransGraph().getGraph(), cell = graph.getSelectionCell();
+		if(this.initialConfig.dataUrl)
+			this.dataUrl = this.initialConfig.dataUrl;
+		else
+			this.dataUrl = GetUrl('step/inputOutputFields.do');
 		
-		var store = Ext.isFunction(this.getExtraStore) ? this.getExtraStore() : new Ext.data.JsonStore({
-			fields: ['name'],
-			proxy: new Ext.data.HttpProxy({
-				url: 'step/inputOutputFields.do',
-				method: 'POST'
-			})
-		});
-		
-		var enc = new mxCodec(mxUtils.createXmlDocument());
-		var node = enc.encode(graph.getModel());
-		
-		store.baseParams.stepName = cell.getAttribute('label');
-		store.baseParams.graphXml = mxUtils.getPrettyXml(node);
-		store.baseParams.before = true;
+		var store = this.getStore(), me = this;
 		
 		var listBox = new ListBox({
-			valueField: 'name',
-			displayField: 'name',
+			valueField: this.valueField,
+			displayField: this.displayField,
 			store: store
 		});
-		
-		if(store.getTotalCount() < 1) {
-			store.load();
-		}
 		
 		this.items = listBox;
 		
@@ -56,5 +45,26 @@ EnterSelectionDialog = Ext.extend(Ext.Window, {
 		
 		EnterSelectionDialog.superclass.initComponent.call(this);
 		this.addEvents('sure');
+	},
+	
+	getStore: function() {
+		if(!this.store) {
+			var fields = [this.valueField];
+			if(this.valueField != this.displayField)
+				fields.push(this.displayField);
+			this.store = new Ext.data.JsonStore({
+				fields: fields,
+				proxy: new Ext.data.HttpProxy({
+					url: this.dataUrl,
+					method: 'POST'
+				})
+			});
+		}
+		return this.store;
+	},
+	
+	load: function(bp) {
+		this.store.baseParams = bp;
+		this.store.load();
 	}
 });

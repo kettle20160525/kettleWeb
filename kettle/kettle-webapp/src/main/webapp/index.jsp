@@ -4,6 +4,8 @@
 	<head>
 	  	<title>TransformationsManager</title>
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/public.css" />
+	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/common.css" />
+	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/explorer.css" />
 	</head>
 	<body>
 		<div id="loading-mask"></div>
@@ -16,10 +18,6 @@
 		
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/resources/css/ext-all.css" />
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/ext-patch.css" />
-	    <script type="text/javascript">
-			mxBasePath = '${pageContext.request.contextPath}/mxgraph2';
-			mxLanguages = ['de'];
-		</script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/mxgraph2/js/mxClient.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/adapter/ext/ext-base.js"></script>
@@ -44,27 +42,16 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransExecutionConfigurationDialog.js"></script>
 	    
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/RowGeneratorDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/CheckSumDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/ExecSQLDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/TableInputDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/TableOutputDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/FilterRowsDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/SequenceDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/DummyDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/SwitchCaseDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/InsertUpdateDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/JsonInputDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/SelectValuesDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/SystemInfoDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/steps/SQLFileOutputDialog.js"></script>
-	    
-	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/NormalPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/AdvancePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/OptionsPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/PoolPanel.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/ClusterPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/DatabaseDialog.js"></script>
+	    
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleDatabaseRepositoryDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleFileRepositoryDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/RepositoriesDialog.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/DebugWin.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextFieldDialog.js"></script>
@@ -73,16 +60,19 @@
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/StepFieldsDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/CheckResultDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterTextDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterSelectionDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterValueDialog.js"></script>
 	    
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/LibraryPanel.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/MainPanel.js"></script>
+<%-- 	    <script type="text/javascript" src="${pageContext.request.contextPath}/TRANS.js"></script> --%>
+	    
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/JobGraph.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ResultPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/TransGraph.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/SystemStore.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/App.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
 	    
-	    <input  type ="hidden"  id="context-path" value ="${pageContext.request.contextPath}"/>
+	    <input type="hidden" id="context-path" value="${pageContext.request.contextPath}" />
 	</body>
 </html>

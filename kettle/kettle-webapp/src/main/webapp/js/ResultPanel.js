@@ -64,7 +64,7 @@ ResultPanel = Ext.extend(Ext.TabPanel, {
 		
 		var me = this;
         setTimeout(function() {
-        	var transGraph = getActiveTransGraph();
+        	var transGraph = getActiveGraph();
         	if(!transGraph) return;
         	var graph = transGraph.getGraph();
             if(!graph) return; 
@@ -84,7 +84,7 @@ ResultPanel = Ext.extend(Ext.TabPanel, {
 		var me = this, grid = this.items.get(2), log = this.items.get(1);
 		
 		Ext.Ajax.request({
-			url: GetUrl('graph/result.do'),
+			url: GetUrl('trans/result.do'),
 			params: {executionId: executionId},
 			method: 'POST',
 			success: function(response) {
@@ -96,7 +96,7 @@ ResultPanel = Ext.extend(Ext.TabPanel, {
 				store.loadData(result.stepMeasure);
 				log.items.get(0).setValue(result.log);
 				
-				getActiveTransGraph().updateStatus(result.stepStatus);
+				getActiveGraph().updateStatus(result.stepStatus);
 				
 				if(!result.finished) {
 					setTimeout(function() { me.loadResult(executionId); }, 500);

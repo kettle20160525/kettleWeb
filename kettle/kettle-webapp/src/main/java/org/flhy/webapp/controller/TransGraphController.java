@@ -2,6 +2,7 @@ package org.flhy.webapp.controller;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,25 +14,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.flhy.ext.App;
 import org.flhy.ext.TransExecutor;
 import org.flhy.ext.trans.TransDecoder;
-import org.flhy.ext.trans.TransEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
-import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.logging.LogLevel;
-import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
-import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.StepMeta;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,7 +42,7 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 
 @Controller
-@RequestMapping(value="/graph")
+@RequestMapping(value="/trans")
 public class TransGraphController {
 
 	@ResponseBody
@@ -56,29 +54,49 @@ public class TransGraphController {
 		codec.decode(doc.getDocumentElement(), graph.getModel());
 		
 		TransMeta transMeta = TransDecoder.decode(graph);
+		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
 		
 		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(transMeta.getXML());
+		response.getWriter().write(xml);
 	}
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/load")
-	protected void load(HttpServletRequest request, HttpServletResponse response, @RequestParam String filename) throws Exception {
-		String path = request.getSession().getServletContext().getRealPath("/");  
-		File file = new File(path, filename);
-		
-		TransMeta transMeta = new TransMeta(file.getAbsolutePath());
-		
+	@RequestMapping(method=RequestMethod.POST, value="/save")
+	protected void save(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
+		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
-		mxGraph graph = TransEncoder.encode(transMeta);
-		String graphXml = mxUtils.getPrettyXml(codec.encode(graph.getModel()));
+		Document doc = mxUtils.parseXml(graphXml);
+		codec.decode(doc.getDocumentElement(), graph.getModel());
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(graphXml);
+		TransMeta transMeta = TransDecoder.decode(graph);
+		File file = new File(transMeta.getFilename());
+		if(file.exists()) {
+			List<String> fileRows = FileUtils.readLines(file);
+			
+			String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
+			List<String> engineRows = IOUtils.readLines(new StringReader(xml));
+			
+			int number = fileRows.size() > engineRows.size() ? engineRows.size() : fileRows.size();
+			for(int i=0; i<number; i++) {
+				String fileRow = fileRows.get(i);
+				String engineRow = engineRows.get(i);
+				
+				if(!fileRow.equals(engineRow)) {
+					System.out.println("[" + i + "]file: " + fileRow);
+					System.out.println("[" + i + "]engine: " + engineRow);
+					System.out.println("================================================================================");
+				}
+			}
+			System.out.println("=====finished=====");
+		}
+		
+		
+//		response.setContentType("text/html; charset=utf-8");
+//		response.getWriter().write(transMeta.getXML());
 	}
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/checkTrans")
+	@RequestMapping(method=RequestMethod.POST, value="/check")
 	protected void checkTrans(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml, @RequestParam boolean show_successful_results) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
@@ -125,10 +143,10 @@ public class TransGraphController {
 		
 		TransMeta transMeta = TransDecoder.decode(graph);
 		
-		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
-		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(transMeta.getFilename(), false));
-		dos.write(xml.getBytes(Const.XML_ENCODING));
-		dos.close();
+//		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
+//		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(transMeta.getFilename(), false));
+//		dos.write(xml.getBytes(Const.XML_ENCODING));
+//		dos.close();
 		
 		JSONObject jsonObject = JSONObject.fromObject(executionConfig);
 		TransExecutionConfiguration executionConfiguration = new TransExecutionConfiguration();

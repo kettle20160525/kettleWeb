@@ -7,7 +7,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	bodyStyle: 'padding: 5px',
 	
 	initComponent: function() {
-		var transGraph = getActiveTransGraph(), graph = transGraph.getGraph(), root = graph.getDefaultParent();
+		var transGraph = getActiveGraph(), graph = transGraph.getGraph(), root = graph.getDefaultParent();
 		var executeMethod = new Ext.form.FormPanel({
 			title: '执行方式',
 			labelWidth: 1,
@@ -258,7 +258,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 				var enc = new mxCodec(mxUtils.createXmlDocument());
 				var node = enc.encode(graph.getModel());
 				Ext.Ajax.request({
-					url: GetUrl('graph/run.do'),
+					url: GetUrl('trans/run.do'),
 					params: {graphXml: mxUtils.getPrettyXml(node), executionConfig: Ext.encode(executionConfig)},
 					method: 'POST',
 					success: function(response) {

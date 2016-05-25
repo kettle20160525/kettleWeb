@@ -7,14 +7,14 @@ CheckResultDialog = Ext.extend(Ext.Window, {
 	modal: true,
 	initComponent: function() {
 		
-		var graph = getActiveTransGraph().getGraph();
+		var graph = getActiveGraph().getGraph();
 		var enc = new mxCodec(mxUtils.createXmlDocument());
 		var node = enc.encode(graph.getModel());
 		
 		var store = new Ext.data.JsonStore({
 			fields: ['name', 'type', 'typeDesc', 'text'],
 			proxy: new Ext.data.HttpProxy({
-			    url: 'graph/checkTrans.do',
+			    url: GetUrl('trans/check.do'),
 			    method: 'POST'
 			})
 		});

@@ -5,7 +5,7 @@ TransLogStepPanel = Ext.extend(Ext.Panel, {
         align:'stretch'
     },
 	initComponent: function() {
-		var graph = getActiveTransGraph().getGraph(), root = graph.getDefaultParent();
+		var graph = getActiveGraph().getGraph(), root = graph.getDefaultParent();
 		var stepLogTable = Ext.decode(root.getAttribute('stepLogTable'));
 		
 		var form = new Ext.form.FormPanel({

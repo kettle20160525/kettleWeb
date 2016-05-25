@@ -15,5 +15,9 @@ public class PluginFactory implements ApplicationContextAware {
 	public static Object getBean(String beanId) {
 		return context.getBean(beanId);
 	}
+	
+	public static boolean containBean(String beanId) {
+		return context.containsBean(beanId);
+	}
 
 }

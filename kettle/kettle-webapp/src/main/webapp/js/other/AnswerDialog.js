@@ -44,7 +44,9 @@ AnswerDialog = Ext.extend(Ext.Window, {
 		
 		var tpl = new Ext.XTemplate(
 		    '<table style="width:100%;height:100%"><tr>',
-		    '<td width="48" align="center" valign="center"><img src="/kw/ui/resources/icon-warning.gif"></td>',
+		    '<td width="48" align="center" valign="center"><img src="',
+		    GetUrl("ui/resources/icon-warning.gif"),
+		    '"></td>',
 		    '<td><span style="font-size: 13px">表中已经有{has}行数据，如何处理新找到的{found}列？</span></td>',
 		    '</tr></table>',
 		    {

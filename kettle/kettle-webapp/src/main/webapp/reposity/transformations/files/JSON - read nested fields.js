@@ -1,4 +1,5 @@
-{ "status": "ok",
+{
+    "status": "ok",
     "response": {
         "submissions": [
             {

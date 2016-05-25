@@ -1,21 +1,87 @@
 TransGraph = Ext.extend(Ext.Panel, {
-	bodyStyle:'overflow: auto',
+	layout: 'border',
+	iconCls: 'trans',
+	defaults: {border: false},
+	title: '正在加载...',
+	
 	initComponent: function() {
+		var me = this;
+		var resultPanel = new ResultPanel({
+			region: 'south',
+			hidden: true,
+			height: 250
+		});
+		
+		var graphPanel = new Ext.Panel({
+			region: 'center',
+			bodyStyle:'overflow: auto',
+			tbar: [{
+				iconCls: 'save', handler: function() {
+					var enc = new mxCodec(mxUtils.createXmlDocument());
+					var node = enc.encode(me.getGraph().getModel());
+					Ext.Ajax.request({
+						url: GetUrl('trans/save.do'),
+						params: {graphXml: mxUtils.getPrettyXml(node)},
+						method: 'POST',
+						success: function(response) {
+							
+						}
+					});
+				}
+			},'-',{
+				iconCls: 'run', handler: me.run
+			},{
+				iconCls: 'pause', handler: function() { }
+			},{
+				iconCls: 'stop'
+			},{
+				iconCls: 'preview'
+			},{
+				iconCls: 'debug'
+			},{
+				iconCls: 'replay'
+			},'-',{
+				iconCls: 'check', scope: this, handler: this.check
+			},{
+				iconCls: 'impact'
+			},{
+				iconCls: 'SQLbutton'
+			},{
+				iconCls: 'exploredb'
+			},'-',{
+				iconCls: 'show-results', scope: this, handler: function() {
+					resultPanel.setVisible(!resultPanel.isVisible());
+					this.doLayout();
+				}
+			}]
+		});
+		
+		this.items = [graphPanel, resultPanel];
+		
+		this.on('run', function(executionId) {
+			if(resultPanel.isVisible() == false) {
+				resultPanel.show();
+				me.doLayout();
+			}
+			
+			resultPanel.loadResult(executionId);
+		});
+		
+		graphPanel.on('afterrender', function(comp) {
+			var container = comp.body.dom;
+			this.initGraph(container);
+			this.installDragDrop(container);
+			this.installPopupMenu(container);
+		}, this);
+		
 		TransGraph.superclass.initComponent.call(this);
 		this.addEvents('run');
 	},
-	afterRender: function() {
-		TransGraph.superclass.afterRender.call(this, arguments);
-		
-		var container = this.body.dom;
-		this.initGraph(container);
-		this.installDragDrop(container);
-		this.installPopupMenu(container);
-	},
+	
 	initGraph: function(container) {
 		var me = this;
 		var graph = this.graph = new mxGraph(container);
-		var node = mxUtils.load(mxBasePath + '/style/default-style.xml').getDocumentElement();
+		var node = mxUtils.load(GetUrl('mxgraph2/style/default-style.xml')).getDocumentElement();
 		var dec = new mxCodec(node.ownerDocument);
 		dec.decode(node, graph.getStylesheet());
 		
@@ -42,7 +108,9 @@ TransGraph = Ext.extend(Ext.Panel, {
 			if(child.value && child.value.nodeName && 'Note' == child.value.nodeName) {
 				child.setConnectable(false);
 			}
-				
+			
+			loadPluginScript(child.getAttribute('ctype'));
+			
 			return child;
 		};
 		
@@ -110,7 +178,7 @@ TransGraph = Ext.extend(Ext.Panel, {
 					var node = enc.encode(graph.getModel());
 					
 					Ext.Ajax.request({
-						url: GetUrl('graph/engineXml.do'),
+						url: GetUrl('trans/engineXml.do'),
 						params: {graphXml: mxUtils.getPrettyXml(node)},
 						method: 'POST',
 						success: function(response) {
@@ -211,7 +279,7 @@ TransGraph = Ext.extend(Ext.Panel, {
 		return this.database_store;
 	},
 	
-	checkTrans: function() {
+	check: function() {
 		var checkResultDialog = new CheckResultDialog();
 		checkResultDialog.show();
 	},
@@ -271,18 +339,6 @@ TransGraph = Ext.extend(Ext.Panel, {
 		}
 	},
 	
-	openXml: function(graphXml, cb) {
-		var xmlDocument = mxUtils.parseXml(graphXml);
-		var decoder = new mxCodec(xmlDocument);
-		var node = xmlDocument.documentElement;
-		cb();
-		var graph = this.graph;
-		decoder.decode(node, graph.getModel());
-		
-		var cell = graph.getDefaultParent();
-		this.ownerCt.setTitle(cell.getAttribute('name'));
-	},
-	
 	updateStatus: function(status) {
 		var graph = this.graph;
 		
@@ -313,7 +369,6 @@ TransGraph = Ext.extend(Ext.Panel, {
 			}
 		}
 	}
-	
 });
 
 Ext.reg('TransGraph', TransGraph);

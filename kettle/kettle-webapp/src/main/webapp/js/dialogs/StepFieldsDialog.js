@@ -5,7 +5,7 @@ StepFieldsDialog = Ext.extend(Ext.Window, {
 	modal: true,
 	initComponent: function() {
 		var me = this,
-		graph = getActiveTransGraph().getGraph(), 
+		graph = getActiveGraph().getGraph(), 
 		cell = graph.getSelectionCell();
 		
 		this.setTitle('步骤里的字段和其来源：' + cell.getAttribute('label'));

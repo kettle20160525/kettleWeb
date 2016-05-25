@@ -5,7 +5,7 @@ TransTab = Ext.extend(Ext.form.FormPanel, {
 	labelWidth: 90,
 	
 	initComponent: function() {
-		var graph = getActiveTransGraph().getGraph(), root = graph.getDefaultParent();
+		var graph = getActiveGraph().getGraph(), root = graph.getDefaultParent();
 		
 		this.items = [{
 			fieldLabel: '转换名称',

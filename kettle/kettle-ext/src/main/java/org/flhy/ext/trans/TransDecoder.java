@@ -2,9 +2,7 @@ package org.flhy.ext.trans;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.step.StepDecoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -23,7 +22,6 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.NotePadMeta;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
-import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.logging.ChannelLogTable;
 import org.pentaho.di.core.logging.LogTableField;
 import org.pentaho.di.core.logging.MetricsLogTable;
@@ -33,7 +31,11 @@ import org.pentaho.di.core.logging.TransLogTable;
 import org.pentaho.di.core.parameters.DuplicateParamException;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.partition.PartitionSchema;
+import org.pentaho.di.repository.ObjectId;
+import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectory;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.repository.filerep.KettleFileRepository;
 import org.pentaho.di.trans.TransHopMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -46,17 +48,36 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 import com.mxgraph.model.mxCell;
-import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 
 public class TransDecoder {
 	
 	public static TransMeta decode(mxGraph graph) throws Exception {
-		TransMeta transMeta = new TransMeta();
 		mxCell root = (mxCell) graph.getDefaultParent();
 		
-		if(App.getInstance().getRepository() == null)
+		Repository repository = App.getInstance().getRepository();
+		
+//		String fname = root.getAttribute("name") + ".ktr";
+//		if(StringUtils.hasText(directory))
+//			fname = directory + "/" + fname;
+		TransMeta transMeta = new TransMeta();
+		
+		if(repository == null) {
 			transMeta.setFilename(root.getAttribute("fileName"));
+		} else {
+			String directory = root.getAttribute("directory");
+			RepositoryDirectoryInterface path = repository.findDirectory(directory);
+			if(path == null)
+				path = new RepositoryDirectory();
+			transMeta.setRepositoryDirectory(path);
+			
+			if(repository instanceof KettleFileRepository) {
+				KettleFileRepository ktr = (KettleFileRepository) repository;
+				ObjectId fileId = ktr.getTransformationID(root.getAttribute("name"), path);
+				String realPath = ktr.calcFilename(fileId);
+				transMeta.setFilename(realPath);
+			}
+		}
 		
 		transMeta.setSharedObjectsFile(root.getAttribute("shared_objects_file"));
 		if(transMeta.getRepository() != null)
@@ -192,10 +213,7 @@ public class TransDecoder {
 		transMeta.setExtendedDescription(root.getAttribute("extended_description"));
 		transMeta.setTransstatus(Integer.parseInt(root.getAttribute("trans_status")));
 		transMeta.setTransversion(root.getAttribute("trans_version"));
-		
-		if ( transMeta.getRepositoryDirectory() != null && transMeta.getRepositoryDirectory().getPath() != null ) {
-			transMeta.setRepositoryDirectory(new RepositoryDirectory());
-	    }
+//		transMeta.setRepositoryDirectory(path);
 		
 		// Read the named parameters.
 		JSONArray namedParameters = JSONArray.fromObject(root.getAttribute("parameters"));
@@ -392,58 +410,59 @@ public class TransDecoder {
 	}
 	
 	public static DatabaseMeta decodeDatabases(JSONObject jsonObject) throws KettleDatabaseException {
-		DatabaseMeta databaseMeta = new DatabaseMeta();
-		String type = jsonObject.optString("type");
-		databaseMeta.setDatabaseInterface(DatabaseMeta.getDatabaseInterface(type));
-
-		databaseMeta.setName(jsonObject.optString("name"));
-		databaseMeta.setDisplayName(databaseMeta.getName());
-		databaseMeta.setHostname(jsonObject.optString("server"));
-		databaseMeta.setAccessType(jsonObject.optInt("access"));
-
-		databaseMeta.setDBName(jsonObject.optString("database"));
-
-		databaseMeta.setDBPort(jsonObject.optString("port"));
-		databaseMeta.setUsername(jsonObject.optString("username"));
-		databaseMeta.setPassword(jsonObject.optString("password"));
-		databaseMeta.setServername(jsonObject.optString("servername"));
-		databaseMeta.setDataTablespace(jsonObject.optString("data_tablespace"));
-		databaseMeta.setIndexTablespace(jsonObject.optString("index_tablespace"));
-
-		databaseMeta.setReadOnly(jsonObject.optBoolean("read_only"));
-
-		JSONObject attrsJson = jsonObject.optJSONObject("attributes");
-		if (attrsJson != null) {
-			Collection<String> keys = attrsJson.keySet();
-		
-			Iterator<String> iter = keys.iterator();
-			while(iter.hasNext()) {
-				String key = iter.next();
-				String value = (String) attrsJson.get(key);
-			
-				if (key != null && value != null) {
-					if("SQL_CONNECT".equalsIgnoreCase(key))
-						value = StringEscapeHelper.decode(value);
-					
-					databaseMeta.getAttributes().put(key, value);
-				}
-				
-				databaseMeta.getDatabasePortNumberString();
-			}
-		}
-		
-		JSONArray options = jsonObject.optJSONArray("options");
-		for(int i=0; i<options.size(); i++) {
-			JSONObject jsonObject2 = options.getJSONObject(i);
-			String prefix = jsonObject2.optString("prefix");
-			String name = jsonObject2.optString("name");
-			String value = jsonObject2.optString("value");
-			
-			databaseMeta.getAttributes().put(prefix + "." + name, value);
-			databaseMeta.getDatabasePortNumberString();
-		}
-		
-		return databaseMeta;
+		return DatabaseCodec.decode(jsonObject);
+//		DatabaseMeta databaseMeta = new DatabaseMeta();
+//		String type = jsonObject.optString("type");
+//		databaseMeta.setDatabaseInterface(DatabaseMeta.getDatabaseInterface(type));
+//
+//		databaseMeta.setName(jsonObject.optString("name"));
+//		databaseMeta.setDisplayName(databaseMeta.getName());
+//		databaseMeta.setHostname(jsonObject.optString("server"));
+//		databaseMeta.setAccessType(jsonObject.optInt("access"));
+//
+//		databaseMeta.setDBName(jsonObject.optString("database"));
+//
+//		databaseMeta.setDBPort(jsonObject.optString("port"));
+//		databaseMeta.setUsername(jsonObject.optString("username"));
+//		databaseMeta.setPassword(jsonObject.optString("password"));
+//		databaseMeta.setServername(jsonObject.optString("servername"));
+//		databaseMeta.setDataTablespace(jsonObject.optString("data_tablespace"));
+//		databaseMeta.setIndexTablespace(jsonObject.optString("index_tablespace"));
+//
+//		databaseMeta.setReadOnly(jsonObject.optBoolean("read_only"));
+//
+//		JSONObject attrsJson = jsonObject.optJSONObject("attributes");
+//		if (attrsJson != null) {
+//			Collection<String> keys = attrsJson.keySet();
+//		
+//			Iterator<String> iter = keys.iterator();
+//			while(iter.hasNext()) {
+//				String key = iter.next();
+//				String value = (String) attrsJson.get(key);
+//			
+//				if (key != null && value != null) {
+//					if("SQL_CONNECT".equalsIgnoreCase(key))
+//						value = StringEscapeHelper.decode(value);
+//					
+//					databaseMeta.getAttributes().put(key, value);
+//				}
+//				
+//				databaseMeta.getDatabasePortNumberString();
+//			}
+//		}
+//		
+//		JSONArray options = jsonObject.optJSONArray("options");
+//		for(int i=0; i<options.size(); i++) {
+//			JSONObject jsonObject2 = options.getJSONObject(i);
+//			String prefix = jsonObject2.optString("prefix");
+//			String name = jsonObject2.optString("name");
+//			String value = jsonObject2.optString("value");
+//			
+//			databaseMeta.getAttributes().put(prefix + "." + name, value);
+//			databaseMeta.getDatabasePortNumberString();
+//		}
+//		
+//		return databaseMeta;
 	}
 	
 	public static SlaveServer decodeSlaveServer(JSONObject jsonObject) throws Exception {

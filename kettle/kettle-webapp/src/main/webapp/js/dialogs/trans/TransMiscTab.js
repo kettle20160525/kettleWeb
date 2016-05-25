@@ -4,7 +4,7 @@ TransMiscTab = Ext.extend(Ext.form.FormPanel, {
 	bodyStyle: 'padding: 10px 15px',
 	defaultType: 'textfield',
 	initComponent: function() {
-		var graph = getActiveTransGraph().getGraph(), root = graph.getDefaultParent();
+		var graph = getActiveGraph().getGraph(), root = graph.getDefaultParent();
 		
 		this.items = [{
 			fieldLabel: '记录集合里的记录数',

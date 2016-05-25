@@ -20,12 +20,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.JLabel;
 
+import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.trans.steps.FilterRows;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.SvgImageUrl;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
@@ -33,7 +36,13 @@ import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaAndData;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaPluginType;
+import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositoryDirectoryInterface;
+import org.pentaho.di.repository.RepositoryElementMetaInterface;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
+import org.pentaho.di.ui.repository.dialog.RepositoryDialogInterface;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -58,7 +67,7 @@ public class SystemMainController {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
-//			jsonObject.put("icon", "ui/images/folder_connection.png");
+			jsonObject.put("icon", "ui/images/folder_connection.png");
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 
@@ -75,12 +84,11 @@ public class SystemMainController {
 			});
 			for (PluginInterface p : sortedCat) {
 				String pluginName = p.getName();
-//				String imageFile = p.getImageFile();
 				String pluginDescription = p.getDescription();
 				
 				JSONObject child = new JSONObject();
 				child.put("id", p.getIds()[0]);
-				child.put("text", pluginName);
+				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
 				child.put("icon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Small));
 				child.put("dragIcon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Middle));
 				child.put("cls", "nav");
@@ -101,50 +109,85 @@ public class SystemMainController {
 	}
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/resposity")
-	protected void resposity(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		ArrayList nodes = new ArrayList();
+	@RequestMapping(method=RequestMethod.POST, value="/jobentrys")
+	protected void jobentrys(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		JSONArray jsonArray = new JSONArray();
 		
-		String path = request.getSession().getServletContext().getRealPath("/");  
-		File repoDir = new File(path, "reposity");
-		browser(repoDir, nodes);
-		
-		
-		response.setContentType("text/javascript; charset=utf-8");
-		response.getWriter().write(JSONArray.fromObject(nodes).toString());
-	}
-	
-	private void browser(File dir, List list) {
-		if(dir.isDirectory()) {
-			HashMap<String, Object> node = new HashMap<String, Object>();
-			node.put("id", dir.getName());
-			node.put("text", dir.getName());
+		PluginRegistry registry = PluginRegistry.getInstance();
+		final List<PluginInterface> baseJobEntries = registry.getPlugins(JobEntryPluginType.class);
+		final List<String> baseCategories = registry.getCategories(JobEntryPluginType.class);
+
+		int i=0;
+		for (String baseCategory : baseCategories) {
 			
-			ArrayList children = new ArrayList();
-			node.put("children", children);
-			list.add(node);
-			
-			File[] files = dir.listFiles();
-			Arrays.sort(files, new Comparator<File>() {
-				public int compare(File f1, File f2) {
-					if (f1.isFile() && f2.isFile())
-						return 0;
-					else if(f1.isFile() && f2.isDirectory())
-						return 1;
-					else
-						return -1;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", "category" + i++);
+			jsonObject.put("text", baseCategory);
+			jsonObject.put("icon", "ui/images/folder_connection.png");
+			jsonObject.put("cls", "nav-node");
+			JSONArray children = new JSONArray();
+
+			List<PluginInterface> sortedCat = new ArrayList<PluginInterface>();
+			if ( baseCategory.equalsIgnoreCase( JobEntryPluginType.GENERAL_CATEGORY ) ) {
+				JobEntryCopy startEntry = JobMeta.createStartEntry();
+				JSONObject child = new JSONObject();
+				child.put("id", startEntry.getEntry().getPluginId() + "0");
+				child.put("text", startEntry.getName());
+				child.put("icon", SvgImageUrl.getUrl(startEntry.getEntry().getPluginId() + "0", SvgImageUrl.Size_Small));
+				child.put("dragIcon", SvgImageUrl.getUrl(startEntry.getEntry().getPluginId() + "0", SvgImageUrl.Size_Middle));
+				child.put("cls", "nav");
+				child.put("qtip", startEntry.getDescription());
+				child.put("leaf", true);
+				children.add(child);
+				
+				JobEntryCopy dummyEntry = JobMeta.createDummyEntry();
+				child = new JSONObject();
+				child.put("id", dummyEntry.getEntry().getPluginId() + "1");
+				child.put("text", dummyEntry.getName());
+				child.put("icon", SvgImageUrl.getUrl(dummyEntry.getEntry().getPluginId() + "1", SvgImageUrl.Size_Small));
+				child.put("dragIcon", SvgImageUrl.getUrl(dummyEntry.getEntry().getPluginId() + "1", SvgImageUrl.Size_Middle));
+				child.put("cls", "nav");
+				child.put("qtip", dummyEntry.getDescription());
+				child.put("leaf", true);
+				children.add(child);
+		    }
+			for (PluginInterface baseJobEntry : baseJobEntries) {
+				if ( baseJobEntry.getIds()[ 0 ].equals( "SPECIAL" ) ) 
+					continue;
+				
+				if (baseJobEntry.getCategory().equalsIgnoreCase(baseCategory)) {
+					sortedCat.add(baseJobEntry);
+				}
+			}
+			Collections.sort(sortedCat, new Comparator<PluginInterface>() {
+				public int compare(PluginInterface p1, PluginInterface p2) {
+					return p1.getName().compareTo(p2.getName());
 				}
 			});
-			for(File file : files)
-				browser(file, children);
-			
-		} else if(dir.isFile()) {
-			HashMap<String, Object> node = new HashMap<String, Object>();
-			node.put("id", dir.getName());
-			node.put("text", dir.getName());
-			node.put("leaf", true);
-			list.add(node);
+			for (PluginInterface p : sortedCat) {
+				String pluginName = p.getName();
+				String pluginDescription = p.getDescription();
+				
+				JSONObject child = new JSONObject();
+				child.put("id", p.getIds()[0]);
+				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
+				child.put("icon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Small));
+				child.put("dragIcon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Middle));
+				child.put("cls", "nav");
+				child.put("qtip", pluginDescription);
+				child.put("leaf", true);
+				children.add(child);
+				// if ( !filterMatch( pluginName ) && !filterMatch(
+				// 	pluginDescription ) ) {
+				// continue;
+				// }
+			}
+			jsonObject.put("children", children);
+			jsonArray.add(jsonObject);
 		}
+		
+		response.setContentType("text/javascript; charset=utf-8");
+		response.getWriter().write(jsonArray.toString());
 	}
 	
 	@ResponseBody

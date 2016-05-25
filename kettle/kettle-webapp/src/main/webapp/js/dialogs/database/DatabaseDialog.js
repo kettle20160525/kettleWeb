@@ -19,17 +19,49 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 			value: 0
 		});
 		
-		var generate = new NormalPanel({database: this.initialConfig.database});
-		var advance = new AdvancePanel({database: this.initialConfig.database});
-		var options = new OptionsPanel({database: this.initialConfig.database});
-		var pool = new PoolPanel({database: this.initialConfig.database});
+		var normal = new NormalPanel();
+		var advance = new AdvancePanel();
+		var options = new OptionsPanel();
+		var pool = new PoolPanel();
+		var cluster = new ClusterPanel();
+		
+		var me = this;
+		this.initReposityDatabase = function(database) {
+			Ext.Ajax.request({
+				url: GetUrl('repository/database.do'),
+				method: 'POST',
+				params: {database: database},
+				success: function(response) {
+					var dbinfo = Ext.decode(response.responseText);
+					me.initDatabase(dbinfo);
+				}
+			})
+		};
+		
+		this.initDatabase = function(dbinfo) {
+			normal.initData(dbinfo);
+			advance.initData(dbinfo);
+			options.initData(dbinfo);
+			pool.initData(dbinfo);
+			cluster.initData(dbinfo);
+		};
+		
+		this.getValue = function() {
+			var val = normal.getValue();
+			advance.getValue(val);
+			options.getValue(val);
+			pool.getValue(val);
+			cluster.getValue(val);
+			
+			return val;
+		};
 		
 		var content = new Ext.Panel({
 			region: 'center',
 			defaults: {border: false},
 			layout: 'card',
 			activeItem: 0,
-			items: [generate, advance, options, pool]
+			items: [normal, advance, options, pool, cluster]
 		});
 		
 		listBox.on('valueChange', function(v) {
@@ -52,7 +84,17 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 		});
 		var bTest = new Ext.Button({
 			text: '测试', scope: this, handler: function() {
-				this.close();
+				Ext.Ajax.request({
+					url: GetUrl('database/test.do'),
+					method: 'POST',
+					params: {databaseInfo: Ext.encode(me.getValue())},
+					success: function(response) {
+						var dialog = new EnterTextDialog();
+						dialog.show(null, function() {
+							dialog.setText(decodeURIComponent(response.responseText));
+						});
+					}
+				});
 			}
 		});
 		var bFuture = new Ext.Button({
@@ -67,13 +109,27 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 		});
 		var bOk = new Ext.Button({
 			text: '确定', handler: function() {
-				alert(listBox.getValue());
+				Ext.Ajax.request({
+					url: GetUrl('database/check.do'),
+					method: 'POST',
+					params: {databaseInfo: Ext.encode(me.getValue())},
+					success: function(response) {
+						var json = Ext.decode(response.responseText);
+						if(!json.success) {
+							Ext.Msg.alert('系统提示', json.message);
+						} else {
+							me.fireEvent('create', me);
+						}
+					}
+				});
 			}
 		});
 		
 		this.bbar = ['->', bCancel, bTest, bFuture, bView, bOk];
 		
 		DatabaseDialog.superclass.initComponent.call(this);
+		
+		this.addEvents('create')
 	}
 });
 

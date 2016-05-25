@@ -12,7 +12,7 @@ ValueMetaAndData = Ext.extend(Object, {
 	},
 	toString: function() {
 		
-		return app.syncCall({
+		return syncCall({
             url: "system/valueString.do",    
             params: {valueMeta: Ext.encode(this)}
         });
@@ -439,7 +439,11 @@ ConditionEditor = Ext.extend(Ext.Container, {
 				me.doLayout();
 			});
 		}	
-			
+		
+		var graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
+		var enc = new mxCodec(mxUtils.createXmlDocument());
+		var node = enc.encode(graph.getModel());
+		
 		var left = this.el.child('div.left_field', true);
 		if(left) {
 			var leftControl = new ControlField({
@@ -454,7 +458,13 @@ ConditionEditor = Ext.extend(Ext.Container, {
 					active_condition.setLeftValuename(v);
 					leftControl.setValue(v);
 				});
-				dialog.show();
+				dialog.show(null, function() {
+					dialog.load({
+						stepName: cell.getAttribute('label'),
+						graphXml: mxUtils.getPrettyXml(node),
+						before: true
+					});
+				});
 			});
 		}
 		
@@ -470,20 +480,16 @@ ConditionEditor = Ext.extend(Ext.Container, {
 			funcControl.getEl().on('click', function() {
 				var dialog = new EnterSelectionDialog({
 					title: '函数',
-					getExtraStore: function() {
-						var store = new Ext.data.JsonStore({
-							fields: ['name'],
-							data: active_condition.getFunctions()
-						});
-						return store;
-					}
+					dataUrl: GetUrl('step/func.do')
 				});
 				dialog.on('sure', function(v) {
 					var rawv = active_condition.getFunc(v);
 					active_condition.setFunc(rawv);
 					funcControl.setValue(v);
 				});
-				dialog.show();
+				dialog.show(null, function() {
+					dialog.load();
+				});
 			});
 		}
 		
@@ -506,7 +512,13 @@ ConditionEditor = Ext.extend(Ext.Container, {
 					
 					me.doLayout();
 				});
-				dialog.show();
+				dialog.show(null, function() {
+					dialog.load({
+						stepName: cell.getAttribute('label'),
+						graphXml: mxUtils.getPrettyXml(node),
+						before: true
+					});
+				});
 			});
 		}
 		

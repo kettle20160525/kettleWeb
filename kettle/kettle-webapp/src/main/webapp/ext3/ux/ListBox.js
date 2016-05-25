@@ -19,7 +19,9 @@ ListBox = Ext.extend(Ext.BoxComponent, {
 		this.store.on('datachanged', function(s) {
 			me.initStore();
 		});
-		me.initStore();
+		
+		if(this.store.getCount() > 0)
+			this.initStore();
 		
 		this.el.on('change', function() {
 			var dom = this.dom, v = dom.value, c=0;
@@ -36,33 +38,51 @@ ListBox = Ext.extend(Ext.BoxComponent, {
 				
 				me.fireEvent('valueChange', v);
 			}
-			
-			
 		});
 	},
 	
 	initStore: function() {
-		var el = this.el, v = this.vaule || this.initialConfig.value, me = this;
+		var el = this.el, me = this;
+		if(!el.dom) return;
 		
-		while(el.first())
-			el.first().remove();
+		this.el.select('option').each(function(item) {
+			item.remove();
+		});
 		
+//		var tpl = new Ext.XTemplate('<tpl for="."><option value="{value}">{text}</option></tpl>'), data = [];
 		this.store.each(function(rec) {
+//			data.push({value: rec.get(me.valueField), text: rec.get(me.displayField)});
+			
 			var op = document.createElement('option');
 			op.setAttribute('value', rec.get(me.valueField));
 			op.appendChild(document.createTextNode(rec.get(me.displayField)));
 			
-			if(rec.get(me.valueField) == v){
-				op.setAttribute('selected', 'selected');
-				me.fireEvent('valueChange', v);
-			}
-			
 			el.dom.appendChild(op);
-		});
+		});	
+//		tpl.overwrite(el, data);
 		
+		var v = Ext.isEmpty(this.value) ? this.initialConfig.value : this.value;
+		
+		if(!Ext.isEmpty(v))
+			this.setValue(v);
 	},
 	
 	getValue: function() {
 		return this.value;
+	},
+	
+	setValue: function(v, flag) {
+		this.value = v;
+		var count = this.el.select('option').getCount();
+		for(var i=0; i<count; i++) {
+			var item = this.el.select('option').item(i);
+			if(item.getValue() == v) {
+				item.dom.setAttribute('selected', 'selected');
+			} else {
+				item.dom.removeAttribute('selected');
+			}
+		}
+		
+		this.fireEvent('valueChange', v);
 	}
 });

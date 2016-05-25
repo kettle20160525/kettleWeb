@@ -8,7 +8,7 @@ TransDialog = Ext.extend(Ext.Window, {
 	bodyStyle: 'padding: 5px;',
 	
 	initComponent: function() {
-		var me = this, graph = getActiveTransGraph().getGraph(), root = graph.getDefaultParent();
+		var me = this, graph = getActiveGraph().getGraph(), root = graph.getDefaultParent();
 		
 		var transForm = new TransTab();
 		var transParam = new TransParamTab();

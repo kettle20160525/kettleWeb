@@ -1,15 +1,11 @@
 package org.flhy.ext.trans;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.ColorUtils;
 import org.flhy.ext.utils.JSONArray;
@@ -20,8 +16,6 @@ import org.pentaho.di.cluster.ClusterSchema;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.NotePadMeta;
-import org.pentaho.di.core.database.BaseDatabaseMeta;
-import org.pentaho.di.core.database.DatabaseConnectionPoolParameter;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.gui.Point;
@@ -243,7 +237,7 @@ public class TransEncoder {
 		    e.setAttribute("modified_user", transMeta.getModifiedUser());
 		    e.setAttribute("modified_date", XMLHandler.date2string( transMeta.getModifiedDate() ));
 		    try {
-		    	if(transMeta.getKey() == null) {
+		    	if(transMeta.getKey() != null) {
 		    		e.setAttribute("key_for_session_key", XMLHandler.encodeBinaryData(transMeta.getKey()));
 		    	} else {
 		    		e.setAttribute("key_for_session_key", "");
@@ -312,20 +306,9 @@ public class TransEncoder {
 				StepMeta step = (StepMeta) list.get(i);
 				Point p = step.getLocation();
 				StepEncoder stepEncoder = (StepEncoder) PluginFactory.getBean(step.getStepID());
-//				PluginInterface plugin = PluginRegistry.getInstance().findPluginWithId(StepPluginType.class, step.getTypeId());
 				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(step), p.x, p.y, 40, 40, "icon;image=" + SvgImageUrl.getUrl(step.getStepID(), SvgImageUrl.Size_Middle));
 				cells.put(step, cell);
 			}
-			
-//			PluginRegistry registry = PluginRegistry.getInstance();
-//			try {
-//				PluginInterface plugin = registry.getPlugin( StepPluginType.class, "Dummy");
-//				ClassLoader classLoader = registry.getClassLoader(plugin);
-//				BufferedImage image = SvgImageUtil.getUniversalImage(classLoader, plugin.getImageFile());
-//				ImageIO.write(image, "PNG", new File("Dummy.png"));
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//			}
 			
 			for(int i=0; i<transMeta.nrTransHops(); i++) {
 				TransHopMeta transHopMeta = transMeta.getTransHop(i);
@@ -346,65 +329,7 @@ public class TransEncoder {
 		JSONArray jsonArray = new JSONArray();
 		for(int i=0; i<transMeta.nrDatabases(); i++) {
 			DatabaseMeta databaseMeta = transMeta.getDatabase(i);
-			
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("name", databaseMeta.getName());
-			jsonObject.put("server", databaseMeta.getHostname());
-			jsonObject.put("type", databaseMeta.getPluginId());
-			jsonObject.put("access", databaseMeta.getAccessType());
-			jsonObject.put("database", databaseMeta.getDatabaseName());
-			jsonObject.put("port", databaseMeta.getDatabasePortNumberString());
-			jsonObject.put("username", databaseMeta.getUsername());
-			jsonObject.put("password", Encr.decryptPasswordOptionallyEncrypted(databaseMeta.getPassword()));
-			jsonObject.put("servername", databaseMeta.getServername());
-			jsonObject.put("data_tablespace", databaseMeta.getDataTablespace());
-			jsonObject.put("index_tablespace", databaseMeta.getIndexTablespace());
-			jsonObject.put("read_only", databaseMeta.isReadOnly());
-			
-			JSONObject attributes = new JSONObject();
-			JSONArray options = new JSONArray();
-			List<String> list = new ArrayList<String>();
-		    Set<Object> keySet = databaseMeta.getAttributes().keySet();
-		    for ( Object object : keySet ) {
-		      list.add( (String) object );
-		    }
-		    Collections.sort( list );
-		    HashSet<String> poolParamsChecked = new HashSet<String>();
-			for (Iterator<String> iter = list.iterator(); iter.hasNext();) {
-				String code = iter.next();
-				String attribute = databaseMeta.getAttributes().getProperty(code);
-				if (!Const.isEmpty(attribute)) {
-					if("SQL_CONNECT".equalsIgnoreCase(code))
-						attribute = StringEscapeHelper.encode(attribute);
-					if(code.indexOf(".") > 0) {
-						int index = code.indexOf(".");
-						JSONObject jsonObject2 = new JSONObject();
-						jsonObject2.put("prefix", code.substring(0, index));
-						jsonObject2.put("name", code.substring(index + 1));
-						jsonObject2.put("value", attribute);
-						options.add(jsonObject2);
-					} else if(code.startsWith("POOLING_")) {
-						poolParamsChecked.add(code.substring(8));
-					} else {
-						attributes.put(code, attribute);
-					}
-				}
-			}
-			
-			JSONArray jsonArray2 = new JSONArray();
-			for (DatabaseConnectionPoolParameter parameter : BaseDatabaseMeta.poolingParameters) {
-				JSONObject jsonObject2 = new JSONObject();
-				jsonObject2.put("enabled", poolParamsChecked.contains(parameter.getParameter()));
-				jsonObject2.put("name", parameter.getParameter());
-				jsonObject2.put("defValue", parameter.getDefaultValue());
-				jsonObject2.put("description", StringEscapeHelper.encode(parameter.getDescription()));
-				jsonArray2.add(jsonObject2);
-			}
-			jsonObject.put("options", options);
-			jsonObject.put("attributes", attributes);
-			jsonObject.put("pool_params", jsonArray2);
-			
-			jsonArray.add(jsonObject);
+			jsonArray.add(DatabaseCodec.encode(databaseMeta));
 		}
 		e.setAttribute("databases", jsonArray.toString());
 	}

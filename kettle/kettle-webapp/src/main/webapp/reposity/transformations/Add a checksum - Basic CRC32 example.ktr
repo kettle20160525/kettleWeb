@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>Add a checksum - basic CRC32 example</name>
+    <name>Add a checksum - Basic CRC32 example</name>
     <description/>
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
     <trans_status>0</trans_status>
-    <directory>&#x2f;</directory>
+    <directory>&#x2f;transformations</directory>
     <parameters>
     </parameters>
     <log>

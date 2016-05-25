@@ -4,7 +4,7 @@ TransMonitoringTab = Ext.extend(Ext.form.FormPanel, {
 	bodyStyle: 'padding: 10px 15px',
 	defaultType: 'textfield',
 	initComponent: function() {
-		var graph = getActiveTransGraph().getGraph(), root = graph.getDefaultParent();
+		var graph = getActiveGraph().getGraph(), root = graph.getDefaultParent();
 		
 		this.items = [{
 			fieldLabel: '开启步骤性能监控?',

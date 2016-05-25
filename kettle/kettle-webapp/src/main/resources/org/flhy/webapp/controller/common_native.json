@@ -4,7 +4,7 @@
 	style: 'line-height:22px; padding-left: 5px',
 },{
 	xtype: 'textfield',
-	name: 'server',
+	name: 'hostname',
 	anchor: '-5'
 },
 
@@ -14,7 +14,7 @@
 	style: 'line-height:22px; padding-left: 5px',
 },{
 	xtype: 'textfield',
-	name: 'database',
+	name: 'databaseName',
 	anchor: '-5'
 },
 

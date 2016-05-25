@@ -23,6 +23,16 @@
 		<servlet-name>SvgDispatcher</servlet-name>
 		<url-pattern>*.svg</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>JavaScriptServlet</servlet-name>
+		<servlet-class>org.flhy.webapp.servlet.JavaScriptServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>JavaScriptServlet</servlet-name>
+		<url-pattern>*.js2</url-pattern>
+	</servlet-mapping>
 
 	<listener>
 		<listener-class>org.flhy.webapp.listener.SystemLoadListener</listener-class>
@@ -31,13 +41,5 @@
 	<welcome-file-list>
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
-	<!-- 
-	<servlet>
-		<servlet-name>default</servlet-name>
-		<init-param>
-			<param-name>useFileMappedBuffer</param-name>
-			<param-value>false</param-value>
-		</init-param>
-	</servlet> -->
-
+	
 </web-app>

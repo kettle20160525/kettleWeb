@@ -7,52 +7,31 @@ NormalPanel = Ext.extend(Ext.Panel, {
     bodyStyle: 'padding: 10px',
 	
 	initComponent: function() {
+		var me = this;
 		
-		var store = getActiveTransGraph().getDatabaseStore(), database = this.initialConfig.database;
-		var rec = store.getById(database);
-		var dbinfo = rec ? rec.json : {};
-		
-		var store2 = new Ext.data.JsonStore({
-			fields: ['value','text'],
-			proxy: new Ext.data.HttpProxy({
-				url: 'database/accessData.do',
-				method: 'POST'
-			})
-		});
-		var listBox2 = new ListBox({	//connection type
+		var typeList = this.typeList = new ListBox({	//connection type
 			flex: 1,
-			store: store2,
-			value: dbinfo.type
+			store: Ext.StoreMgr.get('databaseAccessData')
 		});
-		store2.load();
-		
-		var store3 = new Ext.data.JsonStore({
-			fields: ['value','text'],
-			proxy: new Ext.data.HttpProxy({
-				url: 'database/accessMethod.do',
-				method: 'POST'
-			})
-		});
-		var listBox3 = new ListBox({	//connection method: jndi/jdbc/odbc...
+		var accessList = this.accessList = new ListBox({	//connection method: jndi/jdbc/odbc...
 			height: 80,
-			store: store3,
-			value: dbinfo.access
+			store: Ext.StoreMgr.get('databaseAccessMethod')
 		});
 		
-		listBox2.on('valueChange', function(s) {
-			store3.baseParams.accessData = s;
-			store3.load();
+		typeList.on('valueChange', function(s) {
+			Ext.StoreMgr.get('databaseAccessMethod').baseParams.accessData = s;
+			Ext.StoreMgr.get('databaseAccessMethod').load();
+		});
+		
+		var connectName = this.connectName = new Ext.form.TextField({
+			fieldLabel: '连接名称',
+			anchor: '-5'
 		});
 		
 		var form = new Ext.form.FormPanel({
 			labelWidth: 60,
 			bodyStyle: 'padding: 5px 0px',
-			items: [{
-				fieldLabel: '连接名称',
-				anchor: '-5',
-				xtype: 'textfield',
-				value: dbinfo.name
-			}]
+			items: connectName
 		});
 		
 		var fieldset = new Ext.form.FieldSet({
@@ -60,17 +39,17 @@ NormalPanel = Ext.extend(Ext.Panel, {
 			style: 'height: 96%'
 		});
 		
-		var settingsForm = new Ext.form.FormPanel({
+		var settingsForm = this.settingsForm = new Ext.form.FormPanel({
 			flex: 1,
 			bodyStyle: 'padding: 0px 5px 0px 5px',
 			labelWidth: 1,
 			items: fieldset
 		});
 		
-		listBox3.on('valueChange', function(s) {
+		accessList.on('valueChange', function(s) {
 			Ext.Ajax.request({
 				url: 'database/accessSettings.do',
-				params: {accessMethod: s},
+				params: {accessData: typeList.getValue(), accessMethod: s},
 				success: function(response) {
 					fieldset.removeAll(true);
 					fieldset.doLayout();
@@ -80,7 +59,7 @@ NormalPanel = Ext.extend(Ext.Panel, {
 					});
 					fieldset.doLayout();
 					
-					settingsForm.getForm().setValues(dbinfo);
+					settingsForm.getForm().setValues(me.dbinfo);
 				}
 			});
 		});
@@ -103,15 +82,33 @@ NormalPanel = Ext.extend(Ext.Panel, {
 					text: '连接类型：',
 					style: 'padding-top: 5px',
 					height: 25
-				},listBox2,{
+				},typeList,{
 					xtype: 'label',
 					text: '连接方式：',
 					style: 'padding-top: 5px',
 					height: 25
-				}, listBox3]
+				}, accessList]
 			}, settingsForm]
 		}];
 		
 		NormalPanel.superclass.initComponent.call(this);
+	},
+	
+	initData: function(dbinfo) {
+		this.connectName.setValue(dbinfo.name);
+		this.typeList.setValue(dbinfo.type);
+		this.accessList.setValue(dbinfo.access);
+		this.dbinfo = dbinfo;
+	},
+	
+	getValue: function(dbinfo) {
+		var val = {
+			name: this.connectName.getValue(),
+			type: this.typeList.getValue(),
+			access: this.accessList.getValue()
+		};
+		Ext.apply(val, this.settingsForm.getForm().getValues());
+		
+		return val;
 	}
 });

@@ -21,7 +21,7 @@ public class SvgImageUrl {
 		return url.substring(0, url.indexOf("/"));
 	}
 	
-	public static String getStepId(String url) {
+	public static String getPluginId(String url) {
 		if(url.startsWith("/"))
 			url = url.substring(1);
 		
@@ -49,6 +49,6 @@ public class SvgImageUrl {
 		String url = getUrl("Dummy", SvgImageUrl.Size_Small);
 		System.out.println(url);
 		System.out.println("Size = " + getSize(url));
-		System.out.println("StepId = " + getStepId(url));
+		System.out.println("StepId = " + getPluginId(url));
 	}
 }
