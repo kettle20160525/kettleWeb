@@ -11,7 +11,7 @@ RepositoriesDialog = Ext.extend(Ext.Window, {
 		var store = new Ext.data.JsonStore({
 			fields: ['type', 'name', 'description'],
 			proxy: new Ext.data.HttpProxy({
-				url: GetUrl('repository/load.do'),
+				url: GetUrl('repository/list.do'),
 				method: 'POST'
 			})
 		});
@@ -65,7 +65,7 @@ RepositoriesDialog = Ext.extend(Ext.Window, {
 					title: '选择仓库类型',
 					width: 500, height: 130,
 					valueField: 'type',
-					dataUrl: GetUrl('repository/type.do')
+					dataUrl: GetUrl('repository/types.do')
 				});
 				dialog.on('sure', function(ct) {
 					var d = Ext.create({}, ct);

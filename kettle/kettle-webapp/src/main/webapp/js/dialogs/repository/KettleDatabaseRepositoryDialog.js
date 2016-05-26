@@ -11,7 +11,7 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 		
 		var store = new Ext.data.JsonStore({
 			fields: ['name'],
-			url: GetUrl('repository/databases.do')
+			url: GetUrl('database/listNames.do')
 		});
 		var combo = this.combo = new Ext.form.ComboBox({
 			flex: 1,

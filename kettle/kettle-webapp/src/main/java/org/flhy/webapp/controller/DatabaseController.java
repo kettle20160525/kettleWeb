@@ -1,30 +1,21 @@
 package org.flhy.webapp.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.flhy.ext.core.database.DatabaseCodec;
+import org.flhy.ext.core.database.DatabaseType;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
-import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.plugins.DatabasePluginType;
-import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
-import org.pentaho.di.core.plugins.PluginTypeListener;
 import org.pentaho.di.repository.RepositoriesMeta;
 import org.pentaho.ui.database.Messages;
 import org.springframework.core.io.ClassPathResource;
@@ -39,91 +30,34 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value="/database")
 public class DatabaseController {
 	
-	public static final SortedMap<String, DatabaseInterface> connectionMap = new TreeMap<String, DatabaseInterface>();
-	public static final Map<String, String> connectionNametoID = new HashMap<String, String>();
-
-	static {
-		PluginRegistry registry = PluginRegistry.getInstance();
-
-		List<PluginInterface> plugins = registry.getPlugins(DatabasePluginType.class);
-
-		PluginTypeListener databaseTypeListener = new DatabaseTypeListener(registry) {
-			public void databaseTypeAdded(String pluginName, DatabaseInterface databaseInterface) {
-				connectionMap.put(pluginName, databaseInterface);
-				connectionNametoID.put(pluginName, databaseInterface.getPluginId());
-			}
-
-			public void databaseTypeRemoved(String pluginName) {
-				connectionMap.remove(pluginName);
-				connectionNametoID.remove(pluginName);
-			}
-		};
-
-		registry.addPluginListener(DatabasePluginType.class, databaseTypeListener);
-		for (PluginInterface plugin : plugins) {
-			databaseTypeListener.pluginAdded(plugin);
-		}
-
-	}
-
-	private static abstract class DatabaseTypeListener implements PluginTypeListener {
-		private final PluginRegistry registry;
-
-		public DatabaseTypeListener(PluginRegistry registry) {
-			this.registry = registry;
-		}
-
-		@Override
-		public void pluginAdded(Object serviceObject) {
-			PluginInterface plugin = (PluginInterface) serviceObject;
-			String pluginName = plugin.getName();
-			try {
-				DatabaseInterface databaseInterface = (DatabaseInterface) registry.loadClass(plugin);
-				databaseInterface.setPluginId(plugin.getIds()[0]);
-				databaseInterface.setName(pluginName);
-				databaseTypeAdded(pluginName, databaseInterface);
-			} catch (KettleException e) {
-				System.out.println("Could not create connection entry for "
-						+ pluginName + ".  "
-						+ e.getCause().getClass().getName());
-				LogChannel.GENERAL
-						.logError("Could not create connection entry for "
-								+ pluginName + ".  "
-								+ e.getCause().getClass().getName());
+	/**
+	 * 该方法获取所有的全局数据库配置名称
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/listNames")
+	protected void listNames(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		RepositoriesMeta input = new RepositoriesMeta();
+		JSONArray jsonArray = new JSONArray();
+		if (input.readData()) {
+			for (int i = 0; i < input.nrDatabases(); i++) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("name", input.getDatabase(i).getName());
+				jsonArray.add(jsonObject);
 			}
 		}
 
-		public abstract void databaseTypeAdded(String pluginName, DatabaseInterface databaseInterface);
-
-		@Override
-		public void pluginRemoved(Object serviceObject) {
-			PluginInterface plugin = (PluginInterface) serviceObject;
-			String pluginName = plugin.getName();
-			databaseTypeRemoved(pluginName);
-		}
-
-		public abstract void databaseTypeRemoved(String pluginName);
-
-		@Override
-		public void pluginChanged(Object serviceObject) {
-			pluginRemoved(serviceObject);
-			pluginAdded(serviceObject);
-		}
-
+		response.setContentType("text/html; charset=utf-8");
+		response.getWriter().write(jsonArray.toString());
 	}
 
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/accessData")
 	public void loadAccessData(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-		JSONArray jsonArray = new JSONArray();
-	    for ( String value : connectionMap.keySet() ) {
-	    	JSONObject jsonObject = new JSONObject();
-	    	jsonObject.put("value", connectionNametoID.get(value));
-	    	jsonObject.put("text", value);
-	    	jsonArray.add(jsonObject);
-	    }
-	    
+		JSONArray jsonArray = JSONArray.fromObject(DatabaseType.instance().loadSupportedDatabaseTypes());
 	    response.setContentType("text/javascript; charset=utf-8");
 		response.getWriter().write(jsonArray.toString());
 	    
@@ -132,29 +66,10 @@ public class DatabaseController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/accessMethod")
 	public void loadAccessMethod(HttpServletRequest request, HttpServletResponse response, @RequestParam String accessData) throws IOException {
-		Iterator<Map.Entry<String, String>> iter = connectionNametoID.entrySet().iterator();
-		while(iter.hasNext()) {
-			Map.Entry<String, String> entry = iter.next();
-			if(accessData.equals(entry.getValue())) {
-				accessData = entry.getKey();
-				break;
-			}
-		}
+		JSONArray jsonArray = JSONArray.fromObject(DatabaseType.instance().loadSupportedDatabaseMethodsByTypeId(accessData));
 		
-		DatabaseInterface database = connectionMap.get( accessData );
-		int[] acc = database.getAccessTypeList();
-
-		JSONArray jsonArray = new JSONArray();
-	    for ( int value : acc ) {
-	    	JSONObject jsonObject = new JSONObject();
-	    	jsonObject.put("value", value);
-	    	jsonObject.put("text", DatabaseMeta.getAccessTypeDescLong( value ));
-	    	jsonArray.add(jsonObject);
-	    }
-	    
 	    response.setContentType("text/javascript; charset=utf-8");
 		response.getWriter().write(jsonArray.toString());
-	    
 	}
 	
 	@ResponseBody
@@ -166,7 +81,6 @@ public class DatabaseController {
 	    } catch ( Exception e ) {
 	      e.printStackTrace();
 	    }
-//	    DatabaseInterface database = connectionMap.get( accessData );
 		
 	    String fragment = "";
 	    switch ( accessMethod ) {

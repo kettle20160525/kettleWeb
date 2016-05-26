@@ -55,8 +55,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value = "/repository")
 public class RepositoryController {
 
+	/**
+	 * 该方法在返回所有的仓库信息
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
 	@ResponseBody
-	@RequestMapping(method = RequestMethod.POST, value = "/load")
+	@RequestMapping(method = RequestMethod.POST, value = "/list")
 	protected void load(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		RepositoriesMeta input = new RepositoriesMeta();
 		JSONArray jsonArray = new JSONArray();
@@ -75,8 +82,15 @@ public class RepositoryController {
 		response.getWriter().write(jsonArray.toString());
 	}
 	
+	/**
+	 * 该方法获取所有的仓库类型，目前支持数据库和文件系统类型
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
 	@ResponseBody
-	@RequestMapping(method = RequestMethod.POST, value = "/type")
+	@RequestMapping(method = RequestMethod.POST, value = "/types")
 	protected void type(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		JSONArray jsonArray = new JSONArray();
 		
@@ -92,23 +106,6 @@ public class RepositoryController {
 	      jsonObject.put("name", plugin.getName() + " : " + plugin.getDescription());
 	      jsonArray.add(jsonObject);
 	    }
-
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
-	}
-	
-	@ResponseBody
-	@RequestMapping(method = RequestMethod.POST, value = "/databases")
-	protected void databases(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		RepositoriesMeta input = new RepositoriesMeta();
-		JSONArray jsonArray = new JSONArray();
-		if (input.readData()) {
-			for (int i = 0; i < input.nrDatabases(); i++) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("name", input.getDatabase(i).getName());
-				jsonArray.add(jsonObject);
-			}
-		}
 
 		response.setContentType("text/html; charset=utf-8");
 		response.getWriter().write(jsonArray.toString());
