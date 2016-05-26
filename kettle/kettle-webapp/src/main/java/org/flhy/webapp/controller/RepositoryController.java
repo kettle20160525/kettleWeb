@@ -423,7 +423,7 @@ public class RepositoryController {
 		Repository reposity = PluginRegistry.getInstance().loadClass( RepositoryPluginType.class,  repositoryMeta, Repository.class );
 		reposity.init( repositoryMeta );
 	        
-		if ( repositoryMeta instanceof KettleDatabaseRepositoryMeta && StringUtils.hasText(jsonObject.optJSONObject("extraOptions").optString("database")) ) {
+		if ( repositoryMeta instanceof KettleDatabaseRepositoryMeta && !StringUtils.hasText(jsonObject.optJSONObject("extraOptions").optString("database")) ) {
 			reply.put("success", false);
 			reply.put("title", BaseMessages.getString( KettleDatabaseRepositoryDialog.class, "RepositoryDialog.Dialog.Error.Title" ));
 			reply.put("message", BaseMessages.getString( KettleDatabaseRepositoryDialog.class, "RepositoryDialog.Dialog.ErrorNoConnection.Message" ));
