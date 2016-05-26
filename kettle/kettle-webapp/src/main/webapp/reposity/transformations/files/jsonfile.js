@@ -21,7 +21,7 @@
         "title": "The Lord of the Rings",
         "isbn": "0-395-19395-8",
         "price": 22.99
-      }
+      },
       { "category": "fiction",
         "author": "Samatar",
         "title": "La belle vie",
@@ -33,5 +33,5 @@
       "color": "red",
       "price": 19.95
     }
-  }
+  }]
 }
