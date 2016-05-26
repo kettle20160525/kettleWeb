@@ -9,7 +9,7 @@
 		<module>kettle-webapp</module>
 		<module>kettle-ext</module>
 	</modules>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.pentaho.di</groupId>
