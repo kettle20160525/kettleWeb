@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -20,14 +19,19 @@ import org.flhy.ext.TransExecutor;
 import org.flhy.ext.trans.TransDecoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.flhy.webapp.utils.JsonUtils;
+import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.logging.LogLevel;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.step.StepMeta;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -87,15 +91,18 @@ public class TransGraphController {
 			}
 			System.out.println("=====finished=====");
 		}
-		
-		
-//		response.setContentType("text/html; charset=utf-8");
-//		response.getWriter().write(transMeta.getXML());
 	}
 	
+	/**
+	 * 校验这个转换
+	 * 
+	 * @param graphXml
+	 * @param show_successful_results
+	 * @throws Exception
+	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/check")
-	protected void checkTrans(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml, @RequestParam boolean show_successful_results) throws Exception {
+	protected void check(@RequestParam String graphXml, @RequestParam boolean show_successful_results) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);
@@ -127,13 +134,19 @@ public class TransGraphController {
 			}
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
+	/**
+	 * 执行转换
+	 * 
+	 * @param graphXml
+	 * @param executionConfig
+	 * @throws Exception
+	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/run")
-	protected void run(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml, @RequestParam String executionConfig) throws Exception {
+	protected void run(@RequestParam String graphXml, @RequestParam String executionConfig) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);
@@ -218,41 +231,128 @@ public class TransGraphController {
 	    
 	    TransExecutor transExecutor = TransExecutor.initExecutor(executionConfiguration, transMeta);
 	    new Thread(transExecutor).start();
-		HttpSession session = request.getSession();
-        session.setAttribute(transExecutor.getExecutionId(), transExecutor);
+        executions.put(transExecutor.getExecutionId(), transExecutor);
 		
-	    jsonObject = new JSONObject();
-        jsonObject.put("success", true);
-        jsonObject.put("executionId", transExecutor.getExecutionId());
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonObject.toString());
+        JsonUtils.success(transExecutor.getExecutionId());
 	}
 	
+	private static HashMap<String, TransExecutor> executions = new HashMap<String, TransExecutor>();
+	
+	/**
+	 * 获取执行结果
+	 * 
+	 * @param executionId
+	 * @throws Exception
+	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/result")
-	protected void result(HttpServletRequest request, HttpServletResponse response, @RequestParam String executionId) throws Exception {
-		JSONObject jsonReply = new JSONObject();
+	protected void result(@RequestParam String executionId) throws Exception {
+		JSONObject jsonObject = new JSONObject();
 		
-		HttpSession session = request.getSession();
-		TransExecutor transExecutor = (TransExecutor) session.getAttribute(executionId);
+		TransExecutor transExecutor = executions.get(executionId);
 		
-		jsonReply.put("finished", transExecutor.isFinished());
+		jsonObject.put("finished", transExecutor.isFinished());
 		if(transExecutor.isFinished()) {
-			session.removeAttribute(executionId);
+			executions.remove(executionId);
 			
-			jsonReply.put("stepMeasure", transExecutor.getStepMeasure());
-			jsonReply.put("log", transExecutor.getExecutionLog());
-			jsonReply.put("stepStatus", transExecutor.getStepStatus());
-			jsonReply.put("previewData", transExecutor.getPreviewData());
+			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("stepStatus", transExecutor.getStepStatus());
+			jsonObject.put("previewData", transExecutor.getPreviewData());
 		} else {
-			jsonReply.put("stepMeasure", transExecutor.getStepMeasure());
-			jsonReply.put("log", transExecutor.getExecutionLog());
-			jsonReply.put("stepStatus", transExecutor.getStepStatus());
-			jsonReply.put("previewData", transExecutor.getPreviewData());
+			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
+			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("stepStatus", transExecutor.getStepStatus());
+			jsonObject.put("previewData", transExecutor.getPreviewData());
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonReply.toString());
+		JsonUtils.response(jsonObject);
+	}
+	
+	/**
+	 * 获取输入输出字段
+	 * 
+	 * @param stepName
+	 * @param graphXml
+	 * @param before false回去输出字段，true获取输入字段
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/inputOutputFields")
+	protected void inputOutputFields(@RequestParam String graphXml, @RequestParam String stepName, @RequestParam boolean before) throws Exception {
+		mxGraph graph = new mxGraph();
+		mxCodec codec = new mxCodec();
+		Document doc = mxUtils.parseXml(graphXml);
+		codec.decode(doc.getDocumentElement(), graph.getModel());
+		
+		TransMeta transMeta = TransDecoder.decode(graph);
+		
+		StepMeta stepMeta = getStep(transMeta, stepName);
+		SearchFieldsProgress op = new SearchFieldsProgress( transMeta, stepMeta, before );
+		op.run();
+		RowMetaInterface rowMetaInterface = op.getFields();
+		
+		JSONArray jsonArray = new JSONArray();
+		for (int i = 0; i < rowMetaInterface.size(); i++) {
+			ValueMetaInterface v = rowMetaInterface.getValueMeta(i);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", v.getName());
+			jsonObject.put("type", v.getTypeDesc());
+			jsonObject.put("length", v.getLength() < 0 ? "-" : "" + v.getLength());
+			jsonObject.put("precision", v.getPrecision() < 0 ? "-" : "" + v.getPrecision());
+			jsonObject.put("origin", Const.NVL(v.getOrigin(), ""));
+			jsonObject.put("storageType", ValueMeta.getStorageTypeCode(v.getStorageType()));
+			jsonObject.put("conversionMask", Const.NVL(v.getConversionMask(), ""));
+			jsonObject.put("currencySymbol", Const.NVL(v.getCurrencySymbol(), ""));
+			jsonObject.put("decimalSymbol", Const.NVL(v.getDecimalSymbol(), ""));
+			jsonObject.put("groupingSymbol", Const.NVL(v.getGroupingSymbol(), ""));
+			jsonObject.put("trimType", ValueMeta.getTrimTypeDesc(v.getTrimType()));
+			jsonObject.put("comments", Const.NVL(v.getComments(), ""));
+			jsonArray.add(jsonObject);
+		}
+		JsonUtils.response(jsonArray);
+	}
+	
+	public StepMeta getStep(TransMeta transMeta, String label) {
+		List<StepMeta> list = transMeta.getSteps();
+		for(int i=0; i<list.size(); i++) {
+			StepMeta step = list.get(i);
+			if(label.equals(step.getName()))
+				return step;
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取输入字段信息
+	 * 
+	 * @param graphXml
+	 * @param stepName
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/getFields")
+	protected void getFields(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
+		mxGraph graph = new mxGraph();
+		mxCodec codec = new mxCodec();
+		Document doc = mxUtils.parseXml(graphXml);
+		codec.decode(doc.getDocumentElement(), graph.getModel());
+		
+		TransMeta transMeta = TransDecoder.decode(graph);
+		RowMetaInterface rows = transMeta.getPrevStepFields( stepName );
+		
+		JSONArray jsonArray = new JSONArray();
+		for(int i=0; i<rows.size(); i++) {
+			ValueMetaInterface v = rows.getValueMeta( i );
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", Const.NVL( v.getName(), "" ));
+			jsonObject.put("type", v.getTypeDesc());
+			jsonObject.put("length", Integer.toString( v.getLength() ));
+			jsonObject.put("precision", Integer.toString( v.getPrecision() ));
+			jsonArray.add(jsonObject);
+		}
+		
+		JsonUtils.response(jsonArray);
 	}
 	
 }

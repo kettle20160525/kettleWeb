@@ -263,20 +263,14 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 					method: 'POST',
 					success: function(response) {
 						me.setDisabled(false);
-						var ret = Ext.decode(response.responseText);
-						if(ret.success == true) {
+						decodeResponse(response, function(resObj) {
 							me.close();
-							
 							setTimeout(function() {
-								transGraph.fireEvent('run', ret.executionId);
+								transGraph.fireEvent('run', resObj.message);
 							}, 500);
-							
-						}
+						});
 					},
-					failure: function() {
-						me.setDisabled(false);
-						Ext.Msg.alert('系统提示', '执行出现异常，请查看日志');
-					}
+					failure: failureResponse
 				});
 			}
 		});

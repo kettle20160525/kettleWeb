@@ -480,7 +480,7 @@ ConditionEditor = Ext.extend(Ext.Container, {
 			funcControl.getEl().on('click', function() {
 				var dialog = new EnterSelectionDialog({
 					title: '函数',
-					dataUrl: GetUrl('step/func.do')
+					dataUrl: GetUrl('system/func.do')
 				});
 				dialog.on('sure', function(v) {
 					var rawv = active_condition.getFunc(v);

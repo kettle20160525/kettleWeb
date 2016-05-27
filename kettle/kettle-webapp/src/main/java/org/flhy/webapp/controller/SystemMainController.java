@@ -22,6 +22,7 @@ import org.flhy.ext.trans.steps.FilterRows;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.SvgImageUrl;
+import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
@@ -274,6 +275,21 @@ public class SystemMainController {
 		
 		response.setContentType("text/html; charset=utf-8");
 		response.getWriter().write(value);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/func")
+	protected void func(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		JSONArray jsonArray = new JSONArray();
+		for(int i=0; i<Condition.functions.length; i++) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", Condition.functions[i]);
+			jsonArray.add(jsonObject);
+		}
+		
+		response.setContentType("text/html; charset=utf-8");
+		response.getWriter().write(jsonArray.toString());
 	}
 	
 	@ResponseBody

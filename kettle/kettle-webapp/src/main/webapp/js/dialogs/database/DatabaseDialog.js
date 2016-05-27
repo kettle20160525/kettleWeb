@@ -88,8 +88,8 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 					url: GetUrl('database/test.do'),
 					method: 'POST',
 					params: {databaseInfo: Ext.encode(me.getValue())},
-					success: function(response, opts) {
-						decodeResponse(response, opts, function(resObj) {
+					success: function(response) {
+						decodeResponse(response, function(resObj) {
 							var dialog = new EnterTextDialog();
 							dialog.show(null, function() {
 								dialog.setText(decodeURIComponent(resObj.message));

@@ -176,7 +176,7 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 											method: 'POST',
 											params: {reposityInfo: Ext.encode(me.getValue()), upgrade: reply.opertype == 'update'},
 											success: function(response, opts) {
-												decodeResponse(response, opts, function(resObj) {
+												decodeResponse(response, function(resObj) {
 													var statements = decodeURIComponent(resObj.message);
 													var dialog = new EnterTextDialog({
 														title: '即将执行的SQL语句', 

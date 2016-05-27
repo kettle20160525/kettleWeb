@@ -13,7 +13,7 @@ SwitchCaseDialog = Ext.extend(Ext.Window, {
 		var store = new Ext.data.JsonStore({
 			fields: ['name', 'type', 'length', 'precision', 'origin', 'storageType', 'conversionMask', 'currencySymbol', 'decimalSymbol', 'groupingSymbol', 'trimType', 'comments'],
 			proxy: new Ext.data.HttpProxy({
-				url: GetUrl('step/inputOutputFields.do'),
+				url: GetUrl('trans/inputOutputFields.do'),
 				method: 'POST'
 			})
 		});

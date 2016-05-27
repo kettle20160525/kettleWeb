@@ -112,7 +112,7 @@ function getActiveGraph() {
 	return activeGraph;
 }
 
-function decodeResponse(response, opts, cb) {
+function decodeResponse(response, cb, opts) {
 	try {
 		var resinfo = Ext.decode(response.responseText);
 		if(resinfo.success) {

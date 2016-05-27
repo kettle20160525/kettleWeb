@@ -51,7 +51,7 @@ NormalPanel = Ext.extend(Ext.Panel, {
 				url: GetUrl('database/accessSettings.do'),
 				params: {accessData: typeList.getValue(), accessMethod: s},
 				success: function(response, opts) {
-					decodeResponse(response, opts, function(resObj) {
+					decodeResponse(response, function(resObj) {
 						fieldset.removeAll(true);
 						fieldset.doLayout();
 						

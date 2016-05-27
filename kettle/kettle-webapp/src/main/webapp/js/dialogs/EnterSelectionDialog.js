@@ -14,7 +14,7 @@ EnterSelectionDialog = Ext.extend(Ext.Window, {
 		if(this.initialConfig.dataUrl)
 			this.dataUrl = this.initialConfig.dataUrl;
 		else
-			this.dataUrl = GetUrl('step/inputOutputFields.do');
+			this.dataUrl = GetUrl('trans/inputOutputFields.do');
 		
 		var store = this.getStore(), me = this;
 		

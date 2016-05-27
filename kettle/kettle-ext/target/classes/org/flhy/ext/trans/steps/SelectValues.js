@@ -40,7 +40,7 @@ SelectValuesDialog = Ext.extend(Ext.Window, {
 					var graphXml = mxUtils.getPrettyXml(node);
 					
 					Ext.Ajax.request({
-						url: GetUrl('step/getFields.do'),
+						url: GetUrl('trans/getFields.do'),
 						params: {stepName: stepName, graphXml: graphXml},
 						success: function(response, opts) {
 							var fields = Ext.decode(response.responseText);
@@ -142,7 +142,7 @@ SelectValuesDialog = Ext.extend(Ext.Window, {
 					var graphXml = mxUtils.getPrettyXml(node);
 					
 					Ext.Ajax.request({
-						url: GetUrl('step/getFields.do'),
+						url: GetUrl('trans/getFields.do'),
 						params: {stepName: stepName, graphXml: graphXml},
 						success: function(response, opts) {
 							var fields = Ext.decode(response.responseText);
@@ -223,7 +223,7 @@ SelectValuesDialog = Ext.extend(Ext.Window, {
 					var graphXml = mxUtils.getPrettyXml(node);
 					
 					Ext.Ajax.request({
-						url: GetUrl('step/getFields.do'),
+						url: GetUrl('trans/getFields.do'),
 						params: {stepName: stepName, graphXml: graphXml},
 						success: function(response, opts) {
 							var fields = Ext.decode(response.responseText);
