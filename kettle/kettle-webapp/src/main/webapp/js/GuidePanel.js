@@ -67,15 +67,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    
 	    var repository = new Ext.tree.TreePanel({
 			title: '仓库',
-			root: new Ext.tree.AsyncTreeNode({id:'root', text: 'root'}),
-			loader: new Ext.tree.TreeLoader({
-				dataUrl: GetUrl('repository/explorer.do'),
-				listeners: {
-					load: function(l, n) {
-						n.firstChild.expand();
-					}
-				}
-			}),
+			root: new Ext.tree.TreeNode({id: 'place'}),
 			tbar: [{
 				text: '连接资源库', handler: function() {
 					var dialog = new RepositoriesDialog();
@@ -85,6 +77,20 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 						repository.getRootNode().reload();
 					});
 					dialog.show();
+				}
+			}, {
+				text: '断开资源库', handler: function() {
+					Ext.Ajax.request({
+						url: GetUrl('repository/logout.do'),
+						method: 'POST',
+						success: function(response) {
+							var reply = Ext.decode(response.responseText);
+							if(reply.success) {
+								repository.getRootNode().removeAll(true);
+								repository.getRootNode().reload();
+							}
+						}
+					});
 				}
 			}],
 			enableDD: true,
@@ -106,6 +112,32 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    	}
 	    });
 	    
+	    var count = 0;
+	    repository.on('afterlayout', function() {
+	    	count++;
+	    	if(count < 3) return;
+	    	if(repository.getRootNode().id == 'root') return;
+	    	
+	    	var root = new Ext.tree.AsyncTreeNode({
+	    		id:'root', 
+	    		text: 'root',
+				loader: new Ext.tree.TreeLoader({
+					dataUrl: GetUrl('repository/explorer.do'),
+					listeners: {
+						beforeload: function(l) {
+							var el = repository.getEl();
+							el.mask('资源库信息加载中...', 'x-mask-loading');
+						},
+						load: function(l, n) {
+							n.firstChild.expand();
+							repository.getEl().unmask();
+						}
+					}
+				})
+	    	});
+	    	repository.setRootNode(root);
+	    });
+	    
 	    jobTree.on("nodedragover", function(e){
 	    	return false;
 	    }); 
@@ -120,27 +152,31 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	},
 	
 	openFile: function(objectId, type) {
+		Ext.getBody().mask('正在加载，请稍后...');
+		
 		Ext.Ajax.request({
-			url: GetUrl('file/open.do'),
+			url: GetUrl('repository/open.do'),
 			params: {objectId: objectId, type: type},
 			method: 'POST',
-			success: function(response) {
-				var reply = Ext.decode(response.responseText);
-				var graphPanel = Ext.create({xtype: reply.GraphType});
-				var tabPanel = Ext.getCmp('TabPanel');
-				tabPanel.add(graphPanel);
-				tabPanel.setActiveTab(graphPanel.getId());
-				
-				var xmlDocument = mxUtils.parseXml(decodeURIComponent(reply.graphXml));
-				var decoder = new mxCodec(xmlDocument);
-				var node = xmlDocument.documentElement;
-				
-				var graph = graphPanel.getGraph();
-				decoder.decode(node, graph.getModel());
-				
-				var cell = graph.getDefaultParent();
-				graphPanel.setTitle(cell.getAttribute('name'));
-			}
+			success: function(response, opts) {
+				decodeResponse(response, opts, function(resObj) {
+					var graphPanel = Ext.create({xtype: resObj.GraphType});
+					var tabPanel = Ext.getCmp('TabPanel');
+					tabPanel.add(graphPanel);
+					tabPanel.setActiveTab(graphPanel.getId());
+					
+					var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+					var decoder = new mxCodec(xmlDocument);
+					var node = xmlDocument.documentElement;
+					
+					var graph = graphPanel.getGraph();
+					decoder.decode(node, graph.getModel());
+					
+					var cell = graph.getDefaultParent();
+					graphPanel.setTitle(cell.getAttribute('name'));
+				});
+			},
+			failure: failureResponse
 		});
 	}
 });

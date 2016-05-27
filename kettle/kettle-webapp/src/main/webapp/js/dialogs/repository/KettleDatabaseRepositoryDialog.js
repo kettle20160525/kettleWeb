@@ -129,9 +129,9 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 		}, {
 			text: '创建或更新', handler: function() {
 				Ext.Ajax.request({
-					url: GetUrl('repository/createOrUpdate.do'),
+					url: GetUrl('database/checkInit.do'),
 					method: 'POST',
-					params: {reposityInfo: Ext.encode(me.getValue())},
+					params: {connection: combo.getValue()},
 					success: function(res) {
 						var reply = Ext.decode(res.responseText);
 						
@@ -139,7 +139,7 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 							var myMask = new Ext.LoadMask(Ext.getBody(), {msg:"正在执行，请稍后..."});
 							myMask.show();
 							Ext.Ajax.request({
-								url: GetUrl('repository/execute.do'),
+								url: GetUrl('database/execute.do'),
 								method: 'POST',
 								params: {reposityInfo: Ext.encode(me.getValue()), script: script},
 								success: function(response) {
@@ -172,26 +172,27 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 							   fn: function(bId) {
 								   if(bId == 'yes') {
 									   Ext.Ajax.request({
-											url: GetUrl('repository/schema.do'),
+											url: GetUrl('database/schema.do'),
 											method: 'POST',
 											params: {reposityInfo: Ext.encode(me.getValue()), upgrade: reply.opertype == 'update'},
-											success: function(response) {
-												var ret = Ext.decode(response.responseText);
-												var statements = decodeURIComponent(ret.statements);
-												var dialog = new EnterTextDialog({
-													title: '即将执行的SQL语句', 
-													width: 800,
-													height: 500,
-													bbar: ['->', {
-														text: '执行', handler: function() {execute(ret.statements);}
-													}, {
-														text: '清除缓存'
-													}, {
-														text: '关闭', handler: function() {dialog.close();}
-													}]
-												});
-												dialog.show(null, function() {
-													dialog.setText(statements);
+											success: function(response, opts) {
+												decodeResponse(response, opts, function(resObj) {
+													var statements = decodeURIComponent(resObj.message);
+													var dialog = new EnterTextDialog({
+														title: '即将执行的SQL语句', 
+														width: 800,
+														height: 500,
+														bbar: ['->', {
+															text: '执行', handler: function() {execute(resObj.message);}
+														}, {
+															text: '清除缓存'
+														}, {
+															text: '关闭', handler: function() {dialog.close();}
+														}]
+													});
+													dialog.show(null, function() {
+														dialog.setText(statements);
+													});
 												});
 											}
 									   });
@@ -235,12 +236,12 @@ KettleDatabaseRepositoryDialog = Ext.extend(Ext.Window, {
 								    if (btn == 'ok'){
 								    	
 								    	Ext.Ajax.request({
-											url: GetUrl('repository/drop.do'),
+											url: GetUrl('database/drop.do'),
 											method: 'POST',
 											params: {reposityInfo: Ext.encode(me.getValue()), password: text},
 											success: function(response) {
 												var ret = Ext.decode(response.responseText);
-												Ext.Msg.alert(ret.title, ret.msg);
+												Ext.Msg.alert(ret.title, ret.message);
 											}
 									   });
 								    	

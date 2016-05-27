@@ -24,6 +24,16 @@
 		<url-pattern>*.svg</url-pattern>
 	</servlet-mapping>
 	
+	<filter>
+		<filter-name>GlobalFilter</filter-name>
+		<filter-class>org.flhy.webapp.filter.GlobalFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>GlobalFilter</filter-name>
+		<url-pattern>*</url-pattern>
+	</filter-mapping>
+	
 	<servlet>
 		<servlet-name>JavaScriptServlet</servlet-name>
 		<servlet-class>org.flhy.webapp.servlet.JavaScriptServlet</servlet-class>

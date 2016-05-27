@@ -112,6 +112,45 @@ function getActiveGraph() {
 	return activeGraph;
 }
 
+function decodeResponse(response, opts, cb) {
+	try {
+		var resinfo = Ext.decode(response.responseText);
+		if(resinfo.success) {
+			cb(resinfo);
+		} else {
+			Ext.Msg.show({
+			   title: resinfo.title,
+			   msg: resinfo.message,
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.ERROR
+			});
+		}
+		Ext.getBody().unmask();
+	} catch(e) {
+		Ext.getBody().unmask();
+		alert('处理响应信息发生异常！');
+	}
+}
+
+function failureResponse(response) {
+	Ext.getBody().unmask();
+	if(response.status == 0 && !response.responseText) {
+		Ext.Msg.show({
+		   title: '系统提示',
+		   msg: '服务器繁忙或宕机，请确认服务器状态！',
+		   buttons: Ext.Msg.OK,
+		   icon: Ext.MessageBox.WARNING
+		});
+	} else if(response.status == 500) {
+		Ext.Msg.show({
+		   title: '系统提示',
+		   msg: '系统发生错误！错误信息：' + response.statusText,
+		   buttons: Ext.Msg.OK,
+		   icon: Ext.MessageBox.ERROR
+		});
+	}
+}
+
 var cellLabelChanged = mxGraph.prototype.cellLabelChanged;
 mxGraph.prototype.cellLabelChanged = function(cell, value, autoSize)
 {

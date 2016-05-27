@@ -28,7 +28,7 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 		var me = this;
 		this.initReposityDatabase = function(database) {
 			Ext.Ajax.request({
-				url: GetUrl('repository/database.do'),
+				url: GetUrl('database/load.do'),
 				method: 'POST',
 				params: {database: database},
 				success: function(response) {
@@ -88,10 +88,12 @@ DatabaseDialog = Ext.extend(Ext.Window, {
 					url: GetUrl('database/test.do'),
 					method: 'POST',
 					params: {databaseInfo: Ext.encode(me.getValue())},
-					success: function(response) {
-						var dialog = new EnterTextDialog();
-						dialog.show(null, function() {
-							dialog.setText(decodeURIComponent(response.responseText));
+					success: function(response, opts) {
+						decodeResponse(response, opts, function(resObj) {
+							var dialog = new EnterTextDialog();
+							dialog.show(null, function() {
+								dialog.setText(decodeURIComponent(resObj.message));
+							});
 						});
 					}
 				});

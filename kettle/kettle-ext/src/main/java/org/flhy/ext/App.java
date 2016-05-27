@@ -3,8 +3,6 @@ package org.flhy.ext;
 import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.repository.Repository;
-import org.pentaho.di.repository.filerep.KettleFileRepository;
-import org.pentaho.di.repository.filerep.KettleFileRepositoryMeta;
 import org.pentaho.metastore.stores.delegate.DelegatingMetaStore;
 
 public class App {
@@ -27,6 +25,18 @@ public class App {
 
 	public Repository getRepository() {
 		return repository;
+	}
+	
+	private Repository defaultRepository;
+	
+	public void initDefault(Repository defaultRepo) {
+		if(this.defaultRepository == null)
+			this.defaultRepository = defaultRepo;
+		this.repository = defaultRepo;
+	}
+	
+	public Repository getDefaultRepository() {
+		return this.defaultRepository;
 	}
 	
 	public void selectRepository(Repository repo) {

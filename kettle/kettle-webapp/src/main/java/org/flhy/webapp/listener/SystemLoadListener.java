@@ -27,7 +27,6 @@ public class SystemLoadListener implements ServletContextListener {
 			KettleEnvironment.init();
 			Props.init( Props.TYPE_PROPERTIES_KITCHEN );
 			
-			
 			String path = context.getServletContext().getRealPath("/reposity/");
 			KettleFileRepositoryMeta meta = new KettleFileRepositoryMeta();
 			meta.setBaseDirectory(path);
@@ -39,7 +38,7 @@ public class SystemLoadListener implements ServletContextListener {
 			KettleFileRepository rep = new KettleFileRepository();
 			rep.init(meta);
 			
-			App.getInstance().selectRepository(rep);
+			App.getInstance().initDefault(rep);
 		} catch (KettleException e) {
 			e.printStackTrace();
 		}

@@ -48,18 +48,20 @@ NormalPanel = Ext.extend(Ext.Panel, {
 		
 		accessList.on('valueChange', function(s) {
 			Ext.Ajax.request({
-				url: 'database/accessSettings.do',
+				url: GetUrl('database/accessSettings.do'),
 				params: {accessData: typeList.getValue(), accessMethod: s},
-				success: function(response) {
-					fieldset.removeAll(true);
-					fieldset.doLayout();
-					
-					Ext.each(Ext.decode(response.responseText), function(item) {
-						fieldset.add(item);
+				success: function(response, opts) {
+					decodeResponse(response, opts, function(resObj) {
+						fieldset.removeAll(true);
+						fieldset.doLayout();
+						
+						Ext.each(Ext.decode(resObj.message), function(item) {
+							fieldset.add(item);
+						});
+						fieldset.doLayout();
+						
+						settingsForm.getForm().setValues(me.dbinfo);
 					});
-					fieldset.doLayout();
-					
-					settingsForm.getForm().setValues(me.dbinfo);
 				}
 			});
 		});
