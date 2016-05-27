@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	  	<title>TransformationsManager</title>
+	  	<title>KettleConsole</title>
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/public.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/common.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/explorer.css" />
@@ -63,8 +63,6 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterTextDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterSelectionDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/EnterValueDialog.js"></script>
-	    
-<%-- 	    <script type="text/javascript" src="${pageContext.request.contextPath}/TRANS.js"></script> --%>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/JobGraph.js"></script>

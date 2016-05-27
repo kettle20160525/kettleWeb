@@ -20,7 +20,7 @@
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<webAppConfig>
-						<contextPath>/kw</contextPath>
+						<contextPath>/web</contextPath>
 						<defaultsDescriptor>src/main/resources/webdefault.xml</defaultsDescriptor>
 					</webAppConfig>
 <!-- 					<connectors> -->

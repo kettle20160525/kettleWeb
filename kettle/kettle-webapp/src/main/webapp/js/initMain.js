@@ -218,3 +218,89 @@ NoteShape.prototype.constraints = [new mxConnectionConstraint(new mxPoint(0.25, 
  	            		 new mxConnectionConstraint(new mxPoint(0.25, 1), true),
  	            		 new mxConnectionConstraint(new mxPoint(0.5, 1), true),
  	            		 new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
+
+KettleForm = Ext.extend(Ext.form.FormPanel, {
+	labeWidth: 100,
+	labelAlign: 'right',
+	defaultType: 'textfield'
+	
+});
+
+KettleDialog = Ext.extend(Ext.Window, {
+	modal: true,
+	layout: 'border',
+	closeAction: 'close',
+	defaults: {border: false},
+	
+	initComponent: function() {
+		var cell = getActiveGraph().getGraph().getSelectionCell(), me = this;
+		
+		var form = new KettleForm({
+			bodyStyle: 'padding: 10px',
+			region: 'north',
+			height: 35,
+			labelWidth: 100,
+			items: [{
+				fieldLabel: '步骤名称',
+				anchor: '-40',
+				name: 'label',
+				value: cell.getAttribute('label')
+			}]
+		});
+		
+		this.items = [form, {
+			region: 'center',
+			bodyStyle: 'padding: 5px',
+			layout: 'fit',
+			items: this.fitItem
+		}];
+		
+		var bCancel = new Ext.Button({
+			text: '取消', handler: function() {
+				me.close();
+			}
+		});
+		var bOk = new Ext.Button({
+			text: '确定', handler: function() {
+				graph.getModel().beginUpdate();
+                try
+                {
+                	var formValues = form.getForm().getValues();
+                	for(var fieldName in formValues) {
+						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
+                    	graph.getModel().execute(edit);
+					}
+                	
+                }
+                finally
+                {
+                    graph.getModel().endUpdate();
+                }
+                
+				me.close();
+			}
+		});
+		
+		this.bbar = ['->', bCancel, bOk];
+		
+		KettleDialog.superclass.initComponent.call(this);
+		
+	}
+	
+});
+
+KettleTabDialog = Ext.extend(KettleDialog, {
+	initComponent: function() {
+		
+		this.fitItem = new Ext.TabPanel({
+			region: 'center',
+			activeTab: 0,
+			items: this.tabItems
+		});
+		
+		KettleTabDialog.superclass.initComponent.call(this);
+		
+	}
+	
+});
+

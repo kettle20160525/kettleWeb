@@ -239,10 +239,8 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    	}
 	    });
 	    
-	    var count = 0;
 	    repository.on('afterlayout', function() {
-	    	count++;
-	    	if(count < 3) return;
+	    	if(repository.getEl().getHeight() <50) return;	//确保高度已经计算完毕
 	    	if(repository.getRootNode().id == 'root') return;
 	    	
 	    	var root = new Ext.tree.AsyncTreeNode({
