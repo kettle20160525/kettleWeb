@@ -165,6 +165,11 @@ public class RepositoryController {
 				return;
 			}
 			
+			if(repository.getDirectoryNames(dir.getObjectId()).length > 0) {
+				JsonUtils.fail("删除失败，该目录下存在子元素，请先移除他们！");
+				return;
+			}
+			
 			repository.deleteRepositoryDirectory(dir);
 		}
 		
