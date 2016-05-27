@@ -159,7 +159,8 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			params: {objectId: objectId, type: type},
 			method: 'POST',
 			success: function(response, opts) {
-				decodeResponse(response, opts, function(resObj) {
+				try {
+					var resObj = Ext.decode(response.responseText);
 					var graphPanel = Ext.create({xtype: resObj.GraphType});
 					var tabPanel = Ext.getCmp('TabPanel');
 					tabPanel.add(graphPanel);
@@ -174,7 +175,10 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					
 					var cell = graph.getDefaultParent();
 					graphPanel.setTitle(cell.getAttribute('name'));
-				});
+					Ext.getBody().unmask();
+				} catch(e) {
+					Ext.getBody().unmask();
+				}
 			},
 			failure: failureResponse
 		});
