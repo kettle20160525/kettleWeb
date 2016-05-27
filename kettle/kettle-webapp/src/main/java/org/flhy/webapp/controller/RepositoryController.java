@@ -128,6 +128,29 @@ public class RepositoryController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/createJob")
+	protected void createJob(@RequestParam String dir, @RequestParam String jobName) throws KettleException, IOException {
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface path = repository.findDirectory(new StringObjectId(dir));
+		
+		if(repository.exists(jobName, path, RepositoryObjectType.JOB)) {
+			JsonUtils.fail("该转换已经存在，请重新输入！");
+			return;
+		}
+		
+		JobMeta jobMeta = new JobMeta();
+		jobMeta.setRepository(App.getInstance().getRepository());
+		jobMeta.setMetaStore(App.getInstance().getMetaStore());
+		jobMeta.setName(jobName);
+		jobMeta.setRepositoryDirectory(path);
+		
+		repository.save(jobMeta, "add: " + new Date(), null);
+		
+		ObjectId id = repository.getJobId(jobName, path);
+		JsonUtils.success(id.getId());
+	}
+	
+	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/drop")
 	protected void drop(@RequestParam String id, @RequestParam int type) throws KettleException, IOException {
 		Repository repository = App.getInstance().getRepository();

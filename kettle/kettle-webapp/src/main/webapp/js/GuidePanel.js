@@ -155,7 +155,37 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					}
                 }
             }, {
-                iconCls: 'job_tree', text: '新建任务'
+                iconCls: 'job_tree', text: '新建任务', handler: function() {
+                	var sm = repository.getSelectionModel();
+					var node = sm.getSelectedNode();
+					if(node && !node.isLeaf()) {
+						Ext.Msg.prompt('系统提示', '请输入任务名称:', function(btn, text){
+						    if (btn == 'ok' && text != ''){
+						    	Ext.Ajax.request({
+									url: GetUrl('repository/createJob.do'),
+									method: 'POST',
+									params: {dir: node.attributes.objectId, jobName: text},
+									success: function(response) {
+										decodeResponse(response, function(resObj) {
+											var child = new Ext.tree.TreeNode({
+												id: "job_" + resObj.message,
+												objectId: resObj.message,
+												text: text,
+												iconCls: 'job_tree',
+												leaf: true
+											});
+											node.appendChild(child);
+											
+											me.openFile(resObj.message, 1);
+										});
+									},
+									failure: failureResponse
+							   });
+						    	
+						    }
+						});
+					}
+                }
             }, '-', {
             	text: '重命名'
             }, {
