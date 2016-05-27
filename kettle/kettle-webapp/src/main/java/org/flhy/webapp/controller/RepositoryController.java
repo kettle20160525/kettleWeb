@@ -1,7 +1,9 @@
 package org.flhy.webapp.controller;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
 import org.flhy.webapp.utils.JsonUtils;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettlePluginException;
@@ -21,6 +24,8 @@ import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.PluginTypeInterface;
 import org.pentaho.di.core.plugins.RepositoryPluginType;
+import org.pentaho.di.core.vfs.KettleVFS;
+import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.ObjectId;
@@ -36,6 +41,7 @@ import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.repository.kdr.KettleDatabaseRepositoryDialog;
+import org.pentaho.di.ui.spoon.Spoon;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +66,7 @@ public class RepositoryController {
 	 */
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/list")
-	protected void load() throws KettleException, IOException {
+	protected void list() throws KettleException, IOException {
 		RepositoriesMeta input = new RepositoriesMeta();
 		JSONArray jsonArray = new JSONArray();
 		if (input.readData()) {
@@ -71,6 +77,75 @@ public class RepositoryController {
 		}
 
 		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/createDir")
+	protected void createDir(@RequestParam String dir, @RequestParam String name) throws KettleException, IOException {
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface path = repository.findDirectory(new StringObjectId(dir));
+		RepositoryDirectoryInterface newdir = repository.createRepositoryDirectory(path, name);
+		JsonUtils.success(newdir.getObjectId().getId());
+	}
+	
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/createTrans")
+	protected void createTrans(@RequestParam String dir, @RequestParam String transName) throws KettleException, IOException {
+		Repository repository = App.getInstance().getRepository();
+		RepositoryDirectoryInterface path = repository.findDirectory(new StringObjectId(dir));
+		
+//		String name = null;
+//		int i=1;
+//		do {
+//			name = BaseMessages.getString( Spoon.class, "Spoon.STRING_TRANSFORMATION" ) + i;
+//			if(!repository.exists(name, path, RepositoryObjectType.TRANSFORMATION))
+//				break;
+//			i++;
+//		} while(true);
+		if(repository.exists(transName, path, RepositoryObjectType.TRANSFORMATION)) {
+			JsonUtils.fail("该转换已经存在，请重新输入！");
+			return;
+		}
+		
+		TransMeta transMeta = new TransMeta();
+		transMeta.setRepository(App.getInstance().getRepository());
+		transMeta.setMetaStore(App.getInstance().getMetaStore());
+		transMeta.setName(transName);
+		transMeta.setRepositoryDirectory(path);
+		
+		repository.save(transMeta, "add: " + new Date(), null);
+		
+//		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
+//		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(transMeta.getFilename(), false));
+//		dos.write(xml.getBytes(Const.XML_ENCODING));
+//		dos.close();
+		
+		ObjectId id = repository.getTransformationID(transName, path);
+		
+		JsonUtils.success(id.getId());
+//		RepositoryDirectoryInterface dir = repository.createRepositoryDirectory(path, name);
+//		JsonUtils.success(dir.getObjectId().getId());
+	}
+	
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/drop")
+	protected void drop(@RequestParam String id, @RequestParam int type) throws KettleException, IOException {
+		Repository repository = App.getInstance().getRepository();
+		if(type == 0) {
+			repository.deleteTransformation(new StringObjectId(id));
+		} else if(type == 1) {
+			repository.deleteJob(new StringObjectId(id));
+		} else if(type == -1) {
+			RepositoryDirectoryInterface dir = repository.findDirectory(new StringObjectId(id));
+			if(repository.getJobAndTransformationObjects(dir.getObjectId(), true).size() > 0) {
+				JsonUtils.fail("删除失败，该目录下存在子元素，请先移除他们！");
+				return;
+			}
+			
+			repository.deleteRepositoryDirectory(dir);
+		}
+		
+		JsonUtils.success("操作成功");
 	}
 	
 	/**
@@ -84,7 +159,7 @@ public class RepositoryController {
 	@RequestMapping(method=RequestMethod.POST, value="/open")
 	protected void open(@RequestParam String objectId, @RequestParam int type) throws Exception {
 		JSONObject jsonObject = new JSONObject();
-		    
+		
 	    if(type == 0) {	//trans
 	    	jsonObject.put("GraphType", "TransGraph");
 	    	ObjectId id = new StringObjectId( objectId );

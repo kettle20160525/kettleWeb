@@ -46,25 +46,6 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			}
 		};
 		
-		var menu = new Ext.menu.Menu({
-			items: [{
-				text: '打开'
-			},'-',{
-                text: '新建目录'
-            }, {
-                iconCls: 'trans_tree',
-                text: '新建转换'
-            }, {
-                iconCls: 'job_tree',
-                text: '新建任务'
-            }, '-', {
-            	text: '重命名'
-            }, {
-                iconCls: 'delete',
-                text: '删除'
-            }]
-		});
-	    
 	    var repository = new Ext.tree.TreePanel({
 			title: '仓库',
 			root: new Ext.tree.TreeNode({id: 'place'}),
@@ -101,8 +82,124 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			rootVisible: false
 		});
 	    
+	    var menu = new Ext.menu.Menu({
+			items: [{
+				text: '打开', handler: function() {
+					var sm = repository.getSelectionModel();
+					var node = sm.getSelectedNode();
+					if(node && node.isLeaf()) {
+			    		var type = node.attributes.iconCls == 'job_tree' ? 1 : 0;
+			    		me.openFile(node.attributes.objectId, type);
+					}
+				}
+			},'-',{
+                text: '新建目录', handler: function() {
+                	var sm = repository.getSelectionModel();
+					var node = sm.getSelectedNode();
+					if(node && !node.isLeaf()) {
+						Ext.Msg.prompt('系统提示', '请输入目录名称:', function(btn, text){
+						    if (btn == 'ok' && text != ''){
+						    	Ext.Ajax.request({
+									url: GetUrl('repository/createDir.do'),
+									method: 'POST',
+									params: {dir: node.attributes.objectId, name: text},
+									success: function(response) {
+										decodeResponse(response, function(resObj) {
+											var child = new Ext.tree.TreeNode({
+												id: "directory_" + resObj.message,
+												objectId: resObj.message,
+												text: text,
+												children:[]
+											});
+											node.appendChild(child);
+										});
+									},
+									failure: failureResponse
+							   });
+						    	
+						    }
+						});
+					}
+                }
+            }, {
+                iconCls: 'trans_tree',
+                text: '新建转换', handler: function() {
+                	var sm = repository.getSelectionModel();
+					var node = sm.getSelectedNode();
+					if(node && !node.isLeaf()) {
+						Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
+						    if (btn == 'ok' && text != ''){
+						    	Ext.Ajax.request({
+									url: GetUrl('repository/createTrans.do'),
+									method: 'POST',
+									params: {dir: node.attributes.objectId, transName: text},
+									success: function(response) {
+										decodeResponse(response, function(resObj) {
+											var child = new Ext.tree.TreeNode({
+												id: "transaction_" + resObj.message,
+												objectId: resObj.message,
+												text: text,
+												iconCls: 'trans_tree',
+												leaf: true
+											});
+											node.appendChild(child);
+											
+											me.openFile(resObj.message, 0);
+										});
+									},
+									failure: failureResponse
+							   });
+						    	
+						    }
+						});
+					}
+                }
+            }, {
+                iconCls: 'job_tree', text: '新建任务'
+            }, '-', {
+            	text: '重命名'
+            }, {
+                iconCls: 'delete', text: '删除', handler: function() {
+                	var sm = repository.getSelectionModel();
+					var node = sm.getSelectedNode();
+					if(node) {
+						Ext.Msg.show({
+							   title:'系统提示',
+							   msg: '您确定要删除该对象吗？',
+							   buttons: Ext.Msg.YESNO,
+							   icon: Ext.MessageBox.WARNING,
+							   fn: function(bId) {
+								   if(bId == 'yes') {
+									   var type = -1;
+									   if(node.attributes.iconCls == 'job_tree')
+										   type = 1;
+									   else if(node.attributes.iconCls == 'trans_tree')
+										   type = 0;
+									   
+									   Ext.Ajax.request({
+											url: GetUrl('repository/drop.do'),
+											method: 'POST',
+											params: {id: node.attributes.objectId, type: type},
+											success: function(response) {
+												decodeResponse(response, function(resObj) {
+													node.remove();
+												});
+											},
+											failure: failureResponse
+									   });
+								   }
+							   }
+						});
+						
+						
+					}
+                }
+            }]
+		});
+	    
 	    repository.on('contextmenu', function(node, e) {
 	    	menu.showAt(e.getXY());
+	    	repository.getSelectionModel().select(node);
 	    });
 	    
 	    repository.on('dblclick', function(node) {
