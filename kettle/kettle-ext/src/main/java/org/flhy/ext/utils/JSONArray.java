@@ -20,6 +20,10 @@ public class JSONArray extends ArrayList<Object> {
 		
 	}
 	
+	public JSONArray(int initialCapacity) {
+		super(initialCapacity);
+	}
+
 	public JSONArray(List<Object> list) {
 		if(list != null)
 			this.addAll(list);

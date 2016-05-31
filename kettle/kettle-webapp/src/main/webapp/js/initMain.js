@@ -233,7 +233,7 @@ KettleDialog = Ext.extend(Ext.Window, {
 	defaults: {border: false},
 	
 	initComponent: function() {
-		var cell = getActiveGraph().getGraph().getSelectionCell(), me = this;
+		var graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell(), me = this;
 		
 		var form = new KettleForm({
 			bodyStyle: 'padding: 10px',
@@ -252,7 +252,7 @@ KettleDialog = Ext.extend(Ext.Window, {
 			region: 'center',
 			bodyStyle: 'padding: 5px',
 			layout: 'fit',
-			items: this.fitItem
+			items: this.fitItems
 		}];
 		
 		var bCancel = new Ext.Button({
@@ -265,14 +265,13 @@ KettleDialog = Ext.extend(Ext.Window, {
 				graph.getModel().beginUpdate();
                 try
                 {
-                	var formValues = form.getForm().getValues();
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
+                	var values = me.getValues();
+                	for(var name in values) {
+						var edit = new mxCellAttributeChange(cell, name, values[name]);
                     	graph.getModel().execute(edit);
 					}
                 	
-                }
-                finally
+                } finally
                 {
                     graph.getModel().endUpdate();
                 }
@@ -285,6 +284,10 @@ KettleDialog = Ext.extend(Ext.Window, {
 		
 		KettleDialog.superclass.initComponent.call(this);
 		
+	},
+	
+	getValues: function() {
+		return {};
 	}
 	
 });
@@ -292,7 +295,7 @@ KettleDialog = Ext.extend(Ext.Window, {
 KettleTabDialog = Ext.extend(KettleDialog, {
 	initComponent: function() {
 		
-		this.fitItem = new Ext.TabPanel({
+		this.fitItems = new Ext.TabPanel({
 			region: 'center',
 			activeTab: 0,
 			items: this.tabItems
@@ -303,4 +306,3 @@ KettleTabDialog = Ext.extend(KettleDialog, {
 	}
 	
 });
-

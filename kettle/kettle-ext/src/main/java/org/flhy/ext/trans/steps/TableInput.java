@@ -30,9 +30,9 @@ public class TableInput extends AbstractStep {
 		tableInputMeta.setSQL(StringEscapeHelper.decode(cell.getAttribute( "sql" )));
 		tableInputMeta.setRowLimit(cell.getAttribute("limit"));
 		
-		tableInputMeta.setExecuteEachInputRow("true".equalsIgnoreCase(cell.getAttribute( "execute_each_row" )));
-		tableInputMeta.setVariableReplacementActive("true".equalsIgnoreCase(cell.getAttribute( "variables_active" )));
-		tableInputMeta.setLazyConversionActive("true".equalsIgnoreCase(cell.getAttribute( "lazy_conversion_active" )));
+		tableInputMeta.setExecuteEachInputRow("Y".equalsIgnoreCase(cell.getAttribute( "execute_each_row" )));
+		tableInputMeta.setVariableReplacementActive("Y".equalsIgnoreCase(cell.getAttribute( "variables_active" )));
+		tableInputMeta.setLazyConversionActive("Y".equalsIgnoreCase(cell.getAttribute( "lazy_conversion_active" )));
 
 		String lookupFromStepname = cell.getAttribute("lookup");
 		StreamInterface infoStream = tableInputMeta.getStepIOMeta().getInfoStreams().get(0);
@@ -49,9 +49,9 @@ public class TableInput extends AbstractStep {
 		e.setAttribute("connection", tableInputMeta.getDatabaseMeta() == null ? "" : tableInputMeta.getDatabaseMeta().getName());
 		e.setAttribute("sql", StringEscapeHelper.encode(tableInputMeta.getSQL()));
 		e.setAttribute("limit", tableInputMeta.getRowLimit());
-		e.setAttribute("execute_each_row", Boolean.toString(tableInputMeta.isExecuteEachInputRow()));
-		e.setAttribute("variables_active", Boolean.toString(tableInputMeta.isVariableReplacementActive()));
-		e.setAttribute("lazy_conversion_active", Boolean.toString(tableInputMeta.isLazyConversionActive()));
+		e.setAttribute("execute_each_row", tableInputMeta.isExecuteEachInputRow() ? "Y" : "N");
+		e.setAttribute("variables_active", tableInputMeta.isVariableReplacementActive() ? "Y" : "N");
+		e.setAttribute("lazy_conversion_active", tableInputMeta.isLazyConversionActive() ? "Y" : "N");
 		StreamInterface infoStream = tableInputMeta.getStepIOMeta().getInfoStreams().get( 0 );
 		e.setAttribute("lookup", infoStream.getStepname());
 		

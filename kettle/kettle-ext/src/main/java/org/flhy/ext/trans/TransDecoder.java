@@ -240,17 +240,19 @@ public class TransDecoder {
 		transLogTable.setLogInterval(jsonObject.optString("interval"));
 		transLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
 		jsonArray = jsonObject.optJSONArray("fields");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	JSONObject fieldJson = jsonArray.getJSONObject(i);
-	    	String id = fieldJson.optString("id");
-	    	LogTableField field = transLogTable.findField( id );
-	    	if ( field == null ) {
-	    		field = transLogTable.getFields().get(i);
-	    	}
-			if (field != null) {
-				field.setFieldName(fieldJson.optString("name"));
-				field.setEnabled(fieldJson.optBoolean("enabled"));
-				field.setSubject(StepMeta.findStep(transMeta.getSteps(), fieldJson.optString("subject")));
+		if(jsonArray != null) {
+			for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
+		    	String id = fieldJson.optString("id");
+		    	LogTableField field = transLogTable.findField( id );
+		    	if ( field == null ) {
+		    		field = transLogTable.getFields().get(i);
+		    	}
+				if (field != null) {
+					field.setFieldName(fieldJson.optString("name"));
+					field.setEnabled(fieldJson.optBoolean("enabled"));
+					field.setSubject(StepMeta.findStep(transMeta.getSteps(), fieldJson.optString("subject")));
+				}
 			}
 		}
 	    
@@ -261,16 +263,18 @@ public class TransDecoder {
 		stepLogTable.setTableName(jsonObject.optString("table"));
 		stepLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
 		jsonArray = jsonObject.optJSONArray("fields");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	JSONObject fieldJson = jsonArray.getJSONObject(i);
-	    	String id = fieldJson.optString("id");
-	    	LogTableField field = stepLogTable.findField( id );
-	    	if ( field == null && i<stepLogTable.getFields().size()) {
-	    		field = stepLogTable.getFields().get(i);
-	    	}
-			if (field != null) {
-				field.setFieldName(fieldJson.optString("name"));
-				field.setEnabled(fieldJson.optBoolean("enabled"));
+		if(jsonArray != null) {
+			for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
+		    	String id = fieldJson.optString("id");
+		    	LogTableField field = stepLogTable.findField( id );
+		    	if ( field == null && i<stepLogTable.getFields().size()) {
+		    		field = stepLogTable.getFields().get(i);
+		    	}
+				if (field != null) {
+					field.setFieldName(fieldJson.optString("name"));
+					field.setEnabled(fieldJson.optBoolean("enabled"));
+				}
 			}
 		}
 	    
@@ -282,16 +286,18 @@ public class TransDecoder {
 		performanceLogTable.setLogInterval(jsonObject.optString("interval"));
 		performanceLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
 		jsonArray = jsonObject.optJSONArray("fields");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	JSONObject fieldJson = jsonArray.getJSONObject(i);
-	    	String id = fieldJson.optString("id");
-	    	LogTableField field = performanceLogTable.findField( id );
-	    	if ( field == null && i<performanceLogTable.getFields().size()) {
-	    		field = performanceLogTable.getFields().get(i);
-	    	}
-			if (field != null) {
-				field.setFieldName(fieldJson.optString("name"));
-				field.setEnabled(fieldJson.optBoolean("enabled"));
+		if(jsonArray != null) {
+			for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
+		    	String id = fieldJson.optString("id");
+		    	LogTableField field = performanceLogTable.findField( id );
+		    	if ( field == null && i<performanceLogTable.getFields().size()) {
+		    		field = performanceLogTable.getFields().get(i);
+		    	}
+				if (field != null) {
+					field.setFieldName(fieldJson.optString("name"));
+					field.setEnabled(fieldJson.optBoolean("enabled"));
+				}
 			}
 		}
 	    
@@ -302,16 +308,18 @@ public class TransDecoder {
 		channelLogTable.setTableName(jsonObject.optString("table"));
 		channelLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
 		jsonArray = jsonObject.optJSONArray("fields");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	JSONObject fieldJson = jsonArray.getJSONObject(i);
-	    	String id = fieldJson.optString("id");
-	    	LogTableField field = channelLogTable.findField( id );
-	    	if ( field == null && i<channelLogTable.getFields().size()) {
-	    		field = channelLogTable.getFields().get(i);
-	    	}
-			if (field != null) {
-				field.setFieldName(fieldJson.optString("name"));
-				field.setEnabled(fieldJson.optBoolean("enabled"));
+		if(jsonArray != null) {
+			for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
+		    	String id = fieldJson.optString("id");
+		    	LogTableField field = channelLogTable.findField( id );
+		    	if ( field == null && i<channelLogTable.getFields().size()) {
+		    		field = channelLogTable.getFields().get(i);
+		    	}
+				if (field != null) {
+					field.setFieldName(fieldJson.optString("name"));
+					field.setEnabled(fieldJson.optBoolean("enabled"));
+				}
 			}
 		}
 	    
@@ -322,16 +330,18 @@ public class TransDecoder {
 	    metricsLogTable.setTableName(jsonObject.optString("table"));
 	    metricsLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
 		jsonArray = jsonObject.optJSONArray("fields");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	JSONObject fieldJson = jsonArray.getJSONObject(i);
-	    	String id = fieldJson.optString("id");
-	    	LogTableField field = metricsLogTable.findField( id );
-	    	if ( field == null && i<metricsLogTable.getFields().size()) {
-	    		field = metricsLogTable.getFields().get(i);
-	    	}
-			if (field != null) {
-				field.setFieldName(fieldJson.optString("name"));
-				field.setEnabled(fieldJson.optBoolean("enabled"));
+		if(jsonArray != null) {
+			for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
+		    	String id = fieldJson.optString("id");
+		    	LogTableField field = metricsLogTable.findField( id );
+		    	if ( field == null && i<metricsLogTable.getFields().size()) {
+		    		field = metricsLogTable.getFields().get(i);
+		    	}
+				if (field != null) {
+					field.setFieldName(fieldJson.optString("name"));
+					field.setEnabled(fieldJson.optBoolean("enabled"));
+				}
 			}
 		}
 	    
@@ -525,14 +535,16 @@ public class TransDecoder {
 		
 		ArrayList<SlaveServer> slaveServers = new ArrayList<SlaveServer>();
 		JSONArray slavesNode = jsonObject.optJSONArray("slaveservers");
-		for (int i = 0; i < slavesNode.size(); i++) {
-			String serverName = slavesNode.getString(i);
-			SlaveServer slaveServer = SlaveServer.findSlaveServer(referenceSlaveServers, serverName);
-			if (slaveServer != null) {
-				slaveServers.add(slaveServer);
+		if(slavesNode != null) {
+			for (int i = 0; i < slavesNode.size(); i++) {
+				String serverName = slavesNode.getString(i);
+				SlaveServer slaveServer = SlaveServer.findSlaveServer(referenceSlaveServers, serverName);
+				if (slaveServer != null) {
+					slaveServers.add(slaveServer);
+				}
 			}
+			clusterSchema.setSlaveServers(slaveServers);
 		}
-		clusterSchema.setSlaveServers(slaveServers);
 		
 		return clusterSchema;
 	}
@@ -544,9 +556,12 @@ public class TransDecoder {
 		partitionSchema.setNumberOfPartitionsPerSlave(jsonObject.optString("partitions_per_slave"));
 
 	    JSONArray jsonArray = jsonObject.optJSONArray("partition");
-	    for ( int i = 0; i < jsonArray.size(); i++ ) {
-	    	partitionSchema.getPartitionIDs().add(jsonArray.getString(i));
+	    if(jsonArray != null) {
+	    	for ( int i = 0; i < jsonArray.size(); i++ ) {
+		    	partitionSchema.getPartitionIDs().add(jsonArray.getString(i));
+		    }
 	    }
+	    
 	    return partitionSchema;
 	}
 	

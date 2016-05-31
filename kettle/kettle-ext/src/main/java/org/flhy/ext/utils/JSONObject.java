@@ -86,8 +86,13 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 	}
 	
 	public JSONArray optJSONArray(String key) {
-		List list = (List) get(key);
-		return new JSONArray(list);
+		if(containsKey(key)) {
+			List list = (List) get(key);
+			JSONArray jsonArray = new JSONArray(list.size());
+			jsonArray.addAll(list);
+			return jsonArray;
+		}
+		return null;
 	}
 	
 	public String toString() {

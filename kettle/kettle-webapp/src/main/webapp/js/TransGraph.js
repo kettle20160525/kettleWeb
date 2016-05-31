@@ -118,7 +118,7 @@ TransGraph = Ext.extend(Ext.Panel, {
 			idProperty: 'name',
 			fields: ['name']
 		});
-		graph.addListener(mxEvent.ROOT, function(sender, evt){ 
+		graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt){ 
 			var cell = graph.getDefaultParent();
 			var databases = Ext.decode(cell.getAttribute('databases') || '[]');
 			database_store.loadData(databases);

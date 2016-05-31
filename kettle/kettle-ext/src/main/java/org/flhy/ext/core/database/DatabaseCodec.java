@@ -208,23 +208,24 @@ public class DatabaseCodec {
 	    // Option parameters:
 	    
 		JSONArray options = jsonObject.optJSONArray("extraOptions");
-		for(int i=0; i<options.size(); i++) {
-			JSONObject jsonObject2 = options.getJSONObject(i);
-			String parameter = jsonObject2.optString("name");
-			String value = jsonObject2.optString("value");
-			
-			if (value == null) {
-				value = "";
-			}
-			
-			if ((parameter != null) && (parameter.trim().length() > 0)) {
-				if (value.trim().length() <= 0) {
-					value = DatabaseMeta.EMPTY_OPTIONS_STRING;
+		if(options != null) {
+			for(int i=0; i<options.size(); i++) {
+				JSONObject jsonObject2 = options.getJSONObject(i);
+				String parameter = jsonObject2.optString("name");
+				String value = jsonObject2.optString("value");
+				
+				if (value == null) {
+					value = "";
 				}
+				
+				if ((parameter != null) && (parameter.trim().length() > 0)) {
+					if (value.trim().length() <= 0) {
+						value = DatabaseMeta.EMPTY_OPTIONS_STRING;
+					}
 
-				databaseMeta.addExtraOption(databaseMeta.getPluginId(), parameter, value);
+					databaseMeta.addExtraOption(databaseMeta.getPluginId(), parameter, value);
+				}
 			}
-			
 		}
 		
 		// Advanced panel settings:
@@ -266,26 +267,28 @@ public class DatabaseCodec {
 	    if ( jsonObject.containsKey("partitioned") ) {
 	    	databaseMeta.setPartitioned( jsonObject.optBoolean("partitioned") );
 			JSONArray partitionInfo = jsonObject.optJSONArray("partitionInfo");
-			ArrayList<PartitionDatabaseMeta> list = new ArrayList<PartitionDatabaseMeta>();
-			for (int i = 0; i < partitionInfo.size(); i++) {
-				JSONObject jsonObject2 = partitionInfo.getJSONObject(i);
-				PartitionDatabaseMeta meta = new PartitionDatabaseMeta();
+			if(partitionInfo != null) {
+				ArrayList<PartitionDatabaseMeta> list = new ArrayList<PartitionDatabaseMeta>();
+				for (int i = 0; i < partitionInfo.size(); i++) {
+					JSONObject jsonObject2 = partitionInfo.getJSONObject(i);
+					PartitionDatabaseMeta meta = new PartitionDatabaseMeta();
 
-				String partitionId = jsonObject2.optString("partitionId");
-				if ((partitionId == null) || (partitionId.trim().length() <= 0)) {
-					continue;
+					String partitionId = jsonObject2.optString("partitionId");
+					if ((partitionId == null) || (partitionId.trim().length() <= 0)) {
+						continue;
+					}
+
+					meta.setPartitionId(jsonObject2.optString("partitionId"));
+					meta.setHostname(jsonObject2.optString("hostname"));
+					meta.setPort(jsonObject2.optString("port"));
+					meta.setDatabaseName(jsonObject2.optString("databaseName"));
+					meta.setUsername(jsonObject2.optString("username"));
+					meta.setPassword(jsonObject2.optString("password"));
+					list.add(meta);
 				}
-
-				meta.setPartitionId(jsonObject2.optString("partitionId"));
-				meta.setHostname(jsonObject2.optString("hostname"));
-				meta.setPort(jsonObject2.optString("port"));
-				meta.setDatabaseName(jsonObject2.optString("databaseName"));
-				meta.setUsername(jsonObject2.optString("username"));
-				meta.setPassword(jsonObject2.optString("password"));
-				list.add(meta);
+				if (list.size() > 0)
+					databaseMeta.setPartitioningInformation(list.toArray( new PartitionDatabaseMeta[list.size()] ));
 			}
-			if (list.size() > 0)
-				databaseMeta.setPartitioningInformation(list.toArray( new PartitionDatabaseMeta[list.size()] ));
 	    }
 
 	    if(jsonObject.containsKey("usingConnectionPool")) {
@@ -302,22 +305,24 @@ public class DatabaseCodec {
 			}
 	    	
 	    	JSONArray pool_params = jsonObject.optJSONArray("pool_params");
-	    	Properties properties = new Properties();
-			for(int i=0; i<pool_params.size(); i++) {
-				JSONObject jsonObject2 = pool_params.getJSONObject(i);
-				Boolean enabled = jsonObject2.optBoolean("enabled");
-				String parameter = jsonObject2.optString("name");
-				String value = jsonObject2.optString("defValue");
+	    	if(pool_params != null) {
+	    		Properties properties = new Properties();
+	    		for(int i=0; i<pool_params.size(); i++) {
+					JSONObject jsonObject2 = pool_params.getJSONObject(i);
+					Boolean enabled = jsonObject2.optBoolean("enabled");
+					String parameter = jsonObject2.optString("name");
+					String value = jsonObject2.optString("defValue");
 
-				if (!enabled) {
-					continue;
+					if (!enabled) {
+						continue;
+					}
+					
+					if( StringUtils.hasText(parameter) && StringUtils.hasText(value) ) {
+						properties.setProperty( parameter, value );
+					}
 				}
-				
-				if( StringUtils.hasText(parameter) && StringUtils.hasText(value) ) {
-					properties.setProperty( parameter, value );
-				}
-			}
-			databaseMeta.setConnectionPoolingProperties( properties );
+	    		databaseMeta.setConnectionPoolingProperties( properties );
+	    	}
 	    }
 	    
 		databaseMeta.setReadOnly(jsonObject.optBoolean("read_only"));

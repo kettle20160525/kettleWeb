@@ -48,6 +48,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/PoolPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/ClusterPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/DatabaseDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/database/DatabaseExplorerDialog.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleDatabaseRepositoryDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleFileRepositoryDialog.js"></script>

@@ -19,12 +19,18 @@ import org.flhy.ext.TransExecutor;
 import org.flhy.ext.trans.TransDecoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.flhy.ext.utils.StringEscapeHelper;
 import org.flhy.webapp.utils.JsonUtils;
 import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.database.Database;
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogLevel;
+import org.pentaho.di.core.logging.LoggingObjectInterface;
+import org.pentaho.di.core.logging.LoggingObjectType;
+import org.pentaho.di.core.logging.SimpleLoggingObject;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -202,30 +208,35 @@ public class TransGraphController {
 		
 		Map<String, String> map = new HashMap<String, String>();
 		JSONArray parameters = jsonObject.optJSONArray("parameters");
-		for(int i=0; i<parameters.size(); i++) {
-			JSONObject param = parameters.getJSONObject(i);
-			String paramName = param.optString("name");
-			String paramValue = param.optString("value");
-			String defaultValue = param.optString("default_value");
-			if (Const.isEmpty(paramValue)) {
-				paramValue = Const.NVL(defaultValue, "");
+		if(parameters != null) {
+			for(int i=0; i<parameters.size(); i++) {
+				JSONObject param = parameters.getJSONObject(i);
+				String paramName = param.optString("name");
+				String paramValue = param.optString("value");
+				String defaultValue = param.optString("default_value");
+				if (Const.isEmpty(paramValue)) {
+					paramValue = Const.NVL(defaultValue, "");
+				}
+				map.put( paramName, paramValue );
 			}
-			map.put( paramName, paramValue );
+			executionConfiguration.setParams(map);
 		}
-		executionConfiguration.setParams(map);
 		
 		map = new HashMap<String, String>();
 		JSONArray variables = jsonObject.optJSONArray("variables");
-	    for ( int i = 0; i < variables.size(); i++ ) {
-	    	JSONObject var = variables.getJSONObject(i);
-	    	String varname = var.optString("var_name");
-	    	String value = var.optString("var_value");
-	      
+		if(variables != null) {
+			for ( int i = 0; i < variables.size(); i++ ) {
+		    	JSONObject var = variables.getJSONObject(i);
+		    	String varname = var.optString("var_name");
+		    	String value = var.optString("var_value");
+		      
 
-	    	if ( !Const.isEmpty( varname ) ) {
-	    		map.put( varname, value );
-	    	}
-	    }
+		    	if ( !Const.isEmpty( varname ) ) {
+		    		map.put( varname, value );
+		    	}
+		    }
+		}
+	    
 	    executionConfiguration.setVariables( map );
 	    
 	    
@@ -355,4 +366,39 @@ public class TransGraphController {
 		JsonUtils.response(jsonArray);
 	}
 	
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.POST, value = "/fieldNames")
+	protected void fieldNames(@RequestParam String graphXml, @RequestParam String databaseName, @RequestParam String sql) throws Exception {
+		mxGraph graph = new mxGraph();
+		mxCodec codec = new mxCodec();
+		Document doc = mxUtils.parseXml(graphXml);
+		codec.decode(doc.getDocumentElement(), graph.getModel());
+		
+		TransMeta transMeta = TransDecoder.decode(graph);
+		DatabaseMeta inf = transMeta.findDatabase(databaseName);
+		
+		Database db = new Database( loggingObject, inf );
+		db.connect();
+		
+		sql = StringEscapeHelper.decode(sql);
+		String subfix = sql.substring(sql.indexOf("from"));
+		RowMetaInterface fields = db.getQueryFields(sql, false);
+		if (fields != null) {
+			sql = "SELECT" + Const.CR;
+			for (int i = 0; i < fields.size(); i++) {
+				ValueMetaInterface field = fields.getValueMeta(i);
+				if (i == 0) {
+					sql += "  ";
+				} else {
+					sql += ", ";
+				}
+				sql += inf.quoteField(field.getName()) + Const.CR;
+			}
+			sql += ' ' + subfix;
+		}
+		
+		JsonUtils.success(StringEscapeHelper.encode(sql));
+	}
+	
+	public static final LoggingObjectInterface loggingObject = new SimpleLoggingObject("TransGraphController", LoggingObjectType.TRANSMETA, null );
 }
