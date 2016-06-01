@@ -59,7 +59,8 @@ public class TextFileOutput extends AbstractStep {
 		textFileOutputMeta.setFastDump("Y".equalsIgnoreCase(cell.getAttribute("fast_dump")));
 		textFileOutputMeta.setSplitEvery(Const.toInt(cell.getAttribute("splitevery"), 0));
 		textFileOutputMeta.setEndedLine(cell.getAttribute("endedLine"));
-		textFileOutputMeta.setNewline(cell.getAttribute("format"));
+		
+		textFileOutputMeta.setNewline(textFileOutputMeta.getNewLine(cell.getAttribute("format")));
 		
 		String fields = cell.getAttribute("fields");
 		JSONArray jsonArray = JSONArray.fromObject(fields);
