@@ -52,14 +52,13 @@ public class TextFileOutput extends AbstractStep {
 		textFileOutputMeta.setEnclosureFixDisabled("Y".equalsIgnoreCase(cell.getAttribute("enclosure_fix_disabled")));
 		textFileOutputMeta.setHeaderEnabled("Y".equalsIgnoreCase(cell.getAttribute("header")));
 		textFileOutputMeta.setFooterEnabled("Y".equalsIgnoreCase(cell.getAttribute("footer")));
-//		textFileOutputMeta.setFileFormat(cell.getAttribute("format"));
+		textFileOutputMeta.setFileFormat(cell.getAttribute("format"));
 		textFileOutputMeta.setFileCompression(cell.getAttribute("compression"));
 		textFileOutputMeta.setEncoding(cell.getAttribute("encoding"));
 		textFileOutputMeta.setPadded("Y".equalsIgnoreCase(cell.getAttribute("pad")));
 		textFileOutputMeta.setFastDump("Y".equalsIgnoreCase(cell.getAttribute("fast_dump")));
 		textFileOutputMeta.setSplitEvery(Const.toInt(cell.getAttribute("splitevery"), 0));
 		textFileOutputMeta.setEndedLine(cell.getAttribute("endedLine"));
-		
 		textFileOutputMeta.setNewline(textFileOutputMeta.getNewLine(cell.getAttribute("format")));
 		
 		String fields = cell.getAttribute("fields");
