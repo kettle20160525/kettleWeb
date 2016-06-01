@@ -21,7 +21,7 @@ StepFieldsDialog = Ext.extend(Ext.Window, {
 		var enc = new mxCodec(mxUtils.createXmlDocument());
 		var node = enc.encode(graph.getModel());
 		
-		store.baseParams.stepName = cell.getAttribute('label');
+		store.baseParams.stepName = encodeURIComponent(cell.getAttribute('label'));
 		store.baseParams.graphXml = mxUtils.getPrettyXml(node);
 		store.baseParams.before = this.initialConfig.before;
 		

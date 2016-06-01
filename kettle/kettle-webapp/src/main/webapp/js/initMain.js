@@ -223,8 +223,8 @@ KettleForm = Ext.extend(Ext.form.FormPanel, {
 	labeWidth: 100,
 	labelAlign: 'right',
 	defaultType: 'textfield'
-	
 });
+Ext.reg('KettleForm', KettleForm);
 
 KettleDialog = Ext.extend(Ext.Window, {
 	modal: true,

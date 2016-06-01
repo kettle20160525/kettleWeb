@@ -30,16 +30,16 @@ public class ExecSQL extends AbstractStep {
 		execSQLMeta.setDatabaseMeta(DatabaseMeta.findDatabase( databases, con ));
 		execSQLMeta.setSql(StringEscapeHelper.decode(cell.getAttribute( "sql" )));
 		
-		execSQLMeta.setExecutedEachInputRow("true".equalsIgnoreCase(cell.getAttribute( "executedEachInputRow" )));
-		execSQLMeta.setSingleStatement("true".equalsIgnoreCase(cell.getAttribute( "singleStatement" )));
-		execSQLMeta.setVariableReplacementActive("true".equalsIgnoreCase(cell.getAttribute( "replaceVariables" )));
-		execSQLMeta.setParams("true".equalsIgnoreCase(cell.getAttribute( "setParams" )));
-		execSQLMeta.setQuoteString("true".equalsIgnoreCase(cell.getAttribute( "quoteString" )));
+		execSQLMeta.setExecutedEachInputRow("Y".equalsIgnoreCase(cell.getAttribute( "executedEachInputRow" )));
+		execSQLMeta.setSingleStatement("Y".equalsIgnoreCase(cell.getAttribute( "singleStatement" )));
+		execSQLMeta.setVariableReplacementActive("Y".equalsIgnoreCase(cell.getAttribute( "replaceVariables" )));
+		execSQLMeta.setParams("Y".equalsIgnoreCase(cell.getAttribute( "setParams" )));
+		execSQLMeta.setQuoteString("Y".equalsIgnoreCase(cell.getAttribute( "quoteString" )));
 
-//	      insertField = cell.getAttribute( "insert_field" );
-//	      updateField = cell.getAttribute( "update_field" );
-//	      deleteField = cell.getAttribute( "delete_field" );
-//	      readField = cell.getAttribute( "read_field" );
+		execSQLMeta.setInsertField(cell.getAttribute("insert_field"));
+		execSQLMeta.setUpdateField(cell.getAttribute("update_field"));
+		execSQLMeta.setDeleteField(cell.getAttribute("delete_field"));
+		execSQLMeta.setReadField(cell.getAttribute("read_field"));
 		
 		JSONArray jsonArray = JSONArray.fromObject(cell.getAttribute( "arguments" ));
 		execSQLMeta.allocate( jsonArray.size() );
@@ -58,11 +58,16 @@ public class ExecSQL extends AbstractStep {
 		
 		e.setAttribute("connection", execSQLMeta.getDatabaseMeta() == null ? "" : execSQLMeta.getDatabaseMeta().getName());
 		e.setAttribute("sql", StringEscapeHelper.encode(execSQLMeta.getSql()));
-		e.setAttribute("executedEachInputRow", Boolean.toString(execSQLMeta.isExecutedEachInputRow()));
-		e.setAttribute("singleStatement", Boolean.toString(execSQLMeta.isSingleStatement()));
-		e.setAttribute("replaceVariables", Boolean.toString(execSQLMeta.isReplaceVariables()));
-		e.setAttribute("setParams", Boolean.toString(execSQLMeta.isParams()));
-		e.setAttribute("quoteString", Boolean.toString(execSQLMeta.isQuoteString()));
+		e.setAttribute("executedEachInputRow", execSQLMeta.isExecutedEachInputRow() ? "Y" : "N");
+		e.setAttribute("singleStatement", execSQLMeta.isSingleStatement() ? "Y" : "N");
+		e.setAttribute("replaceVariables", execSQLMeta.isReplaceVariables() ? "Y" : "N");
+		e.setAttribute("setParams", execSQLMeta.isParams() ? "Y" : "N");
+		e.setAttribute("quoteString", execSQLMeta.isQuoteString() ? "Y" : "N");
+		
+		e.setAttribute("insert_field", execSQLMeta.getInsertField());
+		e.setAttribute("update_field", execSQLMeta.getUpdateField());
+		e.setAttribute("delete_field", execSQLMeta.getDeleteField());
+		e.setAttribute("read_field", execSQLMeta.getReadField());
 		
 		JSONArray arguments = new JSONArray();
 		for ( int i = 0; i < execSQLMeta.getArguments().length; i++ ) {

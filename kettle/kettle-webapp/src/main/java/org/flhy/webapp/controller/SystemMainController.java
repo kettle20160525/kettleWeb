@@ -6,7 +6,9 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -22,8 +24,10 @@ import org.flhy.ext.trans.steps.FilterRows;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.SvgImageUrl;
+import org.flhy.webapp.utils.JsonUtils;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.compress.CompressionProviderFactory;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
@@ -35,6 +39,7 @@ import org.pentaho.di.core.row.value.ValueMetaPluginType;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -266,7 +271,7 @@ public class SystemMainController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/valueString")
-	protected void inputOutputFields(HttpServletRequest request, HttpServletResponse response, @RequestParam String valueMeta) throws Exception {
+	protected void valueString(HttpServletRequest request, HttpServletResponse response, @RequestParam String valueMeta) throws Exception {
 		JSONObject jsonObject = JSONObject.fromObject(valueMeta);
 		
 		FilterRows filterRows = (FilterRows) PluginFactory.getBean("FilterRows");
@@ -290,6 +295,62 @@ public class SystemMainController {
 		
 		response.setContentType("text/html; charset=utf-8");
 		response.getWriter().write(jsonArray.toString());
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/datetimeformat")
+	protected void datetimeformat() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		String[] dats = Const.getDateFormats();
+	    for ( int x = 0; x < dats.length; x++ ) {
+	      JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", dats[x]);
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/formatMapperLineTerminator")
+	protected void formatMapperLineTerminator() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		String[] dats = TextFileOutputMeta.formatMapperLineTerminator;
+	    for ( int x = 0; x < dats.length; x++ ) {
+	      JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", dats[x]);
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/compressionProviderNames")
+	protected void compressionProviderNames() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		String[] dats = CompressionProviderFactory.getInstance().getCompressionProviderNames();
+	    for ( int x = 0; x < dats.length; x++ ) {
+	      JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", dats[x]);
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/availableCharsets")
+	protected void availableCharsets() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		Collection<Charset> dats = Charset.availableCharsets().values();
+	    for (Charset charset : dats) {
+	      JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", charset.displayName());
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody

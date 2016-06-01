@@ -26,9 +26,12 @@ public class JSONObject extends LinkedHashMap<String, Object> {
 	}
 	
 	public static JSONObject fromObject(String json) throws JsonParseException, JsonMappingException, IOException {
+		JSONObject jsonObject = new JSONObject();
+		if(!StringUtils.hasText(json))
+			return jsonObject;
+		
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> m = mapper.readValue(json, LinkedHashMap.class);
-		return new JSONObject(m);
+		return mapper.readValue(json, JSONObject.class);
 	}
 	
 	public String optString(String key) {

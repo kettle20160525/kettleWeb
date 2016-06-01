@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.ProgressMonitorAdapter;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogLevel;
@@ -35,6 +37,9 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.repository.ObjectId;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
@@ -77,26 +82,51 @@ public class TransGraphController {
 		codec.decode(doc.getDocumentElement(), graph.getModel());
 		
 		TransMeta transMeta = TransDecoder.decode(graph);
-		File file = new File(transMeta.getFilename());
-		if(file.exists()) {
-			List<String> fileRows = FileUtils.readLines(file);
-			
-			String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
-			List<String> engineRows = IOUtils.readLines(new StringReader(xml));
-			
-			int number = fileRows.size() > engineRows.size() ? engineRows.size() : fileRows.size();
-			for(int i=0; i<number; i++) {
-				String fileRow = fileRows.get(i);
-				String engineRow = engineRows.get(i);
-				
-				if(!fileRow.equals(engineRow)) {
-					System.out.println("[" + i + "]file: " + fileRow);
-					System.out.println("[" + i + "]engine: " + engineRow);
-					System.out.println("================================================================================");
-				}
-			}
-			System.out.println("=====finished=====");
+		Repository repository = App.getInstance().getRepository();
+		ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
+		if(transMeta.getCreatedDate() == null)
+			transMeta.setCreatedDate(new Date());
+		if(transMeta.getObjectId() == null)
+			transMeta.setObjectId(existingId);
+		transMeta.setModifiedDate(new Date());
+		
+		 boolean versioningEnabled = true;
+         boolean versionCommentsEnabled = true;
+         String fullPath = transMeta.getRepositoryDirectory() + "/" + transMeta.getName() + transMeta.getRepositoryElementType().getExtension(); 
+         RepositorySecurityProvider repositorySecurityProvider = repository.getSecurityProvider() != null ? repository.getSecurityProvider() : null;
+         if ( repositorySecurityProvider != null ) {
+        	 versioningEnabled = repositorySecurityProvider.isVersioningEnabled( fullPath );
+        	 versionCommentsEnabled = repositorySecurityProvider.allowsVersionComments( fullPath );
+         }
+		String versionComment = null;
+		if (!versioningEnabled || !versionCommentsEnabled) {
+			versionComment = "";
+		} else {
+			versionComment = "no comment";
 		}
+		
+		repository.save( transMeta, versionComment, null);
+		
+//		File file = new File(transMeta.getFilename());
+//		if(file.exists()) {
+//			List<String> fileRows = FileUtils.readLines(file);
+//			
+//			String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
+//			List<String> engineRows = IOUtils.readLines(new StringReader(xml));
+//			
+//			int number = fileRows.size() > engineRows.size() ? engineRows.size() : fileRows.size();
+//			for(int i=0; i<number; i++) {
+//				String fileRow = fileRows.get(i);
+//				String engineRow = engineRows.get(i);
+//				
+//				if(!fileRow.equals(engineRow)) {
+//					System.out.println("[" + i + "]file: " + fileRow);
+//					System.out.println("[" + i + "]engine: " + engineRow);
+//					System.out.println("================================================================================");
+//				}
+//			}
+//			System.out.println("=====finished=====");
+//		}
 	}
 	
 	/**
@@ -291,6 +321,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/inputOutputFields")
 	protected void inputOutputFields(@RequestParam String graphXml, @RequestParam String stepName, @RequestParam boolean before) throws Exception {
+		stepName = StringEscapeHelper.decode(stepName);
+		
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);

@@ -1,19 +1,13 @@
-ExecSQLDialog = Ext.extend(Ext.Window, {
+ExecSQLDialog = Ext.extend(KettleTabDialog, {
 	title: '执行SQL语句',
 	width: 600,
 	height: 400,
-	closeAction: 'close',
-	modal: true,
-	layout: 'fit',
-	bodyStyle: 'padding: 5px;',
 	initComponent: function() {
-		var me = this, 
-			transGraph = getActiveGraph(),
+		var me = this, transGraph = getActiveGraph(),
 			graph = transGraph.getGraph(), 
-			cell = graph.getSelectionCell(), 
-			store = transGraph.getDatabaseStore();
+			cell = graph.getSelectionCell();
 		
-		var combo = new Ext.form.ComboBox({
+		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
 			displayField: 'name',
 			valueField: 'name',
@@ -22,179 +16,143 @@ ExecSQLDialog = Ext.extend(Ext.Window, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: store,
-			name: 'connection',
+			store: transGraph.getDatabaseStore(),
 			value: cell.getAttribute('connection')
 		});
 		
-		var form = new Ext.form.FormPanel({
-			title: '基本配置',
-			bodyStyle: 'padding: 10px',
-			region: 'center',
-			height: 150,
-			defaultType: 'textfield',
-			labelWidth: 70,
-			items: [{
-				fieldLabel: '步骤名称',
-				anchor: '-10',
-				name: 'label',
-				value: cell.getAttribute('label')
-			}, {
-				xtype: 'compositefield',
-				anchor: '-10',
-				items: [combo, {
-					xtype: 'button', text: '编辑...', handler: function() {
-						store.each(function(item) {
-							if(item.get('name') == combo.getValue()) {
-								var databaseDialog = new DatabaseDialog();
-    							databaseDialog.show(null, function() {
-    								databaseDialog.initDatabase(item.json);
-    							});
-							}
-						});
-					}
-				}, {
-					xtype: 'button', text: '新建...', handler: function() {
-						var databaseDialog = new DatabaseDialog();
-						databaseDialog.show();
-					}
-				}, {
-					xtype: 'button',
-					text: '向导...'
-				}]
-			}, {
-				xtype: 'textarea',
-				fieldLabel: 'SQL语句',
-				height: 200,
-				emptyText: '多个SQL语句之间用;分割，问号(?)将被参数替换',
-				anchor: '-10',
-				name: 'sql',
-				value: decodeURIComponent(cell.getAttribute('sql'))
-			}]
+		var wSQL = new Ext.form.TextArea({
+			emptyText: 'SQL语句，多个语句之间请用;分割',
+		});
+		if(!Ext.isEmpty(cell.getAttribute('sql')))
+			wSQL.setValue(decodeURIComponent(cell.getAttribute('sql')));
+		
+		var wEachRow = new Ext.form.Checkbox({fieldLabel: '执行每一行', checked: cell.getAttribute('executedEachInputRow') == 'Y'});
+		var wSingleStatement = new Ext.form.Checkbox({fieldLabel: 'Execute as a single statement', checked: cell.getAttribute('singleStatement') == 'Y'});
+		var wVariables = new Ext.form.Checkbox({fieldLabel: '变量替换', checked: cell.getAttribute('replaceVariables') == 'Y'});
+		var wSetParams = new Ext.form.Checkbox({fieldLabel: '绑定参数', checked: cell.getAttribute('setParams') == 'Y'});
+		var wQuoteString = new Ext.form.Checkbox({fieldLabel: 'Quote String', checked: cell.getAttribute('quoteString') == 'Y'});
+		
+		var wInsertField = new Ext.form.TextField({fieldLabel: '包含插入状态的字段',  anchor: '-10', value: cell.getAttribute('insert_field')});
+		var wUpdateField = new Ext.form.TextField({fieldLabel: '包含更新状态的字段',  anchor: '-10', value: cell.getAttribute('update_field')});
+		var wDeleteField = new Ext.form.TextField({fieldLabel: '包含删除状态的字段',  anchor: '-10', value: cell.getAttribute('delete_field')});
+		var wReadField = new Ext.form.TextField({fieldLabel: '包含读状态的字段',  anchor: '-10', value: cell.getAttribute('read_field')});
+		
+		var store = new Ext.data.JsonStore({
+			fields: ['name'],
+			data: Ext.decode(cell.getAttribute('arguments')) || []
 		});
 		
-		var details = new Ext.form.FormPanel({
-			title: '细节',
-			bodyStyle: 'padding: 5px',
-			labelWidth: 1,
-			items: [{
-                xtype: 'checkboxgroup',
-                columns: 1,
-                anchor: '-5',
-                items: [
-                    {boxLabel: '执行每一行', name: 'executedEachInputRow', checked: true},
-                    {boxLabel: 'Execute as a single statement', name: 'singleStatement', checked: true},
-                    {boxLabel: '变量替换', name: 'replaceVariables', checked: true},
-                    {boxLabel: '绑定参数?', name: 'setParams'},
-                    {boxLabel: 'Quote String?', name: 'quoteString'}
-                ]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;',
-            		text: '包含插入状态的字段：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;',
-            		text: '包含更新状态的字段：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;',
-            		text: '包含删除状态的字段：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 12px',
-            		text: '包含读状态的字段：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1
-            	}]
-            }]
-		});
+		this.getValues = function(){
+			var args = [];
+			store.each(function(rec) {
+				args.push({name: rec.get('name')});
+			});
+			return {
+				connection: wConnection.getValue(),
+				sql: encodeURIComponent(wSQL.getValue()),
+				executedEachInputRow: wEachRow.getValue() ? "Y" : "N",
+				singleStatement: wSingleStatement.getValue() ? "Y" : "N",
+				replaceVariables: wVariables.getValue() ? "Y" : "N",
+				setParams: wSetParams.getValue() ? "Y" : "N",
+				quoteString: wQuoteString.getValue() ? "Y" : "N",
+				insert_field: wInsertField.getValue(),
+				update_field: wUpdateField.getValue(),
+				delete_field:  wDeleteField.getValue(),
+				read_field:  wReadField.getValue(),
+				arguments: Ext.encode(args)
+			};
+		};
 		
 		var parameters = new Ext.grid.EditorGridPanel({
 			title: '参数',
 			tbar: [{
-				iconCls: 'add', handler: function() {
-					var RecordType = parameters.getStore().recordType;
-	                var p = new RecordType({
-	                    name: '',
-	                    type: '',
-	                    format: '',
-	                    length: 100
-	                });
+				text: '增加参数', handler: function() {
+	                var record = new store.recordType({name: ''});
 	                parameters.stopEditing();
-	                parameters.getStore().insert(0, p);
+	                parameters.getStore().insert(0, record);
 	                parameters.startEditing(0, 0);
 				}
 			},{
-				iconCls: 'delete'
+				text: '删除参数'
 			}],
 			columns: [new Ext.grid.RowNumberer(), {
 				header: '作为参数的字段', dataIndex: 'name', width: 150, editor: new Ext.form.TextField({
 	                allowBlank: false
 	            })
 			}],
-			store: new Ext.data.JsonStore({
-				fields: ['name'],
-				data: []
-			})
+			store: store
 		});
 		
-		this.items = new Ext.TabPanel({
-			activeTab: 0,
-			deferredRender: false,
-			items: [form, details, parameters]
-		});
+		var onDatabaseCreate = function(dialog) {
+			var root = graph.getDefaultParent();
+			var databases = root.getAttribute('databases');
+			var jsonArray = Ext.decode(databases);
+			jsonArray.push(dialog.getValue());
+			graph.getModel().beginUpdate();
+            try
+            {
+				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
+            	graph.getModel().execute(edit);
+            } finally
+            {
+                graph.getModel().endUpdate();
+            }
+			
+            wConnection.setValue(dialog.getValue().name);
+            dialog.close();
+		};
 		
-		var bCancel = new Ext.Button({
-			text: '取消', handler: function() {
-				me.close();
-			}
-		});
-		var bOk = new Ext.Button({
-			text: '确定', handler: function() {
-				graph.getModel().beginUpdate();
-                try
-                {
-                	var formValues = form.getForm().getValues();
-                	formValues.sql = encodeURIComponent(formValues.sql);
-                	//formValues.compatibilityMode = formValues.compatibilityMode ? true : false;
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
-                    	graph.getModel().execute(edit);
-					}
-                	
-                }
-                finally
-                {
-                    graph.getModel().endUpdate();
-                }
-                
-				me.close();
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bOk];
+		this.tabItems = [{
+			title: '基本配置',
+			layout: 'border',
+			defaults: {border: false},
+			items: [{
+				region: 'north',
+				height: 30,
+				xtype: 'KettleForm',
+				bodyStyle: 'padding-top: 5px',
+				labelWidth: 80,
+				items: [{
+					xtype: 'compositefield',
+					fieldLabel: '数据库连接',
+					anchor: '-10',
+					items: [wConnection, {
+						xtype: 'button', text: '编辑...', handler: function() {
+							transGraph.getDatabaseStore().each(function(item) {
+								if(item.get('name') == wConnection.getValue()) {
+									var databaseDialog = new DatabaseDialog();
+									databaseDialog.on('create', onDatabaseCreate);
+	    							databaseDialog.show(null, function() {
+	    								databaseDialog.initDatabase(item.json);
+	    							});
+								}
+							});
+						}
+					}, {
+						xtype: 'button', text: '新建...', handler: function() {
+							var databaseDialog = new DatabaseDialog();
+							databaseDialog.on('create', onDatabaseCreate);
+							databaseDialog.show();
+						}
+					}, {
+						xtype: 'button',
+						text: '向导...'
+					}]
+				}]
+			}, {
+				bodyStyle: 'padding: 5px 10px;',
+				layout: 'fit',
+				region: 'center',
+				items: wSQL
+			}]
+		},{
+			title: '细节',
+			xtype: 'KettleForm',
+			bodyStyle: 'padding: 5px',
+			labelWidth: 180,
+			items: [wEachRow, wSingleStatement, wVariables, wSetParams, wQuoteString,
+			        wInsertField, wUpdateField, wDeleteField, wReadField]
+		}, parameters];
 		
 		ExecSQLDialog.superclass.initComponent.call(this);
 	}

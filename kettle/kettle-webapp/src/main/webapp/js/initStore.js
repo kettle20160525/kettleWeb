@@ -31,7 +31,43 @@ Ext.onReady(function() {
 		storeId: 'databaseAccessData',
 		fields: ['value','text'],
 		proxy: new Ext.data.HttpProxy({
-			url: 'database/accessData.do',
+			url: GetUrl('database/accessData.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'datetimeFormatStore',
+		fields: ['name'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/datetimeformat.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'formatMapperLineTerminatorStore',
+		fields: ['name'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/formatMapperLineTerminator.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'compressionProviderNamesStore',
+		fields: ['name'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/compressionProviderNames.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'availableCharsetsStore',
+		fields: ['name'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/availableCharsets.do'),
 			method: 'POST'
 		})
 	}).load();

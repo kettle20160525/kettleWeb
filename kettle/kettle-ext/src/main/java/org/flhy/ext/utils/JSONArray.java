@@ -8,6 +8,7 @@ import java.util.Map;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.util.StringUtils;
 
 public class JSONArray extends ArrayList<Object> {
 
@@ -30,9 +31,12 @@ public class JSONArray extends ArrayList<Object> {
 	}
 
 	public static JSONArray fromObject(String json) throws JsonParseException, JsonMappingException, IOException {
+		JSONArray jsonArray = new JSONArray();
+		if(!StringUtils.hasText(json))
+			return jsonArray;
+		
 		ObjectMapper mapper = new ObjectMapper();
-		List<Object> list = mapper.readValue(json, ArrayList.class);
-		return fromObject(list);
+		return mapper.readValue(json, JSONArray.class);
 	}
 	
 	public static JSONArray fromObject(List list) throws JsonParseException, JsonMappingException, IOException {

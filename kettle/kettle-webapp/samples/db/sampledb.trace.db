@@ -430,3 +430,12 @@ java.lang.Exception: Stack Trace
 	at org.eclipse.jetty.io.nio.SelectChannelEndPoint$1.run(SelectChannelEndPoint.java:40)
 	at org.eclipse.jetty.util.thread.QueuedThreadPool$2.run(QueuedThreadPool.java:450)
 	at java.lang.Thread.run(Thread.java:745)
+05-31 20:39:52 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "Y" not found; SQL statement:
+select * from Y [42102-131]
+05-31 20:42:36 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "Y" not found; SQL statement:
+select * from Y [42102-131]
+05-31 20:43:00 jdbc[2]: SQLException
+org.h2.jdbc.JdbcSQLException: Table "Y" not found; SQL statement:
+select * from Y [42102-131]
