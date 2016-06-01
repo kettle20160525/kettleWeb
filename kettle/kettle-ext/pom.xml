@@ -18,7 +18,7 @@
 			<url>http://localhost:8081/nexus/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
-			<id>nexus-snapshots</id>
+			<id>nexus-snapshots</id> 
 			<name>Nexus Snapshots Repository</name>
 			<url>http://localhost:8081/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
