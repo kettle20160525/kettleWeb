@@ -340,7 +340,6 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 				value: cell.getAttribute('label')
 			}]
 		});
-		ext.
 		var transset = new Ext.form.FormPanel({
 			title: '一般',
 			bodyStyle: 'padding: 5px',
@@ -562,7 +561,7 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 		var tab = new Ext.TabPanel({
 			activeTab: 0,
 			items: [transset, advance, setlog]
-		})
+		});
 		
 		this.items = [form, {
 			region: 'center',
@@ -595,7 +594,7 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 		
 		this.bbar = ['->', bCancel, bOk];
 		
-		JobEntryTrans.superclass.initComponent.call(this);
+		JobEntryFTP_PUT.superclass.initComponent.call(this);
 	}
 });
 
