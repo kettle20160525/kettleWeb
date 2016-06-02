@@ -315,8 +315,8 @@ KettleTabDialog = Ext.extend(KettleDialog, {
 
 JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 	title: 'FTP上传',
-	width: 600,
-	height: 430,
+	width: 700,
+	height: 550,
 	closeAction: 'close',
 	modal: true,
 	layout: 'border',
@@ -340,72 +340,94 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 				value: cell.getAttribute('label')
 			}]
 		});
+<<<<<<< .mine
+		
+		
+		
+		
+=======
+>>>>>>> .r59
 		var transset = new Ext.form.FormPanel({
 			title: '一般',
-			bodyStyle: 'padding: 5px',
-			labelWidth: 1,
+			bodyStyle: 'padding: 20px 10px',
+			labelWidth: 150,
+			labelAlign: 'right',
+			defaultType: 'textfield',
 			items: [{
-				xtype: 'fieldset',
-				items: [{
-					xtype: 'compositefield',
-					items: [{
-						xtype: 'textfield',
-						fieldLabel: '日志文件后缀名',
-						anchor: '-10',
-						name: 'logext',
-						value: cell.getAttribute('logext')
-					}, {
-						xtype: 'textfield',
-						flex: 1,
-						name: 'filename',
-						value: cell.getAttribute('filename')
-					}, {
-						xtype: 'button',
-						text: '选择...'
-					}]
-				}]
-			},{
-				xtype: 'fieldset',
-				items: [{
-					xtype: 'radio',
-					boxLabel: '通过目录与名称指定转换',
-					name: 'specification_method',
-					inputValue: 'rep_name'
-				}, {
-					xtype: 'textfield',
-					anchor: '-1'
-				}, {
-					xtype: 'compositefield',
-					items: [{
-						xtype: 'textfield',
-						flex: 1
-					}, {
-						xtype: 'button',
-						text: '选择...'
-					}]
-				}]
-			},{
-				xtype: 'fieldset',
-				items: [{
-					xtype: 'compositefield',
-					items: [{
-						xtype: 'radio',
-						boxLabel: '通过引用指定转换',
-						name: 'specification_method',
-						inputValue: 'rep_ref'
-					}, {
-						xtype: 'textfield',
-						flex: 1
-					}, {
-						xtype: 'button',
-						text: '选择...'
-					}]
-				}]
-			}, {
-				xtype: 'button',
-				text: '新建转换'
-			}]
+				fieldLabel: 'FTP服务器名称/IP地址',
+				anchor: '-10',
+				name: 'ftpnameandipaddress',
+				value: cell.getAttribute('partitioning_field')
+			}, 
+			{
+				fieldLabel: '端口',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '用户名',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '密码',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '代理主机',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '代理端口',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '代理用户名',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				fieldLabel: '代理密码',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				xtype: 'checkbox',
+				fieldLabel: '二进制模式？',
+				name: 'use_batch',
+				checked: cell.getAttribute('use_batch') == 'Y'
+			},
+			{
+				fieldLabel: '超时',
+				anchor: '-10',
+				name: 'partitioning_field',
+				value: cell.getAttribute('partitioning_field')
+			},
+			{
+				xtype: 'checkbox',
+				fieldLabel: '使用活动的FTP连接？',
+				name: 'use_batch',
+				checked: cell.getAttribute('use_batch') == 'Y'
+			},
+			{
+				xtype: 'textfield',
+				fieldLabel: '控制编码',
+				anchor: '-30',
+				value: cell.getAttribute('shortFileFieldName')
+			}
+			]
 		});
+	 
 		
 		transset.on('afterrender', function() {
 			var arrays = findItems(transset, 'name', 'specification_method');
@@ -445,58 +467,38 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 			defaultType: 'textfield',
 			labelWidth: 200,
 			labelAlign: 'right',
-			items: [{
-				xtype: 'checkbox',
-				fieldLabel: '复制上一步结果到位置参数',
-				name: 'arg_from_previous',
-				value: cell.getAttribute('arg_from_previous') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '复制上一步结果到命名参数',
-				name: 'params_from_previous',
-				value: cell.getAttribute('params_from_previous') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '执行每一个输入行',
-				name: 'exec_per_row',
-				value: cell.getAttribute('exec_per_row') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '在执行前清除结果行列表',
-				name: 'clear_rows',
-				value: cell.getAttribute('clear_rows') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '在执行前清除结果文件列表',
-				name: 'clear_files',
-				value: cell.getAttribute('clear_files') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '在集群模式下运行这个转换',
-				name: 'cluster',
-				value: cell.getAttribute('cluster') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: 'Log remote execution locally',
-				name: 'logging_remote_work',
-				value: cell.getAttribute('logging_remote_work') == 'Y'
-			},{
-				xtype: 'textfield',
-				fieldLabel: '远程从服务器',
-				name: 'slave_server_name',
-				value: cell.getAttribute('slave_server_name'),
-				anchor: '-10'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '等待远程转换执行结束',
-				name: 'wait_until_finished',
-				value: cell.getAttribute('wait_until_finished') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '本地转换终止时远程转换也通知终止',
-				name: 'follow_abort_remote',
-				value: cell.getAttribute('follow_abort_remote') == 'Y'
-			}]
+			items: [
+					{
+						fieldLabel: '本地目录',
+						anchor: '-10',
+						name: 'partitioning_field',
+						value: cell.getAttribute('partitioning_field')
+					},
+					{
+						fieldLabel: '通配符(正则表达式)',
+						anchor: '-10',
+						name: 'partitioning_field',
+						value: cell.getAttribute('partitioning_field')
+					},
+					{
+						xtype: 'checkbox',
+						fieldLabel: '上传文件后删除本地文件？',
+						name: 'use_batch',
+						checked: cell.getAttribute('use_batch') == 'Y'
+					},
+					{
+						xtype: 'checkbox',
+						fieldLabel: '不覆盖本地文件？',
+						name: 'use_batch',
+						checked: cell.getAttribute('use_batch') == 'Y'
+					},
+					{
+						fieldLabel: '远程目录',
+						anchor: '-10',
+						name: 'partitioning_field',
+						value: cell.getAttribute('partitioning_field')
+					}
+			]
 		});
 		
 		var setlog = new Ext.form.FormPanel({
@@ -506,56 +508,28 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 			labelWidth: 100,
 			labelAlign: 'right',
 			items: [{
-				xtype: 'checkbox',
-				fieldLabel: '指定日志文件',
+				xtype: 'textfield',
+				fieldLabel: '主机',
 				name: 'set_logfile',
-				value: cell.getAttribute('set_logfile') == 'Y'
+				value: cell.getAttribute('set_logfile') 
 			},{
-				xtype: 'checkbox',
-				fieldLabel: '添加到日志文件尾',
+				xtype: 'textfield',
+				fieldLabel: '端口',
 				name: 'set_append_logfile',
-				value: cell.getAttribute('set_append_logfile') == 'Y'
-			},{
-				xtype: 'compositefield',
-				anchor: '-10',
-				fieldLabel: '日志文件名',
-				items: [{
-					xtype: 'textfield',
-					flex: 1,
-					name: 'logfile',
-					value: cell.getAttribute('logfile')
-				}, {
-					xtype: 'button',
-					text: '浏览...'
-				}]
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '创建父文件夹',
-				name: 'create_parent_folder',
-				value: cell.getAttribute('create_parent_folder') == 'Y'
+				value: cell.getAttribute('set_append_logfile') 
 			},{
 				xtype: 'textfield',
-				fieldLabel: '日志文件后缀名',
-				anchor: '-10',
-				name: 'logext',
-				value: cell.getAttribute('logext')
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '日志文件包含日期',
-				name: 'add_date',
-				value: cell.getAttribute('add_date') == 'Y'
-			},{
-				xtype: 'checkbox',
-				fieldLabel: '日志文件包含时间',
-				name: 'add_time',
-				value: cell.getAttribute('add_time') == 'Y'
-			},{
+				fieldLabel: '用户名',
+				name: 'set_append_logfile',
+				value: cell.getAttribute('set_append_logfile') 
+			},
+			{
 				xtype: 'textfield',
-				fieldLabel: '日志级别',
-				name: 'loglevel',
-				value: cell.getAttribute('loglevel'),
-				anchor: '-10'
-			}]
+				fieldLabel: '密码',
+				name: 'set_append_logfile',
+				value: cell.getAttribute('set_append_logfile') 
+			}
+			 ]
 		});
 		
 		var tab = new Ext.TabPanel({
