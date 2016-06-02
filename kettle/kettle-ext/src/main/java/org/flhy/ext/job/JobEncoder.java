@@ -1,13 +1,21 @@
 package org.flhy.ext.job;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.cluster.SlaveServerCodec;
+import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.job.step.JobEntryEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.SvgImageUrl;
+import org.pentaho.di.cluster.SlaveServer;
+import org.pentaho.di.core.Props;
+import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.gui.Point;
+import org.pentaho.di.core.logging.LogTableInterface;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
@@ -46,12 +54,13 @@ public class JobEncoder {
 		    for ( int idx = 0; idx < parameters.length; idx++ ) {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("name", parameters[idx]);
-				jsonObject.put("value", "");
 				jsonObject.put("default_value", jobMeta.getParameterDefault( parameters[idx] ));
 				jsonObject.put("description", jobMeta.getParameterDescription( parameters[idx] ));
 				jsonArray.add(jsonObject);
 		    }
 		    e.setAttribute("parameters", jsonArray.toString());
+		    
+		    encodeDatabases(e, jobMeta);
 		    
 		    // encode steps and hops
 			HashMap<JobEntryCopy, Object> cells = new HashMap<JobEntryCopy, Object>();
@@ -86,4 +95,51 @@ public class JobEncoder {
 		
 		return graph;
 	}
+
+	private static void encodeDatabases(Element e, JobMeta jobMeta) {
+		Props props = null;
+	    if ( Props.isInitialized() ) {
+	      props = Props.getInstance();
+	    }
+	    
+		Set<DatabaseMeta> databaseMetas = new HashSet<DatabaseMeta>();
+		for (JobEntryCopy jobEntryCopy : jobMeta.getJobCopies()) {
+			DatabaseMeta[] dbs = jobEntryCopy.getEntry().getUsedDatabaseConnections();
+			if (dbs != null) {
+				for (DatabaseMeta db : dbs) {
+					databaseMetas.add(db);
+				}
+			}
+		}
+
+		databaseMetas.add(jobMeta.getJobLogTable().getDatabaseMeta());
+
+		for (LogTableInterface logTable : jobMeta.getExtraLogTables()) {
+			databaseMetas.add(logTable.getDatabaseMeta());
+		}
+		
+		JSONArray jsonArray = new JSONArray();
+		for (int i = 0; i < jobMeta.nrDatabases(); i++) {
+			DatabaseMeta dbMeta = jobMeta.getDatabase(i);
+			if (props != null && props.areOnlyUsedConnectionsSavedToXML()) {
+				if (databaseMetas.contains(dbMeta)) {
+					jsonArray.add(DatabaseCodec.encode(dbMeta));
+				}
+			} else {
+				jsonArray.add(DatabaseCodec.encode(dbMeta));
+			}
+		}
+		
+		e.setAttribute("databases", jsonArray.toString());
+	}
+	
+	public static void encodeSlaveServers(JobMeta jobMeta, Element e) {
+		JSONArray jsonArray = new JSONArray();
+		for (int i = 0; i < jobMeta.getSlaveServers().size(); i++) {
+			SlaveServer slaveServer = jobMeta.getSlaveServers().get(i);
+			jsonArray.add(SlaveServerCodec.encode(slaveServer));
+		}
+		e.setAttribute("slaveServers", jsonArray.toString());
+	}
+	
 }

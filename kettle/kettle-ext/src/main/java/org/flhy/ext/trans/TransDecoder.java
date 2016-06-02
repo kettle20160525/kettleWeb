@@ -1,5 +1,6 @@
 package org.flhy.ext.trans;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,8 +10,11 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.cluster.SlaveServerCodec;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.step.StepDecoder;
 import org.flhy.ext.utils.JSONArray;
@@ -56,10 +60,6 @@ public class TransDecoder {
 		mxCell root = (mxCell) graph.getDefaultParent();
 		
 		Repository repository = App.getInstance().getRepository();
-		
-//		String fname = root.getAttribute("name") + ".ktr";
-//		if(StringUtils.hasText(directory))
-//			fname = directory + "/" + fname;
 		TransMeta transMeta = new TransMeta();
 		
 		if(repository == null) {
@@ -89,29 +89,7 @@ public class TransDecoder {
 		
 		
 		// Handle connections
-		JSONArray jsonArray = JSONArray.fromObject(root.getAttribute("databases"));
-		Set<String> privateTransformationDatabases = new HashSet<String>(jsonArray.size());
-		for (int i = 0; i < jsonArray.size(); i++) {
-			JSONObject jsonObject = jsonArray.getJSONObject(i);
-			DatabaseMeta dbcon = decodeDatabases(jsonObject);
-
-			dbcon.shareVariablesWith(transMeta);
-			if (!dbcon.isShared()) {
-				privateTransformationDatabases.add(dbcon.getName());
-			}
-
-			DatabaseMeta exist = transMeta.findDatabase(dbcon.getName());
-			if (exist == null) {
-				transMeta.addDatabase(dbcon);
-			} else {
-				if (!exist.isShared()) {
-					int idx = transMeta.indexOfDatabase(exist);
-					transMeta.removeDatabase(idx);
-					transMeta.addDatabase(idx, dbcon);
-				}
-			}
-		}
-		transMeta.setPrivateDatabases(privateTransformationDatabases);
+		decodeDatabases(root, transMeta);
 		
 		int count = graph.getModel().getChildCount(root);
 		for(int i=0; i<count; i++) {
@@ -213,7 +191,6 @@ public class TransDecoder {
 		transMeta.setExtendedDescription(root.getAttribute("extended_description"));
 		transMeta.setTransstatus(Integer.parseInt(root.getAttribute("trans_status")));
 		transMeta.setTransversion(root.getAttribute("trans_version"));
-//		transMeta.setRepositoryDirectory(path);
 		
 		// Read the named parameters.
 		JSONArray namedParameters = JSONArray.fromObject(root.getAttribute("parameters"));
@@ -239,7 +216,7 @@ public class TransDecoder {
 		transLogTable.setLogSizeLimit(jsonObject.optString("size_limit_lines"));
 		transLogTable.setLogInterval(jsonObject.optString("interval"));
 		transLogTable.setTimeoutInDays(jsonObject.optString("timeout_days"));
-		jsonArray = jsonObject.optJSONArray("fields");
+		JSONArray jsonArray = jsonObject.optJSONArray("fields");
 		if(jsonArray != null) {
 			for ( int i = 0; i < jsonArray.size(); i++ ) {
 		    	JSONObject fieldJson = jsonArray.getJSONObject(i);
@@ -359,21 +336,7 @@ public class TransDecoder {
 			}
 		}
 	    
-	    jsonArray = JSONArray.fromObject(root.getAttribute("slaveServers"));
-		for (int i = 0; i < jsonArray.size(); i++) {
-			jsonObject = jsonArray.getJSONObject(i);
-			SlaveServer slaveServer = decodeSlaveServer(jsonObject);
-			slaveServer.shareVariablesWith(transMeta);
-
-			SlaveServer check = transMeta.findSlaveServer(slaveServer.getName());
-			if (check != null) {
-				if (!check.isShared()) {
-					transMeta.addOrReplaceSlaveServer(slaveServer);
-				}
-			} else {
-				transMeta.getSlaveServers().add(slaveServer);
-			}
-		}
+		decodeSlaveServers(root, transMeta);
 		
 		jsonArray = JSONArray.fromObject(root.getAttribute("clusterSchemas"));
 		for (int i = 0; i < jsonArray.size(); i++) {
@@ -419,109 +382,48 @@ public class TransDecoder {
 	    return transMeta;
 	}
 	
-	public static DatabaseMeta decodeDatabases(JSONObject jsonObject) throws KettleDatabaseException {
-		return DatabaseCodec.decode(jsonObject);
-//		DatabaseMeta databaseMeta = new DatabaseMeta();
-//		String type = jsonObject.optString("type");
-//		databaseMeta.setDatabaseInterface(DatabaseMeta.getDatabaseInterface(type));
-//
-//		databaseMeta.setName(jsonObject.optString("name"));
-//		databaseMeta.setDisplayName(databaseMeta.getName());
-//		databaseMeta.setHostname(jsonObject.optString("server"));
-//		databaseMeta.setAccessType(jsonObject.optInt("access"));
-//
-//		databaseMeta.setDBName(jsonObject.optString("database"));
-//
-//		databaseMeta.setDBPort(jsonObject.optString("port"));
-//		databaseMeta.setUsername(jsonObject.optString("username"));
-//		databaseMeta.setPassword(jsonObject.optString("password"));
-//		databaseMeta.setServername(jsonObject.optString("servername"));
-//		databaseMeta.setDataTablespace(jsonObject.optString("data_tablespace"));
-//		databaseMeta.setIndexTablespace(jsonObject.optString("index_tablespace"));
-//
-//		databaseMeta.setReadOnly(jsonObject.optBoolean("read_only"));
-//
-//		JSONObject attrsJson = jsonObject.optJSONObject("attributes");
-//		if (attrsJson != null) {
-//			Collection<String> keys = attrsJson.keySet();
-//		
-//			Iterator<String> iter = keys.iterator();
-//			while(iter.hasNext()) {
-//				String key = iter.next();
-//				String value = (String) attrsJson.get(key);
-//			
-//				if (key != null && value != null) {
-//					if("SQL_CONNECT".equalsIgnoreCase(key))
-//						value = StringEscapeHelper.decode(value);
-//					
-//					databaseMeta.getAttributes().put(key, value);
-//				}
-//				
-//				databaseMeta.getDatabasePortNumberString();
-//			}
-//		}
-//		
-//		JSONArray options = jsonObject.optJSONArray("options");
-//		for(int i=0; i<options.size(); i++) {
-//			JSONObject jsonObject2 = options.getJSONObject(i);
-//			String prefix = jsonObject2.optString("prefix");
-//			String name = jsonObject2.optString("name");
-//			String value = jsonObject2.optString("value");
-//			
-//			databaseMeta.getAttributes().put(prefix + "." + name, value);
-//			databaseMeta.getDatabasePortNumberString();
-//		}
-//		
-//		return databaseMeta;
+	public static void decodeDatabases(mxCell root, TransMeta transMeta) throws KettleDatabaseException, JsonParseException, JsonMappingException, IOException {
+		JSONArray jsonArray = JSONArray.fromObject(root.getAttribute("databases"));
+		Set<String> privateTransformationDatabases = new HashSet<String>(jsonArray.size());
+		for (int i = 0; i < jsonArray.size(); i++) {
+			JSONObject jsonObject = jsonArray.getJSONObject(i);
+			DatabaseMeta dbcon =  DatabaseCodec.decode(jsonObject);
+
+			dbcon.shareVariablesWith(transMeta);
+			if (!dbcon.isShared()) {
+				privateTransformationDatabases.add(dbcon.getName());
+			}
+
+			DatabaseMeta exist = transMeta.findDatabase(dbcon.getName());
+			if (exist == null) {
+				transMeta.addDatabase(dbcon);
+			} else {
+				if (!exist.isShared()) {
+					int idx = transMeta.indexOfDatabase(exist);
+					transMeta.removeDatabase(idx);
+					transMeta.addDatabase(idx, dbcon);
+				}
+			}
+		}
+		transMeta.setPrivateDatabases(privateTransformationDatabases);
 	}
 	
-	public static SlaveServer decodeSlaveServer(JSONObject jsonObject) throws Exception {
-		
-		StringBuilder xml = new StringBuilder();
+	public static void decodeSlaveServers(mxCell root, TransMeta transMeta) throws Exception {
+		JSONArray jsonArray = JSONArray.fromObject(root.getAttribute("slaveServers"));
+		for (int i = 0; i < jsonArray.size(); i++) {
+			JSONObject jsonObject = jsonArray.getJSONObject(i);
+			SlaveServer slaveServer = SlaveServerCodec.decode(jsonObject);
+			slaveServer.shareVariablesWith(transMeta);
 
-	    xml.append( "<" ).append( SlaveServer.XML_TAG ).append( ">" );
-
-	    xml.append( XMLHandler.addTagValue( "name", jsonObject.optString("name"), false ) );
-	    xml.append( XMLHandler.addTagValue( "hostname", jsonObject.optString("hostname"), false ) );
-	    xml.append( XMLHandler.addTagValue( "port", jsonObject.optString("port"), false ) );
-	    xml.append( XMLHandler.addTagValue( "webAppName", jsonObject.optString("webAppName"), false ) );
-	    xml.append( XMLHandler.addTagValue( "username", jsonObject.optString("username"), false ) );
-	    xml.append( XMLHandler.addTagValue( "password", jsonObject.optString("password"), false ) );
-	    xml.append( XMLHandler.addTagValue( "proxy_hostname", jsonObject.optString("proxy_hostname"), false ) );
-	    xml.append( XMLHandler.addTagValue( "proxy_port", jsonObject.optString("proxy_port"), false ) );
-	    xml.append( XMLHandler.addTagValue( "non_proxy_hosts", jsonObject.optString("non_proxy_hosts"), false ) );
-	    xml.append( XMLHandler.addTagValue( "master", jsonObject.optBoolean("master") ? "Y" : "N", false ) );
-	    xml.append( XMLHandler.addTagValue( SlaveServer.SSL_MODE_TAG, jsonObject.optBoolean("sslMode") ? "Y" : "N", false ) );
-	    
-	    JSONObject sslConfig = jsonObject.optJSONObject("sslConfig");
-	    if ( sslConfig != null ) {
-			xml.append("<").append(SslConfiguration.XML_TAG).append(">");
-			String keyStore = sslConfig.optString("keyStore");
-			if (StringUtils.hasText(keyStore)) {
-				xml.append(XMLHandler.addTagValue("keyStore", keyStore, false));
+			SlaveServer check = transMeta.findSlaveServer(slaveServer.getName());
+			if (check != null) {
+				if (!check.isShared()) {
+					transMeta.addOrReplaceSlaveServer(slaveServer);
+				}
+			} else {
+				transMeta.getSlaveServers().add(slaveServer);
 			}
-
-			String keyStorePassword = sslConfig.optString("keyStorePassword");
-			if (StringUtils.hasText(keyStorePassword)) {
-				xml.append(XMLHandler.addTagValue("keyStorePassword", keyStorePassword, false));
-			}
-
-			String keyPassword = sslConfig.optString("keyPassword");
-			if (StringUtils.hasText(keyPassword)) {
-				xml.append(XMLHandler.addTagValue("keyPassword", keyPassword, false));
-			}
-			xml.append("</").append(SslConfiguration.XML_TAG).append(">");
-	    }
-
-	    xml.append( "</" ).append( SlaveServer.XML_TAG ).append( ">" );
-	    StringReader sr = new StringReader(xml.toString()); 
-	    InputSource is = new InputSource(sr); 
-	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); 
-	    DocumentBuilder builder=factory.newDocumentBuilder(); 
-	    Document doc = builder.parse(is);
-		
-		SlaveServer slaveServer = new SlaveServer(doc.getDocumentElement());
-		return slaveServer;
+		}
 	}
 	
 	public static ClusterSchema decodeClusterSchema(JSONObject jsonObject, List<SlaveServer> referenceSlaveServers) {

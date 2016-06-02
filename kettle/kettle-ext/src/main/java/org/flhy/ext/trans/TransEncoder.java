@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.flhy.ext.PluginFactory;
+import org.flhy.ext.cluster.SlaveServerCodec;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.ColorUtils;
@@ -17,7 +18,6 @@ import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.NotePadMeta;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.gui.Point;
 import org.pentaho.di.core.logging.ChannelLogTable;
 import org.pentaho.di.core.logging.LogTableField;
@@ -388,24 +388,7 @@ public class TransEncoder {
 		JSONArray jsonArray = new JSONArray();
 		for (int i = 0; i < transMeta.getSlaveServers().size(); i++) {
 			SlaveServer slaveServer = transMeta.getSlaveServers().get(i);
-			
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("name", slaveServer.getName());
-			jsonObject.put("hostname", slaveServer.getHostname());
-			jsonObject.put("port", slaveServer.getPort());
-			jsonObject.put("webAppName", slaveServer.getWebAppName());
-			jsonObject.put("username", slaveServer.getUsername());
-			jsonObject.put("password", Encr.decryptPasswordOptionallyEncrypted( slaveServer.getPassword() ));
-			jsonObject.put("proxy_hostname", slaveServer.getProxyHostname());
-			jsonObject.put("proxy_port", slaveServer.getProxyPort());
-			jsonObject.put("non_proxy_hosts", slaveServer.getNonProxyHosts());
-			jsonObject.put("master", slaveServer.isMaster());
-			jsonObject.put("sslMode", slaveServer.isSslMode());
-			if(slaveServer.getSslConfig() != null) {
-				
-			}
-			
-			jsonArray.add(jsonObject);
+			jsonArray.add(SlaveServerCodec.encode(slaveServer));
 		}
 		e.setAttribute("slaveServers", jsonArray.toString());
 	}

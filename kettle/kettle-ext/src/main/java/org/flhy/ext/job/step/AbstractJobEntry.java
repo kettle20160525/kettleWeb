@@ -2,7 +2,12 @@ package org.flhy.ext.job.step;
 
 import java.util.List;
 
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.plugins.JobEntryPluginType;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.metastore.api.IMetaStore;
@@ -14,6 +19,40 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 
 	@Override
 	public JobEntryCopy decodeStep(mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
+		String stepid = cell.getAttribute("ctype");
+	    String stepname = cell.getAttribute("label");
+	    
+		PluginRegistry registry = PluginRegistry.getInstance();
+		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, stepid);
+		if(jobPlugin == null)
+			jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, JobMeta.STRING_SPECIAL);
+		JobEntryInterface entry = registry.loadClass(jobPlugin, JobEntryInterface.class);
+		if(entry != null) {
+			decode(entry, cell, databases, metaStore);
+			// System.out.println("New JobEntryInterface built of type:
+			// "+entry.getTypeDesc());
+			if (jobPlugin != null) {
+				entry.setPluginId(jobPlugin.getIds()[0]);
+			}
+			entry.setMetaStore(metaStore); // inject metastore
+
+			// entry.loadXML( entrynode, databases, slaveServers, rep, metaStore
+			// );
+			// compatibleLoadXml( entrynode, databases, slaveServers, rep );
+
+			// Handle GUI information: nr & location?
+			JobEntryCopy je = new JobEntryCopy(entry);
+			je.setName(stepname);
+			je.setNr(Const.toInt(cell.getAttribute("nr"), 0));
+			je.setLaunchingInParallel("Y".equalsIgnoreCase(cell.getAttribute("parallel")));
+			je.setDrawn("Y".equalsIgnoreCase(cell.getAttribute("draw")));
+			je.setLocation((int) cell.getGeometry().getX(), (int) cell.getGeometry().getY());
+
+//			attributesMap = AttributesUtil.loadAttributes(XMLHandler
+//					.getSubNode(entrynode, AttributesUtil.XML_TAG));
+
+		}
+	      
 		return null;
 	}
 
