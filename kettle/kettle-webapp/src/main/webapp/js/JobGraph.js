@@ -210,19 +210,24 @@ JobGraph = Ext.extend(Ext.Panel, {
             	var xy1 = Ext.fly(ct).getXY(), xy2 = e.getXY();
          		var top = xy2[1] - xy1[1], left = xy2[0]-xy1[0];
          		
-         		var doc = mxUtils.createXmlDocument();
-         		var node = doc.createElement('Step');
-         		node.setAttribute('label', data.node.text);
-         		node.setAttribute('ctype', data.node.id);
-         		
-         		graph.getModel().beginUpdate();
-				try
-				{
-					graph.insertVertex(graph.getDefaultParent(), null, node, left, top, 40, 40, "icon;image=" + data.node.attributes.dragIcon);
-				} finally
-				{
-					graph.getModel().endUpdate();
-				}
+         		var enc = new mxCodec(mxUtils.createXmlDocument());
+				var node = enc.encode(graph.getModel());
+         		Ext.Ajax.request({
+					url: GetUrl('job/newJobEntry.do'),
+					params: {graphXml: mxUtils.getPrettyXml(node), entryId: data.node.id,entryName: data.node.text},
+					method: 'POST',
+					success: function(response) {
+						var doc = response.responseXML;
+		         		graph.getModel().beginUpdate();
+						try
+						{
+							graph.insertVertex(graph.getDefaultParent(), null, doc.documentElement, left, top, 40, 40, "icon;image=" + data.node.attributes.dragIcon);
+						} finally
+						{
+							graph.getModel().endUpdate();
+						}
+					}
+				});
          		
          		return true;
             }

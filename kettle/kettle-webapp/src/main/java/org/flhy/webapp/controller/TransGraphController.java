@@ -1,7 +1,5 @@
 package org.flhy.webapp.controller;
 
-import java.io.File;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,11 +11,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.flhy.ext.App;
+import org.flhy.ext.PluginFactory;
 import org.flhy.ext.TransExecutor;
 import org.flhy.ext.trans.TransDecoder;
+import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
@@ -26,13 +24,15 @@ import org.flhy.webapp.utils.SearchFieldsProgress;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.ProgressMonitorAdapter;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.logging.LoggingObjectInterface;
 import org.pentaho.di.core.logging.LoggingObjectType;
 import org.pentaho.di.core.logging.SimpleLoggingObject;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -43,12 +43,14 @@ import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaInterface;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.mxgraph.io.mxCodec;
 import com.mxgraph.util.mxUtils;
@@ -106,27 +108,6 @@ public class TransGraphController {
 		}
 		
 		repository.save( transMeta, versionComment, null);
-		
-//		File file = new File(transMeta.getFilename());
-//		if(file.exists()) {
-//			List<String> fileRows = FileUtils.readLines(file);
-//			
-//			String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
-//			List<String> engineRows = IOUtils.readLines(new StringReader(xml));
-//			
-//			int number = fileRows.size() > engineRows.size() ? engineRows.size() : fileRows.size();
-//			for(int i=0; i<number; i++) {
-//				String fileRow = fileRows.get(i);
-//				String engineRow = engineRows.get(i);
-//				
-//				if(!fileRow.equals(engineRow)) {
-//					System.out.println("[" + i + "]file: " + fileRow);
-//					System.out.println("[" + i + "]engine: " + engineRow);
-//					System.out.println("================================================================================");
-//				}
-//			}
-//			System.out.println("=====finished=====");
-//		}
 	}
 	
 	/**
@@ -271,7 +252,8 @@ public class TransGraphController {
 	    
 	    
 	    TransExecutor transExecutor = TransExecutor.initExecutor(executionConfiguration, transMeta);
-	    new Thread(transExecutor).start();
+	    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
+	    tr.start();
         executions.put(transExecutor.getExecutionId(), transExecutor);
 		
         JsonUtils.success(transExecutor.getExecutionId());
@@ -308,6 +290,48 @@ public class TransGraphController {
 		}
 		
 		JsonUtils.response(jsonObject);
+	}
+	
+	/**
+	 * 新建步骤
+	 * 
+	 * @param graphXml
+	 * @param stepId
+	 * @param stepName
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/newStep")
+	protected void newStep(@RequestParam String graphXml, @RequestParam String stepId, @RequestParam String stepName) throws Exception {
+		mxGraph graph = new mxGraph();
+		mxCodec codec = new mxCodec();
+		Document doc = mxUtils.parseXml(graphXml);
+		codec.decode(doc.getDocumentElement(), graph.getModel());
+		TransMeta transMeta = TransDecoder.decode(graph);
+		
+	    if ( transMeta.findStep( stepName ) != null ) {
+	      int i = 2;
+	      String newName = stepName + " " + i;
+	      while ( transMeta.findStep( newName ) != null ) {
+	        i++;
+	        newName = stepName + " " + i;
+	      }
+	      stepName = newName;
+	    }
+
+		PluginRegistry registry = PluginRegistry.getInstance();
+		PluginInterface stepPlugin = registry.findPluginWithId( StepPluginType.class, stepId );
+		if (stepPlugin != null) {
+			StepMetaInterface info = (StepMetaInterface) registry.loadClass(stepPlugin);
+			info.setDefault();
+			StepMeta stepMeta = new StepMeta(stepPlugin.getIds()[0], stepName, info);
+			stepMeta.drawStep();
+			
+			StepEncoder encoder = (StepEncoder) PluginFactory.getBean(stepId);
+			Element e = encoder.encodeStep(stepMeta);
+			
+			JsonUtils.responseXml(XMLHandler.getXMLHeader() + mxUtils.getXml(e));
+		}
 	}
 	
 	/**

@@ -45,6 +45,12 @@ public class JsonUtils {
 		response.getWriter().write(jsonArray.toString());
 	}
 	
+	public static void responseXml(String xml) throws IOException {
+		HttpServletResponse response = tl.get();
+		response.setContentType("text/xml; charset=utf-8");
+		response.getWriter().write(xml);
+	}
+	
 	private static ThreadLocal<HttpServletResponse> tl = new ThreadLocal<HttpServletResponse>();
 	
 	public static void putResponse(HttpServletResponse response) {

@@ -149,7 +149,7 @@ public class SystemMainController {
 				children.add(child);
 		    }
 			for (PluginInterface baseJobEntry : baseJobEntries) {
-				if ( baseJobEntry.getIds()[ 0 ].equals( "SPECIAL" ) ) 
+				if ( baseJobEntry.getIds()[ 0 ].equals( JobMeta.STRING_SPECIAL ) ) 
 					continue;
 				
 				if (baseJobEntry.getCategory().equalsIgnoreCase(baseCategory)) {
