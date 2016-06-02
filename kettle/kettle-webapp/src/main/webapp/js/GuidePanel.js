@@ -300,8 +300,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					
 					var cell = graph.getDefaultParent();
 					graphPanel.setTitle(cell.getAttribute('name'));
-					Ext.getBody().unmask();
-				} catch(e) {
+				} finally {
 					Ext.getBody().unmask();
 				}
 			},

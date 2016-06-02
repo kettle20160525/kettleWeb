@@ -106,9 +106,9 @@ public class JobGraphController {
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
 		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, entryId);
-		if (jobPlugin == null && entryId.startsWith(JobMeta.STRING_SPECIAL)) {
-			jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, JobMeta.STRING_SPECIAL);
-		}
+//		if (jobPlugin == null && entryId.startsWith(JobMeta.STRING_SPECIAL)) {
+//			jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, JobMeta.STRING_SPECIAL);
+//		}
 
 		if (jobPlugin != null) {
 			// Determine name & number for this entry.
@@ -130,7 +130,7 @@ public class JobGraphController {
 			jei.setName(entry_name);
 
 			if (jei.isSpecial()) {
-				if (entryId.equals(JobMeta.STRING_SPECIAL + "0")) {
+				if (JobMeta.STRING_SPECIAL_START.equals(jei.getName())) {
 					// Check if start is already on the canvas...
 					if (jobMeta.findStart() != null) {
 						return;
@@ -138,7 +138,7 @@ public class JobGraphController {
 					((JobEntrySpecial) jei).setStart(true);
 					jei.setName(JobMeta.STRING_SPECIAL_START);
 				}
-				if (entryId.equals(JobMeta.STRING_SPECIAL + "1")) {
+				if (JobMeta.STRING_SPECIAL_DUMMY.equals(jei.getName())) {
 					((JobEntrySpecial) jei).setDummy(true);
 					// jei.setName(JobMeta.STRING_SPECIAL_DUMMY); // Don't
 					// overwrite the name

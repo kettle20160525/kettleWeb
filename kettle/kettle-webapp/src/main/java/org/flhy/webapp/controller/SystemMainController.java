@@ -38,6 +38,7 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaPluginType;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.springframework.stereotype.Controller;
@@ -84,10 +85,11 @@ public class SystemMainController {
 				String pluginDescription = p.getDescription();
 				
 				JSONObject child = new JSONObject();
-				child.put("id", p.getIds()[0]);
+				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
-				child.put("icon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Small));
-				child.put("dragIcon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Middle));
+				child.put("pluginId", p.getIds()[0]);
+				child.put("icon", SvgImageUrl.getSmallUrl(p));
+				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);
 				child.put("leaf", true);
@@ -128,10 +130,11 @@ public class SystemMainController {
 			if ( baseCategory.equalsIgnoreCase( JobEntryPluginType.GENERAL_CATEGORY ) ) {
 				JobEntryCopy startEntry = JobMeta.createStartEntry();
 				JSONObject child = new JSONObject();
-				child.put("id", startEntry.getEntry().getPluginId() + "0");
+				child.put("id", startEntry.getEntry().getPluginId());
 				child.put("text", startEntry.getName());
-				child.put("icon", SvgImageUrl.getUrl(startEntry.getEntry().getPluginId() + "0", SvgImageUrl.Size_Small));
-				child.put("dragIcon", SvgImageUrl.getUrl(startEntry.getEntry().getPluginId() + "0", SvgImageUrl.Size_Middle));
+				child.put("pluginId", startEntry.getEntry().getPluginId());
+				child.put("icon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "STR_image" )));
+				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", startEntry.getDescription());
 				child.put("leaf", true);
@@ -139,10 +142,11 @@ public class SystemMainController {
 				
 				JobEntryCopy dummyEntry = JobMeta.createDummyEntry();
 				child = new JSONObject();
-				child.put("id", dummyEntry.getEntry().getPluginId() + "1");
+				child.put("id", "step" + i++);
 				child.put("text", dummyEntry.getName());
-				child.put("icon", SvgImageUrl.getUrl(dummyEntry.getEntry().getPluginId() + "1", SvgImageUrl.Size_Small));
-				child.put("dragIcon", SvgImageUrl.getUrl(dummyEntry.getEntry().getPluginId() + "1", SvgImageUrl.Size_Middle));
+				child.put("pluginId", dummyEntry.getEntry().getPluginId());
+				child.put("icon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "DUM_image" )));
+				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", dummyEntry.getDescription());
 				child.put("leaf", true);
@@ -166,10 +170,11 @@ public class SystemMainController {
 				String pluginDescription = p.getDescription();
 				
 				JSONObject child = new JSONObject();
-				child.put("id", p.getIds()[0]);
+				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
-				child.put("icon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Small));
-				child.put("dragIcon", SvgImageUrl.getUrl(p.getIds()[0], SvgImageUrl.Size_Middle));
+				child.put("pluginId", p.getIds()[0]);
+				child.put("icon", SvgImageUrl.getSmallUrl(p));
+				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);
 				child.put("leaf", true);

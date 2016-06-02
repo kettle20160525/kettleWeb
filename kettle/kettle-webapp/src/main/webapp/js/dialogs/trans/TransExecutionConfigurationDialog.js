@@ -7,7 +7,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	bodyStyle: 'padding: 5px',
 	
 	initComponent: function() {
-		var transGraph = getActiveGraph(), graph = transGraph.getGraph(), root = graph.getDefaultParent();
+		var  root = getActiveGraph().getGraph().getDefaultParent();
 		var executeMethod = new Ext.form.FormPanel({
 			title: '执行方式',
 			labelWidth: 1,
@@ -44,7 +44,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
                 		        selectOnFocus:true,
                 				store: new Ext.data.JsonStore({
                 		        	fields: ['name'],
-                		        	data: Ext.decode(graph.getDefaultParent().getAttribute('slaveServers'))
+                		        	data: getActiveGraph().getSlaveServerStore()
                 			    }),
                 			    hiddenName: 'remoteServer'
                 			})]
@@ -255,18 +255,18 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 				};
 				
 				me.setDisabled(true);
-				var enc = new mxCodec(mxUtils.createXmlDocument());
-				var node = enc.encode(graph.getModel());
+//				var enc = new mxCodec(mxUtils.createXmlDocument());
+//				var node = enc.encode(graph.getModel());
 				Ext.Ajax.request({
 					url: GetUrl('trans/run.do'),
-					params: {graphXml: mxUtils.getPrettyXml(node), executionConfig: Ext.encode(executionConfig)},
+					params: {graphXml: getActiveGraph().toXml(), executionConfig: Ext.encode(executionConfig)},
 					method: 'POST',
 					success: function(response) {
 						me.setDisabled(false);
 						decodeResponse(response, function(resObj) {
 							me.close();
 							setTimeout(function() {
-								transGraph.fireEvent('run', resObj.message);
+								getActiveGraph().fireEvent('doRun', resObj.message);
 							}, 500);
 						});
 					},
