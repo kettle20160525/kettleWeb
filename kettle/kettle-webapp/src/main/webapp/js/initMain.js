@@ -340,13 +340,7 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 				value: cell.getAttribute('label')
 			}]
 		});
-<<<<<<< .mine
-		
-		
-		
-		
-=======
->>>>>>> .r59
+
 		var transset = new Ext.form.FormPanel({
 			title: '一般',
 			bodyStyle: 'padding: 20px 10px',
