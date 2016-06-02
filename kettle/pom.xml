@@ -9,7 +9,7 @@
 		<module>kettle-webapp</module>
 		<module>kettle-ext</module>
 	</modules>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.pentaho.di</groupId>
@@ -142,6 +142,16 @@
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.7</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
 		</dependency>
 	</dependencies>
 
