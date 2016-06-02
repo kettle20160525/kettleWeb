@@ -25,6 +25,9 @@ import org.pentaho.di.core.logging.MetricsLogTable;
 import org.pentaho.di.core.logging.PerformanceLogTable;
 import org.pentaho.di.core.logging.StepLogTable;
 import org.pentaho.di.core.logging.TransLogTable;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
+import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.partition.PartitionSchema;
@@ -67,7 +70,6 @@ public class TransEncoder {
 		    for ( int idx = 0; idx < parameters.length; idx++ ) {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("name", parameters[idx]);
-				jsonObject.put("value", "");
 				jsonObject.put("default_value", transMeta.getParameterDefault( parameters[idx] ));
 				jsonObject.put("description", transMeta.getParameterDescription( parameters[idx] ));
 				jsonArray.add(jsonObject);
@@ -306,7 +308,9 @@ public class TransEncoder {
 				StepMeta step = (StepMeta) list.get(i);
 				Point p = step.getLocation();
 				StepEncoder stepEncoder = (StepEncoder) PluginFactory.getBean(step.getStepID());
-				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(step), p.x, p.y, 40, 40, "icon;image=" + SvgImageUrl.getUrl(step.getStepID(), SvgImageUrl.Size_Middle));
+				
+				PluginInterface plugin = PluginRegistry.getInstance().getPlugin(StepPluginType.class, step.getStepID());
+				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(step), p.x, p.y, 40, 40, "icon;image=" + SvgImageUrl.getMiddleUrl(plugin));
 				cells.put(step, cell);
 			}
 			

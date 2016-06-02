@@ -24,9 +24,16 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 	    
 		PluginRegistry registry = PluginRegistry.getInstance();
 		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, stepid);
-		if(jobPlugin == null)
-			jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, JobMeta.STRING_SPECIAL);
 		JobEntryInterface entry = registry.loadClass(jobPlugin, JobEntryInterface.class);
+//		if(entry == null) {
+//			if(JobMeta.STRING_SPECIAL.equals(stepid)) {
+//				if(JobMeta.STRING_SPECIAL_START.equals(stepname)) {
+//					entry = JobMeta.createStartEntry().getEntry();
+//				} else if(JobMeta.STRING_SPECIAL_DUMMY.equals(stepname))
+//					entry = JobMeta.createDummyEntry().getEntry();
+//			}
+//		}
+		
 		if(entry != null) {
 			decode(entry, cell, databases, metaStore);
 			// System.out.println("New JobEntryInterface built of type:
@@ -51,6 +58,7 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 //			attributesMap = AttributesUtil.loadAttributes(XMLHandler
 //					.getSubNode(entrynode, AttributesUtil.XML_TAG));
 
+			return je;
 		}
 	      
 		return null;

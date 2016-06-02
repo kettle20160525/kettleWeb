@@ -64,7 +64,6 @@ public class TransExecutor implements Runnable {
 	@Override
 	public void run() {
 		try {
-			System.out.println("===========0==============");
 			if (executionConfiguration.isExecutingLocally()) {
 				// Set the variables
 				transMeta.injectVariables( executionConfiguration.getVariables() );
@@ -86,15 +85,11 @@ public class TransExecutor implements Runnable {
 		          String argumentName = argumentNames[i];
 		          args[i] = arguments.get( argumentName );
 		        }
-		        System.out.println("===========1==============");
 		        boolean initialized = false;
 		        trans = new Trans( transMeta );
 		        try {
-		        	System.out.println("===========2==============");
 		            trans.prepareExecution( args );
-		            System.out.println("===========3==============");
 					capturePreviewData(trans, transMeta.getSteps());
-					System.out.println("===========4==============");
 		            initialized = true;
 		        } catch ( KettleException e ) {
 		        	e.printStackTrace();

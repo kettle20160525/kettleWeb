@@ -20,33 +20,33 @@ import com.mxgraph.util.mxUtils;
 public class JobEntryFTP_PUT extends AbstractJobEntry{
 	@Override
 	public void decode(JobEntryInterface jobEntry, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
-		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
-		jobEntrySpecial.setRepeat("Y".equalsIgnoreCase(cell.getAttribute("repeat")));
-		jobEntrySpecial.setSchedulerType(Const.toInt( cell.getAttribute( "schedulerType" ), 
-				org.pentaho.di.job.entries.special.JobEntrySpecial.NOSCHEDULING ));
-		
-		jobEntrySpecial.setIntervalSeconds( Const.toInt( cell.getAttribute( "intervalSeconds" ), 0 ) );
-		jobEntrySpecial.setIntervalMinutes( Const.toInt( cell.getAttribute( "intervalMinutes" ), 0 ) );
-		jobEntrySpecial.setHour( Const.toInt( cell.getAttribute( "hour" ), 0 ) );
-		jobEntrySpecial.setMinutes( Const.toInt( cell.getAttribute( "minutes" ), 0 ) );
-		jobEntrySpecial.setWeekDay( Const.toInt( cell.getAttribute( "weekDay" ), 0 ) );
-		jobEntrySpecial.setDayOfMonth( Const.toInt( cell.getAttribute( "dayOfMonth" ), 0 ) );
+//		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
+//		jobEntrySpecial.setRepeat("Y".equalsIgnoreCase(cell.getAttribute("repeat")));
+//		jobEntrySpecial.setSchedulerType(Const.toInt( cell.getAttribute( "schedulerType" ), 
+//				org.pentaho.di.job.entries.special.JobEntrySpecial.NOSCHEDULING ));
+//		
+//		jobEntrySpecial.setIntervalSeconds( Const.toInt( cell.getAttribute( "intervalSeconds" ), 0 ) );
+//		jobEntrySpecial.setIntervalMinutes( Const.toInt( cell.getAttribute( "intervalMinutes" ), 0 ) );
+//		jobEntrySpecial.setHour( Const.toInt( cell.getAttribute( "hour" ), 0 ) );
+//		jobEntrySpecial.setMinutes( Const.toInt( cell.getAttribute( "minutes" ), 0 ) );
+//		jobEntrySpecial.setWeekDay( Const.toInt( cell.getAttribute( "weekDay" ), 0 ) );
+//		jobEntrySpecial.setDayOfMonth( Const.toInt( cell.getAttribute( "dayOfMonth" ), 0 ) );
 	}
 
 	@Override
 	public Element encode(JobEntryInterface jobEntry) throws Exception {
-		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
+//		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
 		Document doc = mxUtils.createDocument();
 		Element e = doc.createElement("Step");
 		
-		e.setAttribute("repeat", jobEntrySpecial.isRepeat() ? "Y" : "N");
-		e.setAttribute("schedulerType", jobEntrySpecial.getSchedulerType() + "");
-		e.setAttribute("intervalSeconds", jobEntrySpecial.getIntervalSeconds() + "");
-		e.setAttribute("intervalMinutes", jobEntrySpecial.getIntervalMinutes() + "");
-		e.setAttribute("hour", jobEntrySpecial.getHour() + "");
-		e.setAttribute("minutes", jobEntrySpecial.getMinutes() + "");
-		e.setAttribute("weekDay", jobEntrySpecial.getWeekDay() + "");
-		e.setAttribute("DayOfMonth", jobEntrySpecial.getDayOfMonth() + "");
+//		e.setAttribute("repeat", jobEntrySpecial.isRepeat() ? "Y" : "N");
+//		e.setAttribute("schedulerType", jobEntrySpecial.getSchedulerType() + "");
+//		e.setAttribute("intervalSeconds", jobEntrySpecial.getIntervalSeconds() + "");
+//		e.setAttribute("intervalMinutes", jobEntrySpecial.getIntervalMinutes() + "");
+//		e.setAttribute("hour", jobEntrySpecial.getHour() + "");
+//		e.setAttribute("minutes", jobEntrySpecial.getMinutes() + "");
+//		e.setAttribute("weekDay", jobEntrySpecial.getWeekDay() + "");
+//		e.setAttribute("DayOfMonth", jobEntrySpecial.getDayOfMonth() + "");
 		
 		return e;
 	}

@@ -16,10 +16,14 @@ import org.pentaho.di.core.Props;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.gui.Point;
 import org.pentaho.di.core.logging.LogTableInterface;
+import org.pentaho.di.core.plugins.JobEntryPluginType;
+import org.pentaho.di.core.plugins.PluginInterface;
+import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.repository.RepositoryDirectory;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.w3c.dom.Document;
@@ -67,14 +71,16 @@ public class JobEncoder {
 			for(int i=0; i<jobMeta.nrJobEntries(); i++) {
 				JobEntryCopy jge = jobMeta.getJobEntry( i );
 				Point p = jge.getLocation();
-				JobEntryInterface jobEntry = jge.getEntry();
-				JobEntryEncoder stepEncoder = (JobEntryEncoder) PluginFactory.getBean(jobEntry.getPluginId());
-				String pluginId = jobEntry.getPluginId();
+				String pluginId = jge.getEntry().getPluginId();
+				JobEntryEncoder stepEncoder = (JobEntryEncoder) PluginFactory.getBean(jge.getEntry().getPluginId());
+				
+				PluginInterface plugin = PluginRegistry.getInstance().getPlugin(JobEntryPluginType.class, pluginId);
+				String image = SvgImageUrl.getMiddleUrl(plugin);
+				if(jge.isDummy())
+					image = SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" ));
 				if(jge.isStart())
-					pluginId = "SPECIAL0";
-				else if(jge.isDummy())
-					pluginId = "SPECIAL1";
-				String image = SvgImageUrl.getUrl(pluginId, SvgImageUrl.Size_Middle);
+					image = SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" ));
+				
 				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(jge), p.x, p.y, 40, 40, "icon;image=" + image);
 				cells.put(jge, cell);
 			}
