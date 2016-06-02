@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Built-By: children
-Build-Jdk: 1.7.0_80
-Created-By: Maven Integration for Eclipse
-
