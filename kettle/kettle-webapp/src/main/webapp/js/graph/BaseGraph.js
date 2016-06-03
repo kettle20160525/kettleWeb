@@ -335,6 +335,27 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		return mxUtils.getPrettyXml(node);
 	},
 	
+	inputOutputFields: function(stepName, before) {
+		var graph = this.getGraph();
+		var store = new Ext.data.JsonStore({
+			fields: ['name', 'type', 'length', 'precision', 'origin', 'storageType', 'conversionMask', 'currencySymbol', 'decimalSymbol', 'groupingSymbol', 'trimType', 'comments'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('trans/inputOutputFields.do'),
+				method: 'POST'
+			})
+		});
+		
+		var enc = new mxCodec(mxUtils.createXmlDocument());
+		var node = enc.encode(graph.getModel());
+		
+		store.baseParams.stepName = encodeURIComponent(stepName);
+		store.baseParams.graphXml = mxUtils.getPrettyXml(node);
+		store.baseParams.before = before;
+		store.load();
+		
+		return store;
+	},
+	
 	getDatabaseStore: function() {
 		if(!this.databaseStore) {
 			this.databaseStore = new Ext.data.JsonStore({

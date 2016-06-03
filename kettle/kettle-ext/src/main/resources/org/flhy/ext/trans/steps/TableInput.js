@@ -6,20 +6,6 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
 		
-		var connectionField = new Ext.form.ComboBox({
-			flex: 1,
-			displayField: 'name',
-			valueField: 'name',
-			typeAhead: true,
-	        mode: 'local',
-	        forceSelection: true,
-	        triggerAction: 'all',
-	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
-			name: 'connection',
-			value: cell.getAttribute('connection')
-		});
-		
 		var onDatabaseCreate = function(dialog) {
 			var root = graph.getDefaultParent();
 			var databases = root.getAttribute('databases');
@@ -35,40 +21,29 @@ TableInputDialog = Ext.extend(KettleDialog, {
                 graph.getModel().endUpdate();
             }
 			
-            connectionField.setValue(dialog.getValue().name);
+            wConnection.setValue(dialog.getValue().name);
             dialog.close();
 		};
 		
-		var textArea = new Ext.form.TextArea({
-			region: 'center',
-			emptyText: '执行查询的SQL语句'
+		var wConnection = new Ext.form.ComboBox({
+			flex: 1,
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: getActiveGraph().getDatabaseStore(),
+			name: 'connection',
+			value: cell.getAttribute('connection')
 		});
+		var wSQL = new Ext.form.TextArea({ region: 'center', emptyText: '执行查询的SQL语句' });
 		if(!Ext.isEmpty(cell.getAttribute('sql')))
-			textArea.setValue(decodeURIComponent(cell.getAttribute('sql')));
-		
-		var lazyConversionActive = new Ext.form.Checkbox({
-			fieldLabel: '允许简易转',
-			checked: cell.getAttribute('lazy_conversion_active') == 'Y'
-		});
-		var variablesActive = new Ext.form.Checkbox({
-			fieldLabel: '替换SQL语句里的变量',
-			checked: cell.getAttribute('variables_active') == 'Y'
-		});
-		
-		
-		var store = new Ext.data.JsonStore({
-			fields: ['name'],
-			data: []
-		}), data = [];
-		var outputEdges = graph.getIncomingEdges(cell, graph.getDefaultParent());
-		Ext.each(outputEdges, function(edge) {
-			if(edge.source) {
-				data.push({name: edge.source.getAttribute('label')});
-			}
-		});
-		store.loadData(data);
-		
-		var lookupField = new Ext.form.ComboBox({
+			wSQL.setValue(decodeURIComponent(cell.getAttribute('sql')));
+		var wLazyConversion = new Ext.form.Checkbox({ fieldLabel: '允许简易转换', checked: cell.getAttribute('lazy_conversion_active') == 'Y' });
+		var wVariables = new Ext.form.Checkbox({ fieldLabel: '替换SQL语句里的变量', checked: cell.getAttribute('variables_active') == 'Y' });
+		var wDatefrom = new Ext.form.ComboBox({
 			fieldLabel: '从步骤插入数据',
 			anchor: '-10',
 			displayField: 'name',
@@ -78,29 +53,21 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: store,
+			store: getActiveGraph().inputOutputFields(cell.getAttribute('label'), true),
 			value: cell.getAttribute('lookup')
 		});
-		
-		var executeEachRow = new Ext.form.Checkbox({
-			fieldLabel: '执行每一行',
-			checked: cell.getAttribute('execute_each_row') == 'Y'
-		});
-		var limitField = new Ext.form.TextField({
-			fieldLabel: '记录数量限制',
-			anchor: '-10',
-			value: cell.getAttribute('limit') || 0
-		});
+		var wEachRow = new Ext.form.Checkbox({ fieldLabel: '执行每一行', checked: cell.getAttribute('execute_each_row') == 'Y' });
+		var wLimit = new Ext.form.TextField({ fieldLabel: '记录数量限制', anchor: '-10', value: cell.getAttribute('limit') || 0 });
 		
 		this.getValues = function(){
 			return {
-				connection: connectionField.getValue(),
-				sql: encodeURIComponent(textArea.getValue()),
-				limit: limitField.getValue(),
-				lookup: lookupField.getValue(),
-				lazy_conversion_active: lazyConversionActive.getValue() ? "Y" : "N",
-				variables_active: variablesActive.getValue() ? "Y" : "N",
-				execute_each_row: executeEachRow.getValue() ? "Y" : "N"
+				connection: wConnection.getValue(),
+				sql: encodeURIComponent(wSQL.getValue()),
+				limit: wLimit.getValue(),
+				lookup: wDatefrom.getValue(),
+				lazy_conversion_active: wLazyConversion.getValue() ? "Y" : "N",
+				variables_active: wVariables.getValue() ? "Y" : "N",
+				execute_each_row: wEachRow.getValue() ? "Y" : "N"
 			};
 		};
 		
@@ -115,11 +82,11 @@ TableInputDialog = Ext.extend(KettleDialog, {
 				items: [{
 					xtype: 'compositefield',
 					fieldLabel: '数据库连接',
-					items: [connectionField, {
+					items: [wConnection, {
 						xtype: 'button', text: '编辑...', handler: function() {
 							var store = getActiveGraph().getDatabaseStore();
 							store.each(function(item) {
-								if(item.get('name') == connectionField.getValue()) {
+								if(item.get('name') == wConnection.getValue()) {
 									var databaseDialog = new DatabaseDialog();
 									databaseDialog.on('create', onDatabaseCreate);
 									databaseDialog.show(null, function() {
@@ -140,53 +107,56 @@ TableInputDialog = Ext.extend(KettleDialog, {
 						xtype: 'button', text: '获取SQL查询语句..', handler: function() {
 							var store = getActiveGraph().getDatabaseStore();
 							store.each(function(item) {
-								if(item.get('name') == connectionField.getValue()) {
-									var dialog = new DatabaseExplorerDialog();
-									dialog.on('select', function(node) {
-										textArea.setValue('select * from ' + node.attributes.fullText);
-										dialog.close();
-										
-										var enc = new mxCodec(mxUtils.createXmlDocument());
-										Ext.Msg.show({
-											   title:'系统提示',
-											   msg: '你想在SQL里面包含字段名吗？',
-											   buttons: Ext.Msg.YESNO,
-											   icon: Ext.MessageBox.QUESTION,
-											   fn: function(bId) {
-												   if(bId == 'yes') {
-													   Ext.Ajax.request({
-															url: GetUrl('trans/fieldNames.do'),
-															method: 'POST',
-															params: {graphXml: mxUtils.getPrettyXml(enc.encode(graph.getModel())), databaseName: item.get('name'), sql: encodeURIComponent(textArea.getValue())},
-															success: function(response, opts) {
-																decodeResponse(response, function(resObj) {
-																	textArea.setValue(decodeURIComponent(resObj.message));
-																});
-															}
-													   });
-												   }
-											   }
-										});
-										
-									});
-									dialog.show(null, function() {
-										dialog.initDatabase(item.json);
-									});
+								if(item.get('name') == wConnection.getValue()) {
+									me.getSQL(item.json, wSQL);
 								}
 							});
 						}
 					}]
 				}]
-			}, textArea, {
+			}, wSQL, {
 				xtype: 'form',
 				region: 'south',
 				height: 130,
 				labelWidth: 150,
-				items:[lazyConversionActive, variablesActive, lookupField, executeEachRow, limitField]
+				items:[wLazyConversion, wVariables, wDatefrom, wEachRow, wLimit]
 			}]
 		};
 		
 		TableInputDialog.superclass.initComponent.call(this);
+	},
+	
+	getSQL: function(dbInfo, wSQL) {
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(node) {
+			wSQL.setValue('select * from ' + node.attributes.fullText);
+			dialog.close();
+			
+			Ext.Msg.show({
+				   title:'系统提示',
+				   msg: '你想在SQL里面包含字段名吗？',
+				   buttons: Ext.Msg.YESNO,
+				   icon: Ext.MessageBox.QUESTION,
+				   fn: function(bId) {
+					   if(bId == 'yes') {
+						   Ext.Ajax.request({
+								url: GetUrl('trans/fieldNames.do'),
+								method: 'POST',
+								params: {graphXml: getActiveGraph().toXml(), databaseName: dbInfo.name, sql: encodeURIComponent(wSQL.getValue())},
+								success: function(response, opts) {
+									decodeResponse(response, function(resObj) {
+										wSQL.setValue(decodeURIComponent(resObj.message));
+									});
+								}
+						   });
+					   }
+				   }
+			});
+			
+		});
+		dialog.show(null, function() {
+			dialog.initDatabase(dbInfo);
+		});
 	}
 	
 });
