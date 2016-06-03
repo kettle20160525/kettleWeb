@@ -45,6 +45,11 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			
 			rp.loadResult(executionId);
 		}, this);
+		
+
+		graphPanel.on('resize', function() {
+			me.getGraph().sizeDidChange();
+		});
 	},
 	
 	initGraph: function(container) {
@@ -63,11 +68,13 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		graph.setDisconnectOnMove(false);
 		
 		graph.setCellsEditable(false);
+//		container.style.background = 'url("' + GetUrl('ui/images/grid.gif') + '")';
+//		container.style.cursor = 'default';
 		
 		var cellExist = function(label) {
 			var cells = graph.getChildVertices(graph.getDefaultParent());
 			for(var i=0; i<cells.length; i++) {
-				if(cell.getAttribute('label') == label) {
+				if(cells[i].getAttribute('label') == label) {
 					return true;
 				}
 			}
