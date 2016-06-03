@@ -30,12 +30,15 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		BaseGraph.superclass.initComponent.call(this);
 		this.addEvents('doRun');
 		
-		this.on('doRun', function(executionId) {
+		this.showResultPanel = function() {
 			if(!resultPanel.isVisible()) {
 				resultPanel.show();
 				me.doLayout();
 			}
-			
+		};
+		
+		this.on('doRun', function(executionId) {
+			me.showResultPanel();
 			var rp = this.getResultPanel();
 			if(rp) {
 				resultPanel.removeAll();
@@ -69,7 +72,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		
 		graph.setCellsEditable(false);
 		container.style.background = 'url("' + GetUrl('ui/images/grid.gif') + '") repeat white';
-		container.style.cursor = 'default';
+		container.style.cursor = 'hand';
 		
 		var cellExist = function(label) {
 			var cells = graph.getChildVertices(graph.getDefaultParent());

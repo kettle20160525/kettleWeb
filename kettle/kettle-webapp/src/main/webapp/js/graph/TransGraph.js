@@ -40,10 +40,7 @@ TransGraph = Ext.extend(BaseGraph, {
 		},{
 			iconCls: 'exploredb'
 		},'-',{
-			iconCls: 'show-results', scope: this, handler: function() {
-				resultPanel.setVisible(!resultPanel.isVisible());
-				this.doLayout();
-			}
+			iconCls: 'show-results', scope: this, handler: function() {this.showResultPanel();}
 		}];
 		TransGraph.superclass.initComponent.call(this);
 	},
