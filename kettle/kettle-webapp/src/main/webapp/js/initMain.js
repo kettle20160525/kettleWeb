@@ -238,17 +238,18 @@ KettleDialog = Ext.extend(Ext.Window, {
 	initComponent: function() {
 		var graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell(), me = this;
 		
+		var wLabel = new Ext.form.TextField({
+			fieldLabel: '步骤名称',
+			anchor: '-20',
+			value: cell.getAttribute('label')
+		});
+		
 		var form = new KettleForm({
 			bodyStyle: 'padding: 10px',
 			region: 'north',
 			height: 35,
 			labelWidth: 100,
-			items: [{
-				fieldLabel: '步骤名称',
-				anchor: '-40',
-				name: 'label',
-				value: cell.getAttribute('label')
-			}]
+			items: [wLabel]
 		});
 		
 		this.items = [form, {
@@ -273,7 +274,8 @@ KettleDialog = Ext.extend(Ext.Window, {
 						var edit = new mxCellAttributeChange(cell, name, values[name]);
                     	graph.getModel().execute(edit);
 					}
-                	
+                	var edit = new mxCellAttributeChange(cell, 'label', wLabel.getValue());
+                	graph.getModel().execute(edit);
                 } finally
                 {
                     graph.getModel().endUpdate();

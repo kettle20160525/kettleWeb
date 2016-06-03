@@ -64,8 +64,26 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		
 		graph.setCellsEditable(false);
 		
+		var cellExist = function(label) {
+			var cells = graph.getChildVertices(graph.getDefaultParent());
+			for(var i=0; i<cells.length; i++) {
+				if(cell.getAttribute('label') == label) {
+					return true;
+				}
+			}
+
+			return false;
+		};
+		
 		var doInsert = mxCell.prototype.insert, me = this;
 		mxCell.prototype.insert = function(child, index) {
+			var i = 2, name = child.getAttribute('label');
+			while(cellExist(name)) {
+				name = child.getAttribute('label') + i;
+				i++;
+			}
+			child.setAttribute('label', name);
+			
 			child = doInsert.apply(this, arguments);
 			
 			if(child.getValue() != null) {
