@@ -16,7 +16,7 @@ Ext.onReady(function() {
 			url: 'system/valueFormat.do',
 			method: 'POST'
 		})
-	}).load();
+	});
 	
 	new Ext.data.JsonStore({
 		storeId: 'systemDataTypesStore',

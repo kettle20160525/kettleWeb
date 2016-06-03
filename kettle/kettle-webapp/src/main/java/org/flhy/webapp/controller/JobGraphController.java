@@ -2,9 +2,6 @@ package org.flhy.webapp.controller;
 
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.job.JobDecoder;
@@ -39,7 +36,7 @@ public class JobGraphController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/engineXml")
-	protected void engineXml(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
+	protected void engineXml(@RequestParam String graphXml) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);
@@ -48,8 +45,7 @@ public class JobGraphController {
 		JobMeta jobMeta = JobDecoder.decode(graph);
 		String xml = XMLHandler.getXMLHeader() + jobMeta.getXML();
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(xml);
+		JsonUtils.responseXml(xml);
 	}
 	
 	@ResponseBody
@@ -97,7 +93,7 @@ public class JobGraphController {
 	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/newJobEntry")
-	protected void newJobEntry(@RequestParam String graphXml, @RequestParam String entryId, @RequestParam String entryName) throws Exception {
+	protected void newJobEntry(@RequestParam String graphXml, @RequestParam String pluginId, @RequestParam String name) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);
@@ -105,14 +101,14 @@ public class JobGraphController {
 		JobMeta jobMeta = JobDecoder.decode(graph);
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
-		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, entryId);
+		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, pluginId);
 //		if (jobPlugin == null && entryId.startsWith(JobMeta.STRING_SPECIAL)) {
 //			jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, JobMeta.STRING_SPECIAL);
 //		}
 
 		if (jobPlugin != null) {
 			// Determine name & number for this entry.
-	        String basename = entryName;
+	        String basename = name;
 
 	        // See if the name is already used...
 	        //

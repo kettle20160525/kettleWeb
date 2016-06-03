@@ -108,9 +108,9 @@ TransGraph = Ext.extend(BaseGraph, {
 				dialog.show();
 			}, null, null, true);
 			menu.addSeparator(null);
-			menu.addItem('复制到剪贴板', null, function(){alert(1);}, null, null, true);
-			menu.addItem('复制步骤', null, function(){alert(1);}, null, null, true);
-			menu.addItem('删除步骤', null, function(){alert(1);}, null, null, true);
+			menu.addItem('复制到剪贴板', null, function(){mxClipboard.cut(graph);}, null, null, true);
+			menu.addItem('复制步骤', null, function(){mxClipboard.copy(graph);mxClipboard.paste(graph);}, null, null, true);
+			menu.addItem('删除步骤', null, function(){graph.removeCells();}, null, null, true);
 			menu.addItem('隐藏步骤', null, function(){alert(1);}, null, null, true);
 			menu.addItem('分离步骤', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);
@@ -138,18 +138,20 @@ TransGraph = Ext.extend(BaseGraph, {
 		var graph = this.getGraph();
 		Ext.Ajax.request({
 			url: GetUrl('trans/newStep.do'),
-			params: {graphXml: graphXml, stepId: node.attributes.pluginId, stepName: node.text},
+			params: {graphXml: graphXml, pluginId: node.attributes.pluginId, name: node.text},
 			method: 'POST',
 			success: function(response) {
 				var doc = response.responseXML;
          		graph.getModel().beginUpdate();
 				try
 				{
-					graph.insertVertex(graph.getDefaultParent(), null, doc.documentElement, x, y, 40, 40, "icon;image=" + node.attributes.dragIcon);
+					var cell = graph.insertVertex(graph.getDefaultParent(), null, doc.documentElement, x, y, 40, 40, "icon;image=" + node.attributes.dragIcon);
+					graph.setSelectionCells([cell]);
 				} finally
 				{
 					graph.getModel().endUpdate();
 				}
+				graph.container.focus();
 			}
 		});
 	},

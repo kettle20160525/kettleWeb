@@ -302,32 +302,32 @@ public class TransGraphController {
 	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/newStep")
-	protected void newStep(@RequestParam String graphXml, @RequestParam String stepId, @RequestParam String stepName) throws Exception {
+	protected void newStep(@RequestParam String graphXml, @RequestParam String pluginId, @RequestParam String name) throws Exception {
 		mxGraph graph = new mxGraph();
 		mxCodec codec = new mxCodec();
 		Document doc = mxUtils.parseXml(graphXml);
 		codec.decode(doc.getDocumentElement(), graph.getModel());
 		TransMeta transMeta = TransDecoder.decode(graph);
 		
-	    if ( transMeta.findStep( stepName ) != null ) {
+	    if ( transMeta.findStep( name ) != null ) {
 	      int i = 2;
-	      String newName = stepName + " " + i;
+	      String newName = name + " " + i;
 	      while ( transMeta.findStep( newName ) != null ) {
 	        i++;
-	        newName = stepName + " " + i;
+	        newName = name + " " + i;
 	      }
-	      stepName = newName;
+	      name = newName;
 	    }
 
 		PluginRegistry registry = PluginRegistry.getInstance();
-		PluginInterface stepPlugin = registry.findPluginWithId( StepPluginType.class, stepId );
+		PluginInterface stepPlugin = registry.findPluginWithId( StepPluginType.class, pluginId );
 		if (stepPlugin != null) {
 			StepMetaInterface info = (StepMetaInterface) registry.loadClass(stepPlugin);
 			info.setDefault();
-			StepMeta stepMeta = new StepMeta(stepPlugin.getIds()[0], stepName, info);
+			StepMeta stepMeta = new StepMeta(stepPlugin.getIds()[0], name, info);
 			stepMeta.drawStep();
 			
-			StepEncoder encoder = (StepEncoder) PluginFactory.getBean(stepId);
+			StepEncoder encoder = (StepEncoder) PluginFactory.getBean(pluginId);
 			Element e = encoder.encodeStep(stepMeta);
 			
 			JsonUtils.responseXml(XMLHandler.getXMLHeader() + mxUtils.getXml(e));

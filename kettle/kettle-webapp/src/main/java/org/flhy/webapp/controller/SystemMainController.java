@@ -53,7 +53,7 @@ public class SystemMainController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/steps")
-	protected void steps(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void steps() throws ServletException, IOException {
 		JSONArray jsonArray = new JSONArray();
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
@@ -103,13 +103,12 @@ public class SystemMainController {
 			jsonArray.add(jsonObject);
 		}
 		
-		response.setContentType("text/javascript; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/jobentrys")
-	protected void jobentrys(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void jobentrys() throws ServletException, IOException {
 		JSONArray jsonArray = new JSONArray();
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
@@ -188,13 +187,12 @@ public class SystemMainController {
 			jsonArray.add(jsonObject);
 		}
 		
-		response.setContentType("text/javascript; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/systemDataTypes")
-	protected void systemDataTypes(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void systemDataTypes() throws IOException {
 		JSONArray jsonArray = new JSONArray();
 		
 		SystemDataTypes[] values = SystemDataTypes.values();
@@ -205,13 +203,12 @@ public class SystemMainController {
 			jsonArray.add(jsonObject);
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/valueMeta")
-	protected void valueMeta(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void valueMeta() throws IOException {
 		JSONArray jsonArray = new JSONArray();
 		
 		PluginRegistry pluginRegistry = PluginRegistry.getInstance();
@@ -226,16 +223,13 @@ public class SystemMainController {
 			}
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/valueFormat")
-	protected void valueFormat(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void valueFormat(@RequestParam String valueType) throws IOException {
 		JSONArray jsonArray = new JSONArray();
-		
-		String valueType = request.getParameter("valueType");
 		int type = ValueMeta.getType(valueType);
 
 		switch (type) {
@@ -270,8 +264,7 @@ public class SystemMainController {
 			break;
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
@@ -289,7 +282,7 @@ public class SystemMainController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/func")
-	protected void func(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void func() throws Exception {
 		
 		JSONArray jsonArray = new JSONArray();
 		for(int i=0; i<Condition.functions.length; i++) {
@@ -298,8 +291,7 @@ public class SystemMainController {
 			jsonArray.add(jsonObject);
 		}
 		
-		response.setContentType("text/html; charset=utf-8");
-		response.getWriter().write(jsonArray.toString());
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody

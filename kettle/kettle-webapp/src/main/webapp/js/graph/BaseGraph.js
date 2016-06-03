@@ -24,6 +24,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			this.initGraph(container);
 			this.installDragDrop(container);
 			this.installPopupMenu(container);
+			this.installKeyHandler();
 		}, this);
 		
 		BaseGraph.superclass.initComponent.call(this);
@@ -83,21 +84,21 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			return child;
 		};
 		
-//		graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt){  
-//			Ext.each(evt.getProperty('edit').changes, function(change) {
-//				if (change.constructor == mxChildChange && change.change.previous == null)    {
-//					alert(1);
-//				}
-//			});
-//		});
+		graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt){  
+			Ext.each(evt.getProperty('edit').changes, function(change) {
+				if (change.constructor == mxCellAttributeChange && change.cell != null)    {
+					var cell = change.cell, root = graph.getDefaultParent();
+					if(cell.getId() == root.getId())
+						me.getDatabaseStore();
+				}
+			});
+		});
 		graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt){  
 			var cell = evt.getProperty('cell');
 			if(cell) {
 				me.editCell(cell);
 			}
 		});
-	
-		
 		
 		this.getGraph = function() {
 			return graph;
@@ -160,6 +161,143 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		}));
 	},
 	
+	installKeyHandler: function() {
+		var graph = this.getGraph();
+		var history = new mxUndoManager();
+		var undoHandler = function(sender, evt)
+		{
+			var changes = evt.getProperty('edit').changes;
+			graph.setSelectionCells(graph.getSelectionCellsForChanges(changes));
+		};
+		
+		history.addListener(mxEvent.UNDO, undoHandler);
+		history.addListener(mxEvent.REDO, undoHandler);
+		
+		var listener = function(sender, evt)
+		{
+			history.undoableEditHappened(evt.getProperty('edit'));
+		};
+		
+		graph.getModel().addListener(mxEvent.UNDO, listener);
+		graph.getView().addListener(mxEvent.UNDO, listener);
+		
+		var keyHandler = new mxKeyHandler(graph);
+	    
+	    // Ignores enter keystroke. Remove this line if you want the
+	    // enter keystroke to stop editing
+	    keyHandler.enter = function() {};
+	    
+	    keyHandler.bindKey(8, function()
+	    {
+	    	graph.foldCells(true);
+	    });
+	    
+	    keyHandler.bindKey(13, function()
+	    {
+	    	graph.foldCells(false);
+	    });
+	    
+	    keyHandler.bindKey(33, function()
+	    {
+	    	graph.exitGroup();
+	    });
+	    
+	    keyHandler.bindKey(34, function()
+	    {
+	    	graph.enterGroup();
+	    });
+	    
+	    keyHandler.bindKey(36, function()
+	    {
+	    	graph.home();
+	    });
+
+	    keyHandler.bindKey(35, function()
+	    {
+	    	graph.refresh();
+	    });
+	    
+	    keyHandler.bindKey(37, function()
+	    {
+	    	graph.selectPreviousCell();
+	    });
+	        
+	    keyHandler.bindKey(38, function()
+	    {
+	    	graph.selectParentCell();
+	    });
+
+	    keyHandler.bindKey(39, function()
+	    {
+	    	graph.selectNextCell();
+	    });
+	    
+	    keyHandler.bindKey(40, function()
+	    {
+	    	graph.selectChildCell();
+	    });
+	    
+	    keyHandler.bindKey(46, function()
+	    {
+	    	graph.removeCells();
+	    });
+	    
+	    keyHandler.bindKey(107, function()
+	    {
+	    	graph.zoomIn();
+	    });
+	    
+	    keyHandler.bindKey(109, function()
+	    {
+	    	graph.zoomOut();
+	    });
+	    
+	    keyHandler.bindKey(113, function()
+	    {
+	    	graph.startEditingAtCell();
+	    });
+	  
+	    keyHandler.bindControlKey(65, function()
+	    {
+	    	graph.selectAll();
+	    });
+
+	    keyHandler.bindControlKey(89, function()
+	    {
+	    	history.redo();
+	    });
+	    
+	    keyHandler.bindControlKey(90, function()
+	    {
+	    	history.undo();
+	    });
+	    
+	    keyHandler.bindControlKey(88, function()
+	    {
+	    	mxClipboard.cut(graph);
+	    });
+	    
+	    keyHandler.bindControlKey(67, function()
+	    {
+	    	mxClipboard.copy(graph);
+	    });
+	    
+	    keyHandler.bindControlKey(86, function()
+	    {
+	    	mxClipboard.paste(graph);
+	    });
+	    
+	    keyHandler.bindControlKey(71, function()
+	    {
+	    	graph.setSelectionCell(graph.groupCells(null, 20));
+	    });
+	    
+	    keyHandler.bindControlKey(85, function()
+	    {
+	    	graph.setSelectionCells(graph.ungroupCells());
+	    });
+	},
+	
 	initContextMenu: Ext.emptyFn,
 	cellAdded: Ext.emptyFn,
 	
@@ -170,16 +308,19 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	},
 	
 	getDatabaseStore: function() {
-		var databaseStore = new Ext.data.JsonStore({
-			idProperty: 'name',
-			fields: ['name']
-		}), graph = this.getGraph();
-		var cell = graph.getDefaultParent(), data = [];
-		if(cell.getAttribute('databases') != null)
-			data = Ext.decode(cell.getAttribute('databases'));
-		databaseStore.loadData(data);
+		if(!this.databaseStore) {
+			this.databaseStore = new Ext.data.JsonStore({
+				idProperty: 'name',
+				fields: ['name']
+			});
+		}
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent(), data = [];
+		if(root.getAttribute('databases') != null)
+			data = Ext.decode(root.getAttribute('databases'));
+		this.databaseStore.loadData(data);
 		
-		return databaseStore;
+		return this.databaseStore;
 	},
 	
 	getSlaveServerStore: function() {
