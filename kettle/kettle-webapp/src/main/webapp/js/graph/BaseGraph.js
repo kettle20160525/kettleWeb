@@ -68,8 +68,8 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		graph.setDisconnectOnMove(false);
 		
 		graph.setCellsEditable(false);
-//		container.style.background = 'url("' + GetUrl('ui/images/grid.gif') + '")';
-//		container.style.cursor = 'default';
+		container.style.background = 'url("' + GetUrl('ui/images/grid.gif') + '") repeat white';
+		container.style.cursor = 'default';
 		
 		var cellExist = function(label) {
 			var cells = graph.getChildVertices(graph.getDefaultParent());
