@@ -1,6 +1,5 @@
 package org.flhy.webapp.controller;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +14,6 @@ import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
 import org.flhy.webapp.utils.JsonUtils;
-import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettlePluginException;
@@ -24,8 +22,6 @@ import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.PluginTypeInterface;
 import org.pentaho.di.core.plugins.RepositoryPluginType;
-import org.pentaho.di.core.vfs.KettleVFS;
-import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.ObjectId;
@@ -41,7 +37,6 @@ import org.pentaho.di.repository.kdr.KettleDatabaseRepositoryMeta;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.repository.kdr.KettleDatabaseRepositoryDialog;
-import org.pentaho.di.ui.spoon.Spoon;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -205,7 +200,9 @@ public class RepositoryController {
 	    	jsonObject.put("GraphType", "JobGraph");
 	        
 	    	ObjectId id = new StringObjectId( objectId );
+	    	RepositoryObject repositoryObject = App.getInstance().getRepository().getObjectInformation(id, RepositoryObjectType.JOB);
 	    	JobMeta jobMeta = App.getInstance().getRepository().loadJob(id, null);
+	    	jobMeta.setRepositoryDirectory(repositoryObject.getRepositoryDirectory());
 	    	
 	        mxCodec codec = new mxCodec();
 			mxGraph graph = JobEncoder.encode(jobMeta);
