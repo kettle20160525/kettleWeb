@@ -3,6 +3,7 @@
 <html>
 	<head>
 	  	<title>KettleConsole</title>
+	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/resources/css/ext-all.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/public.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/common.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/explorer.css" />
@@ -16,7 +17,6 @@
 		    </div>
 		</div>
 		
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/resources/css/ext-all.css" />
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/ext-patch.css" />
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/mxgraph2/js/mxClient.js"></script>
 	    

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
     <name>ccc</name>
@@ -68,34 +67,44 @@
   <created_user>-</created_user>
   <created_date>2016&#x2f;06&#x2f;01 22&#x3a;27&#x3a;15.365</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;01 22&#x3a;27&#x3a;53.713</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;07 00&#x3a;45&#x3a;30.131</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
   <connection>
-    <name>usertest</name>
-    <server>localhost</server>
-    <type>MYSQL</type>
+    <name>fjtdp</name>
+    <server>192.168.14.69</server>
+    <type>ORACLE</type>
     <access>Native</access>
-    <database>usertest</database>
-    <port>3306</port>
-    <username>root</username>
-    <password>Encrypted 2be98afc86aa7f2e4cb79ce10cc9da0ce</password>
+    <database>fjtdp</database>
+    <port>1521</port>
+    <username>platform</username>
+    <password>Encrypted 2be98afc86aa7f290af09a87ada9efb8b</password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
     <attributes>
-      <attribute><code>PORT_NUMBER</code><attribute>3306</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>INITIAL_POOL_SIZE</code><attribute>5</attribute></attribute>
+      <attribute><code>MAXIMUM_POOL_SIZE</code><attribute>10</attribute></attribute>
+      <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
+      <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
+      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
       <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>N</attribute></attribute>
+      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>N</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>
     </attributes>
   </connection>
   <order>
+  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x5b57;&#x6bb5;&#x9009;&#x62e9;</to><enabled>Y</enabled> </hop>
   </order>
   <step>
-    <name>&#x6267;&#x884c;SQL&#x811a;&#x672c;</name>
-    <type>ExecSQL</type>
+    <name>fjtdp69 - &#x8868;&#x8f93;&#x5165;</name>
+    <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -104,23 +113,45 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>usertest</connection>
+    <connection>fjtdp</connection>
+    <sql>select &#xa;	USERID,&#xa;	USERNAME,&#xa;	USERALIAS,&#xa;	PASSWORD,&#xa;	ISENABLED,&#xa;	BEGINTIME,&#xa;	ENDTIME,&#xa;	MAC,&#xa;	ISADMIN,&#xa;	EMPLOYEEID,&#xa;	WELCOMEURL,&#xa;	ISPROHIBITED,&#xa;	FAILURENUMBER,&#xa;	LASTLOGINTIME,&#xa;	ISREMIND,&#xa;	REMINDTIME,&#xa;	REMINDCYCLE,&#xa;	IPADDRESS,&#xa;	MACADDRESS,&#xa;	BOUNDTYPE,&#xa;	ISNEWUSER,&#xa;	PLAINTEXTPASSWORD,&#xa;	TELEPHONE,&#xa;	REMARK,&#xa;	MOBILEPHONE,&#xa;	OFFICEPHONE,&#xa;	EMAILADDRESS,&#xa;	ORGANSHORTNAME,&#xa;	SEX,&#xa;	BIRTHDAY,&#xa;	NATIONALITY,&#xa;	NATIVEPLACE,&#xa;	POLICITALSTATUS,&#xa;	JOB,&#xa;	POST,&#xa;	TITLE,&#xa;	SKILLLEVEL,&#xa;	IDNUMBER,&#xa;	WORKTIME,&#xa;	EDUCATION,&#xa;	DEGREE,&#xa;	MAJOR,&#xa;	GRADUATECOLLEGES,&#xa;	HIGHESTEDUCATION,&#xa;	HIGHESTDEGREE,&#xa;	HIGHESTMAJOR,&#xa;	HOMEPHONE,&#xa;	PICTURE,&#xa;	ISHOLDER,&#xa;	USERTYPE,&#xa;	DISPATCHDEPTID,&#xa;	DISPATCHORGANID&#xa; from PLATFORM.T_TBP_USER</sql>
+    <limit>0</limit>
+    <lookup/>
     <execute_each_row>N</execute_each_row>
-    <single_statement>N</single_statement>
-    <replace_variables>N</replace_variables>
-    <quoteString>N</quoteString>
-    <sql>select &#x2a; from aa&#x3b;</sql>
-    <set_params>N</set_params>
-    <insert_field/>
-    <update_field/>
-    <delete_field/>
-    <read_field/>
-    <arguments>
-    </arguments>
+    <variables_active>N</variables_active>
+    <lazy_conversion_active>N</lazy_conversion_active>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>136</xloc>
-      <yloc>188</yloc>
+      <xloc>100</xloc>
+      <yloc>70</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>&#x5b57;&#x6bb5;&#x9009;&#x62e9;</name>
+    <type>SelectValues</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>      <field>        <name>USERID</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>      <field>        <name>USERNAME</name>
+        <rename/>
+        <length>-2</length>
+        <precision>-2</precision>
+      </field>        <select_unspecified>N</select_unspecified>
+    </fields>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>310</xloc>
+      <yloc>70</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

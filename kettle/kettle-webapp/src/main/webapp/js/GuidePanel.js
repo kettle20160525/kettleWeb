@@ -6,7 +6,6 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 		
 		var transTree = new Ext.tree.TreePanel({
 			title: '核心对象',
-			cls: 'core-tree',
 			useArrows: true,
 			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
 			loader: new Ext.tree.TreeLoader({
@@ -21,7 +20,6 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 		
 		var jobTree = new Ext.tree.TreePanel({
 			title: '核心对象',
-			cls: 'core-tree',
 			useArrows: true,
 			root: new Ext.tree.AsyncTreeNode({text: 'root'}),
 			loader: new Ext.tree.TreeLoader({

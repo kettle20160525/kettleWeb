@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>test new TableOutput with table name in field</name>
+    <name>Table Output - Tablename in field</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -78,7 +77,7 @@
   <created_user/>
   <created_date>2014&#x2f;02&#x2f;26 16&#x3a;25&#x3a;18.397</created_date>
   <modified_user/>
-  <modified_date>2014&#x2f;02&#x2f;26 16&#x3a;25&#x3a;18.397</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;07 00&#x3a;57&#x3a;07.346</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
@@ -101,7 +100,6 @@
       <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
       <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
       <attribute><code>INITIAL_POOL_SIZE</code><attribute>10</attribute></attribute>
-      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
       <attribute><code>MAXIMUM_POOL_SIZE</code><attribute>5</attribute></attribute>
       <attribute><code>POOLING_accessToUnderlyingConnectionAllowed</code><attribute>false</attribute></attribute>
       <attribute><code>POOLING_defaultAutoCommit</code><attribute>true</attribute></attribute>
@@ -112,6 +110,7 @@
       <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
       <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
       <attribute><code>SQL_CONNECT</code><attribute>select &#x2a; from N&#x3b;&#xd;&#xa;select &#x2a; from Y&#x3b;</attribute></attribute>
+      <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>

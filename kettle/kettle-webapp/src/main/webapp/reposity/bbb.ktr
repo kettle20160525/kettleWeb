@@ -124,7 +124,7 @@
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>124</xloc>
       <yloc>119</yloc>
-      <draw>N</draw>
+      <draw>Y</draw>
       </GUI>
     </step>
 
@@ -150,7 +150,7 @@
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>246</xloc>
       <yloc>200</yloc>
-      <draw>N</draw>
+      <draw>Y</draw>
       </GUI>
     </step>
 

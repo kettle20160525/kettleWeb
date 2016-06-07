@@ -65,7 +65,7 @@ public class SystemMainController {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
-			jsonObject.put("icon", "ui/images/folder_connection.png");
+			jsonObject.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "Folder_image" )));
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 
@@ -121,7 +121,7 @@ public class SystemMainController {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
-			jsonObject.put("icon", "ui/images/folder_connection.png");
+			jsonObject.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "Folder_image" )));
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 

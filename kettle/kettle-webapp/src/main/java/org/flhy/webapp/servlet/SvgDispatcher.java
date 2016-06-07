@@ -20,7 +20,9 @@ public class SvgDispatcher extends HttpServlet {
 		
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		BufferedImage image = StepImageManager.getUniversalImage(cl, imageFile, request.getParameter("scale"));
+		response.setContentType("image/png");
 		ImageIO.write(image, "PNG", response.getOutputStream());
+		response.getOutputStream().flush();
 	}
 
 }

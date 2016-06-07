@@ -130,18 +130,24 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 */
 
 .x-tree-node div.nav-node {
-    background:#eee url(../images/cmp-bg.gif) repeat-x;
-    margin-top:1px;
-    border-top:1px solid #ddd;
-    border-bottom:1px solid #ccc;
-    padding-top:2px;
-    padding-bottom:1px;
+    border-bottom: 1px solid #ccc;
+    background-color: #efefef;
+    line-height: 24px;
+    font-style: italic;
+}
+.x-tree-node div.nav {
+    line-height: 24px;
+}
+div.nav-node .x-tree-ec-icon, div.nav .x-tree-ec-icon {
+	margin-top: 3px;
+}
+div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
+  height: 24px;
+  vertical-align: top;
+  width: 24px;
 }
 
-.nav {
-    border: 1px solid #fff;
-    margin: 3px;
-}
+
 .nav .x-tree-ec-icon {
     display: none;
 }

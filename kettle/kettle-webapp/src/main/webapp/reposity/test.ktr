@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
     <name>test</name>
@@ -68,8 +67,8 @@
   <created_user>-</created_user>
   <created_date>2016&#x2f;05&#x2f;30 22&#x3a;04&#x3a;46.784</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;05&#x2f;30 22&#x3a;04&#x3a;46.784</modified_date>
-    <key_for_session_key/>
+  <modified_date>2016&#x2f;06&#x2f;06 13&#x3a;56&#x3a;06.547</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
@@ -89,17 +88,16 @@
     <attributes>
       <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
       <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
       <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
       <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
       <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
+      <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
-      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>
     </attributes>
   </connection>
   <order>
-  <hop> <from>&#x8868;&#x8f93;&#x5165;</from><to>&#x8868;&#x8f93;&#x5165; 2</to><enabled>Y</enabled> </hop>
   </order>
   <step>
     <name>&#x8868;&#x8f93;&#x5165;</name>
@@ -123,32 +121,6 @@
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>80</xloc>
       <yloc>176</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>&#x8868;&#x8f93;&#x5165; 2</name>
-    <type>TableInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <connection>SampleData</connection>
-    <sql>SELECT&#xd;&#xa;  CONTACTLASTNAME&#xd;&#xa;FROM E&#xd;&#xa;</sql>
-    <limit>0</limit>
-    <lookup>&#x8868;&#x8f93;&#x5165;</lookup>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>224</xloc>
-      <yloc>208</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
