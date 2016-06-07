@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
-import org.flhy.ext.job.JobDecoder;
+import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.job.step.JobEntryEncoder;
 import org.flhy.webapp.utils.JsonUtils;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
@@ -23,12 +23,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.util.mxUtils;
-import com.mxgraph.view.mxGraph;
 
 @Controller
 @RequestMapping(value="/job")
@@ -37,12 +34,8 @@ public class JobGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/engineXml")
 	protected void engineXml(@RequestParam String graphXml) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		JobMeta jobMeta = JobDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		String xml = XMLHandler.getXMLHeader() + jobMeta.getXML();
 		
 		JsonUtils.responseXml(xml);
@@ -51,12 +44,8 @@ public class JobGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(@RequestParam String graphXml) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		JobMeta jobMeta = JobDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		Repository repository = App.getInstance().getRepository();
 		ObjectId existingId = repository.getTransformationID( jobMeta.getName(), jobMeta.getRepositoryDirectory() );
 		if(jobMeta.getCreatedDate() == null)
@@ -94,11 +83,8 @@ public class JobGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/newJobEntry")
 	protected void newJobEntry(@RequestParam String graphXml, @RequestParam String pluginId, @RequestParam String name) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		JobMeta jobMeta = JobDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		
 		PluginRegistry registry = PluginRegistry.getInstance();
 		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, pluginId);

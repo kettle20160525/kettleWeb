@@ -3,6 +3,8 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	width: 600,
 	height: 500,
 	bodyStyle: 'padding: 5px;',
+	showPreview: true,
+	
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
 		
@@ -129,7 +131,10 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	getSQL: function(dbInfo, wSQL) {
 		var dialog = new DatabaseExplorerDialog();
 		dialog.on('select', function(node) {
-			wSQL.setValue('select * from ' + node.attributes.fullText);
+			var schema = node.attributes.schema;
+			var table = node.text;
+			
+			wSQL.setValue('select * from ' + schema + '.' + table);
 			dialog.close();
 			
 			Ext.Msg.show({
@@ -139,15 +144,12 @@ TableInputDialog = Ext.extend(KettleDialog, {
 				   icon: Ext.MessageBox.QUESTION,
 				   fn: function(bId) {
 					   if(bId == 'yes') {
-						   Ext.Ajax.request({
-								url: GetUrl('trans/fieldNames.do'),
-								method: 'POST',
-								params: {graphXml: getActiveGraph().toXml(), databaseName: dbInfo.name, sql: encodeURIComponent(wSQL.getValue())},
-								success: function(response, opts) {
-									decodeResponse(response, function(resObj) {
-										wSQL.setValue(decodeURIComponent(resObj.message));
-									});
-								}
+						   getActiveGraph().tableFields(dbInfo.name, schema, table, function(store) {
+							   var data = [];
+							   store.each(function(rec) {
+								   data.push('\n\t' + rec.get('name'));
+							   });
+							   wSQL.setValue('select ' + data.join(',') + '\n from ' + schema + '.' + table);
 						   });
 					   }
 				   }

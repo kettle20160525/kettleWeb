@@ -335,7 +335,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		return mxUtils.getPrettyXml(node);
 	},
 	
-	inputOutputFields: function(stepName, before) {
+	inputOutputFields: function(stepName, before, cb) {
 		var graph = this.getGraph();
 		var store = new Ext.data.JsonStore({
 			fields: ['name', 'type', 'length', 'precision', 'origin', 'storageType', 'conversionMask', 'currencySymbol', 'decimalSymbol', 'groupingSymbol', 'trimType', 'comments'],
@@ -345,11 +345,17 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			})
 		});
 		
-		var enc = new mxCodec(mxUtils.createXmlDocument());
-		var node = enc.encode(graph.getModel());
+		store.on('loadexception', function(misc, s, response) {
+			failureResponse(response);
+		});
+		
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
 		
 		store.baseParams.stepName = encodeURIComponent(stepName);
-		store.baseParams.graphXml = mxUtils.getPrettyXml(node);
+		store.baseParams.graphXml = this.toXml();
 		store.baseParams.before = before;
 		store.load();
 		
@@ -370,6 +376,30 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		this.databaseStore.loadData(data);
 		
 		return this.databaseStore;
+	},
+	
+	tableFields: function(connection, schema, table, cb) {
+		var store = new Ext.data.JsonStore({
+			idProperty: 'name',
+			fields: ['name'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('trans/tableFields.do'),
+				method: 'POST'
+			})
+		});
+		
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
+		
+		store.baseParams.graphXml = this.toXml();
+		store.baseParams.databaseName = connection;
+		store.baseParams.schema = schema;
+		store.baseParams.table = table;
+		store.load();
+		
+		return store;
 	},
 	
 	getSlaveServerStore: function() {

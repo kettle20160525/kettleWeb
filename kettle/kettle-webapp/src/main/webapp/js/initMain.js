@@ -1,5 +1,10 @@
 var activeGraph = null;
 Ext.onReady(function() {
+	Ext.MessageBox.buttonText.yes = '确定';
+	Ext.MessageBox.buttonText.ok = '是';
+	Ext.MessageBox.buttonText.no = '否';
+	Ext.MessageBox.buttonText.cancel = '取消';
+	
 	var tabPanel = new Ext.TabPanel({
 		id: 'TabPanel',
 		region: 'center',
@@ -25,19 +30,6 @@ Ext.onReady(function() {
 		layout: 'border',
 		items: [guidePanel, tabPanel]
 	});
-    
-//    guidePanel.openFile('variables.ktr');
-//    guidePanel.openFile('insert or update.ktr');
-//    guidePanel.openFile('Table Output - Tablename in field.ktr');
-//    guidePanel.openFile('transformations/JSON - read nested fields.ktr');
-//    guidePanel.openFile('transformations/SQL File Output - Basic example.ktr');
-//    guidePanel.openFile('transformations/Table Output - Tablename in field.ktr');
-//    guidePanel.openFile('transformations/Switch-Case - basic sample.ktr');
-//    guidePanel.openFile('transformations/JsonInput - read a file.ktr');
-//    guidePanel.openFile('transformations/Add a checksum - Basic CRC32 example.ktr');
-//    guidePanel.openFile('transformations/Add a sequence - Basic example.ktr');
-    
-//    guidePanel.openFile('jobs/arguments/Set arguments on a transformation.kjb');
     
     setTimeout(function(){
         Ext.get('loading').remove();
@@ -145,10 +137,39 @@ function failureResponse(response) {
 		   icon: Ext.MessageBox.WARNING
 		});
 	} else if(response.status == 500) {
+		var noText = Ext.MessageBox.buttonText.no;
+		Ext.MessageBox.buttonText.no = '查看详细';
 		Ext.Msg.show({
 		   title: '系统提示',
 		   msg: '系统发生错误！错误信息：' + response.statusText,
-		   buttons: Ext.Msg.OK,
+		   buttons: Ext.Msg.YESNOCANCEL,
+		   fn: function(bId) {
+			   Ext.MessageBox.buttonText.no = noText;
+			   if(bId == 'no') {
+				   var win = new Ext.Window({
+					   width: 1000,
+					   height: 600,
+					   title: '详细错误',
+					   modal: true,
+					   layout: 'fit',
+					   items: new Ext.form.HtmlEditor({
+						   value: response.responseText,
+						   enableAlignments : false,
+							enableColors : false,
+							enableFont : false,
+							enableFontSize : false,
+							enableFormat : false,
+							enableLinks : false,
+							enableLists : false,
+							enableSourceEdit : false
+					   }),
+					   bbar: [{
+						   text: '确定', handler: function() {win.close();}
+					   }]
+				   });
+				   win.show();
+			   }
+		   },
 		   icon: Ext.MessageBox.ERROR
 		});
 	}
@@ -222,6 +243,63 @@ NoteShape.prototype.constraints = [new mxConnectionConstraint(new mxPoint(0.25, 
  	            		 new mxConnectionConstraint(new mxPoint(0.5, 1), true),
  	            		 new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
 
+Ext.override(Ext.data.Store, {
+	toArray: function(fields) {
+		var data = [];
+		this.each(function(rec) {
+			var obj = new Object();
+			Ext.each(fields, function(field) {
+				if(Ext.isString(field))
+					obj[field] = rec.get(field);
+				else if(Ext.isObject(field)) {
+					if(field.value)
+						obj[field.name] = field.value;
+					else
+						obj[field.name] = rec.get(field.field);
+				}
+			});
+			data.push(obj);
+		});
+		return data;
+	},
+	toJson: function() {
+		var data = [];
+		this.each(function(rec) {
+			var obj = new Object();
+			rec.fields.each(function(field) {
+				obj[field.name] = rec.get(field.name);
+			});
+			data.push(obj);
+		});
+		return data;
+	},
+	merge: function(store, fields) {
+		var me = this;
+		if(store.getCount() <= 0) return;
+		var data = store.toArray(fields);
+		
+		if(this.getCount() > 0) {
+			var answerDialog = new AnswerDialog({has: me.getCount(), found: data.length});
+			answerDialog.on('addNew', function() {
+				me.loadData(data, true);
+			});
+			answerDialog.on('addAll', function() {
+				Ext.each(data, function(d) {
+	                var record = new store.recordType(d);
+	                me.insert(0, record);
+				});
+			});
+			answerDialog.on('clearAddAll', function() {
+				me.removeAll();
+				me.loadData(data);
+			});
+			answerDialog.show();
+		} else {
+			me.loadData(data);
+		}
+	}
+});
+
 KettleForm = Ext.extend(Ext.form.FormPanel, {
 	labeWidth: 100,
 	labelAlign: 'right',
@@ -285,7 +363,36 @@ KettleDialog = Ext.extend(Ext.Window, {
 			}
 		});
 		
-		this.bbar = ['->', bCancel, bOk];
+		this.bbar = ['->', bCancel];
+		if(this.showPreview)
+			this.bbar.push({text: '预览', handler: function() {
+				Ext.Ajax.request({
+					url: GetUrl('trans/previewData.do'),
+					params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label'), rowLimit: 100},
+					method: 'POST',
+					success: function(response) {
+						var record = Ext.decode(response.responseText);
+						
+						var previewGrid = new DynamicEditorGrid({
+							rowNumberer: true
+						});
+						
+						var win = new Ext.Window({
+							title: '预览数据',
+							width: 700,
+							height: 500,
+							layout: 'fit',
+							items: previewGrid
+						});
+						win.show();
+						
+						var records = Ext.decode(response.responseText);
+						previewGrid.loadMetaAndValue(records);
+						
+					}
+				});
+			}});
+		this.bbar.push(bOk);
 		
 		KettleDialog.superclass.initComponent.call(this);
 		
@@ -307,13 +414,8 @@ KettleTabDialog = Ext.extend(KettleDialog, {
 		});
 		
 		KettleTabDialog.superclass.initComponent.call(this);
-		
 	}
-	
 });
-
-
-
 
 JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 	title: 'FTP上传',
@@ -569,4 +671,3 @@ JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 });
 
 Ext.reg('FTP_PUT', JobEntryFTP_PUT);
-

@@ -1,5 +1,8 @@
 package org.flhy.webapp.controller;
 
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Toolkit;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,13 +17,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.TransExecutor;
-import org.flhy.ext.trans.TransDecoder;
+import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
 import org.flhy.webapp.utils.JsonUtils;
 import org.flhy.webapp.utils.SearchFieldsProgress;
+import org.flhy.webapp.utils.TransPreviewProgress;
+import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
@@ -42,19 +47,18 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositorySecurityProvider;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.TransPreviewFactory;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.mxgraph.io.mxCodec;
 import com.mxgraph.util.mxUtils;
-import com.mxgraph.view.mxGraph;
 
 @Controller
 @RequestMapping(value="/trans")
@@ -63,12 +67,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/engineXml")
 	protected void engineXml(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		TransMeta transMeta = TransDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		AbstractMeta transMeta = codec.decode(graphXml);
 		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
 		
 		response.setContentType("text/html; charset=utf-8");
@@ -78,12 +78,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/save")
 	protected void save(HttpServletRequest request, HttpServletResponse response, @RequestParam String graphXml) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		TransMeta transMeta = TransDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		AbstractMeta transMeta = codec.decode(graphXml);
 		Repository repository = App.getInstance().getRepository();
 		ObjectId existingId = repository.getTransformationID( transMeta.getName(), transMeta.getRepositoryDirectory() );
 		if(transMeta.getCreatedDate() == null)
@@ -120,12 +116,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/check")
 	protected void check(@RequestParam String graphXml, @RequestParam boolean show_successful_results) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		TransMeta transMeta = TransDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		ArrayList<CheckResultInterface> remarks = new ArrayList<CheckResultInterface>();
 		transMeta.checkSteps(remarks, false, null, transMeta, App.getInstance().getRepository(), App.getInstance().getMetaStore() );
@@ -164,17 +156,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/run")
 	protected void run(@RequestParam String graphXml, @RequestParam String executionConfig) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		TransMeta transMeta = TransDecoder.decode(graph);
-		
-//		String xml = XMLHandler.getXMLHeader() + transMeta.getXML();
-//		DataOutputStream dos = new DataOutputStream(KettleVFS.getOutputStream(transMeta.getFilename(), false));
-//		dos.write(xml.getBytes(Const.XML_ENCODING));
-//		dos.close();
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		JSONObject jsonObject = JSONObject.fromObject(executionConfig);
 		TransExecutionConfiguration executionConfiguration = new TransExecutionConfiguration();
@@ -303,11 +286,8 @@ public class TransGraphController {
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/newStep")
 	protected void newStep(@RequestParam String graphXml, @RequestParam String pluginId, @RequestParam String name) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		TransMeta transMeta = TransDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 	    if ( transMeta.findStep( name ) != null ) {
 	      int i = 2;
@@ -347,12 +327,8 @@ public class TransGraphController {
 	protected void inputOutputFields(@RequestParam String graphXml, @RequestParam String stepName, @RequestParam boolean before) throws Exception {
 		stepName = StringEscapeHelper.decode(stepName);
 		
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
-		
-		TransMeta transMeta = TransDecoder.decode(graph);
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		StepMeta stepMeta = getStep(transMeta, stepName);
 		SearchFieldsProgress op = new SearchFieldsProgress( transMeta, stepMeta, before );
@@ -390,70 +366,104 @@ public class TransGraphController {
 		return null;
 	}
 	
-	/**
-	 * 获取输入字段信息
-	 * 
-	 * @param graphXml
-	 * @param stepName
-	 * @throws Exception
-	 */
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/getFields")
-	protected void getFields(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
+	@RequestMapping(method = RequestMethod.POST, value = "/tableFields")
+	protected void tableFields(@RequestParam String graphXml, @RequestParam String databaseName, @RequestParam String schema, @RequestParam String table) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		DatabaseMeta inf = transMeta.findDatabase(databaseName);
 		
-		TransMeta transMeta = TransDecoder.decode(graph);
-		RowMetaInterface rows = transMeta.getPrevStepFields( stepName );
+		Database db = new Database( loggingObject, inf );
+		db.connect();
 		
 		JSONArray jsonArray = new JSONArray();
-		for(int i=0; i<rows.size(); i++) {
-			ValueMetaInterface v = rows.getValueMeta( i );
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("name", Const.NVL( v.getName(), "" ));
-			jsonObject.put("type", v.getTypeDesc());
-			jsonObject.put("length", Integer.toString( v.getLength() ));
-			jsonObject.put("precision", Integer.toString( v.getPrecision() ));
-			jsonArray.add(jsonObject);
+		String schemaTable = inf.getQuotedSchemaTableCombination( transMeta.environmentSubstitute( schema ), transMeta.environmentSubstitute( table ) );
+		RowMetaInterface fields = db.getTableFields(schemaTable);
+		if (fields != null) {
+			for (int i = 0; i < fields.size(); i++) {
+				ValueMetaInterface field = fields.getValueMeta(i);
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("name", inf.quoteField(field.getName()));
+				jsonArray.add(jsonObject);
+			}
 		}
 		
 		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody
-	@RequestMapping(method = RequestMethod.POST, value = "/fieldNames")
-	protected void fieldNames(@RequestParam String graphXml, @RequestParam String databaseName, @RequestParam String sql) throws Exception {
-		mxGraph graph = new mxGraph();
-		mxCodec codec = new mxCodec();
-		Document doc = mxUtils.parseXml(graphXml);
-		codec.decode(doc.getDocumentElement(), graph.getModel());
+	@RequestMapping(method = RequestMethod.POST, value = "/previewData")
+	protected void previewData(@RequestParam String graphXml, @RequestParam String stepName, @RequestParam int rowLimit) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		StepMeta stepMeta = getStep(transMeta, stepName);
+		TransMeta previewMeta = TransPreviewFactory.generatePreviewTransformation( transMeta, stepMeta.getStepMetaInterface(), stepName );
+		TransPreviewProgress progressDialog = new TransPreviewProgress(previewMeta, new String[] {stepName }, new int[] { rowLimit } );
 		
-		TransMeta transMeta = TransDecoder.decode(graph);
-		DatabaseMeta inf = transMeta.findDatabase(databaseName);
+		RowMetaInterface rowMeta = progressDialog.getPreviewRowsMeta(stepName);
+		List<Object[]> rowsData = progressDialog.getPreviewRows(stepName);
 		
-		Database db = new Database( loggingObject, inf );
-		db.connect();
-		
-		sql = StringEscapeHelper.decode(sql);
-		String subfix = sql.substring(sql.indexOf("from"));
-		RowMetaInterface fields = db.getQueryFields(sql, false);
-		if (fields != null) {
-			sql = "SELECT" + Const.CR;
-			for (int i = 0; i < fields.size(); i++) {
-				ValueMetaInterface field = fields.getValueMeta(i);
-				if (i == 0) {
-					sql += "  ";
-				} else {
-					sql += ", ";
-				}
-				sql += inf.quoteField(field.getName()) + Const.CR;
+		Font f = new Font("Arial", Font.PLAIN, 12);
+		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
+			
+		if (rowMeta != null) {
+			JSONObject stepJson = new JSONObject();
+			List<ValueMetaInterface> valueMetas = rowMeta.getValueMetaList();
+			
+			JSONArray columns = new JSONArray();
+			JSONObject metaData = new JSONObject();
+			JSONArray fields = new JSONArray();
+			for (int i = 0; i < valueMetas.size(); i++) {
+				ValueMetaInterface valueMeta = rowMeta.getValueMeta(i);
+				fields.add(valueMeta.getName());
+				String header = valueMeta.getComments() == null ? valueMeta.getName() : valueMeta.getComments();
+				
+				JSONObject column = new JSONObject();
+				column.put("dataIndex", valueMeta.getName());
+				column.put("width", 100);
+				column.put("header", header);
+				column.put("width", fm.stringWidth(header) + 10);
+				columns.add(column);
 			}
-			sql += ' ' + subfix;
+			
+			JSONArray firstRecords = new JSONArray();
+			for (int rowNr = 0; rowNr < rowsData.size(); rowNr++) {
+				Object[] rowData = rowsData.get(rowNr);
+				JSONObject row = new JSONObject();
+				for (int colNr = 0; colNr < rowMeta.size(); colNr++) {
+					String string = null;
+					ValueMetaInterface valueMetaInterface;
+					try {
+						valueMetaInterface = rowMeta.getValueMeta(colNr);
+						if (valueMetaInterface.isStorageBinaryString()) {
+							Object nativeType = valueMetaInterface.convertBinaryStringToNativeType((byte[]) rowData[colNr]);
+							string = valueMetaInterface.getStorageMetadata().getString(nativeType);
+						} else {
+							string = rowMeta.getString(rowData, colNr);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if(!StringUtils.hasText(string))
+						string = "&lt;null&gt;";
+					
+					ValueMetaInterface valueMeta = rowMeta.getValueMeta( colNr );
+					row.put(valueMeta.getName(), string);
+				}
+				if(firstRecords.size() <= rowLimit) {
+					firstRecords.add(row);
+				}
+			}
+			
+			metaData.put("fields", fields);
+			metaData.put("root", "firstRecords");
+			stepJson.put("metaData", metaData);
+			stepJson.put("columns", columns);
+			stepJson.put("firstRecords", firstRecords);
+			
+			JsonUtils.response(stepJson);
 		}
 		
-		JsonUtils.success(StringEscapeHelper.encode(sql));
 	}
 	
 	public static final LoggingObjectInterface loggingObject = new SimpleLoggingObject("TransGraphController", LoggingObjectType.TRANSMETA, null );

@@ -71,8 +71,8 @@
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/ResultPanel.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
 	    
 	    <input type="hidden" id="context-path" value="${pageContext.request.contextPath}" />
 	</body>

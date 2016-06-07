@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.flhy.ext.App;
-import org.flhy.ext.job.JobEncoder;
+import org.flhy.ext.PluginFactory;
+import org.flhy.ext.base.GraphCodec;
 import org.flhy.ext.repository.RepositoryCodec;
-import org.flhy.ext.trans.TransEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.flhy.ext.utils.StringEscapeHelper;
@@ -44,10 +44,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.mxgraph.io.mxCodec;
-import com.mxgraph.util.mxUtils;
-import com.mxgraph.view.mxGraph;
 
 @Controller
 @RequestMapping(value = "/repository")
@@ -191,9 +187,8 @@ public class RepositoryController {
 			TransMeta transMeta = App.getInstance().getRepository().loadTransformation(id, null);
 			transMeta.setRepositoryDirectory(repositoryObject.getRepositoryDirectory());
 	    	
-			mxCodec codec = new mxCodec();
-			mxGraph graph = TransEncoder.encode(transMeta);
-			String graphXml = mxUtils.getPrettyXml(codec.encode(graph.getModel()));
+			GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+			String graphXml = codec.encode(transMeta);
 			
 			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
 	    } else if(type == 1) { //job
@@ -204,9 +199,8 @@ public class RepositoryController {
 	    	JobMeta jobMeta = App.getInstance().getRepository().loadJob(id, null);
 	    	jobMeta.setRepositoryDirectory(repositoryObject.getRepositoryDirectory());
 	    	
-	        mxCodec codec = new mxCodec();
-			mxGraph graph = JobEncoder.encode(jobMeta);
-			String graphXml = mxUtils.getPrettyXml(codec.encode(graph.getModel()));
+	    	GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+			String graphXml = codec.encode(jobMeta);
 			
 			jsonObject.put("graphXml", StringEscapeHelper.encode(graphXml));
 	    }

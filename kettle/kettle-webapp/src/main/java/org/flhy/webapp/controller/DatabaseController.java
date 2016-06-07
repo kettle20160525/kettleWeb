@@ -360,34 +360,6 @@ public class DatabaseController {
 		}
 		
 		JsonUtils.response(jsonObject);
-		
-//		KettleDatabaseRepositoryMeta repositoryMeta = (KettleDatabaseRepositoryMeta) RepositoryCodec.decode(jsonObject);
-//		if ( repositoryMeta.getConnection() != null ) {
-//			KettleDatabaseRepository rep = (KettleDatabaseRepository) PluginRegistry.getInstance().loadClass( RepositoryPluginType.class,  repositoryMeta, Repository.class );
-//	        rep.init( repositoryMeta );
-//	        
-//	        if ( !rep.getDatabaseMeta().getDatabaseInterface().supportsRepository() ) {
-//	            System.out.println( "Show database type is not supported warning..." );
-//	            	
-//	            reply.put("unSupportedDatabase", true);
-//	        }
-//	        
-//			System.out.println("Connecting to database for repository creation...");
-//			rep.connectionDelegate.connect(true, true);
-//
-//			try {
-//				String userTableName = rep.getDatabaseMeta().quoteField(KettleDatabaseRepository.TABLE_R_USER);
-//				boolean upgrade = rep.getDatabase().checkTableExists( userTableName );
-//				if (upgrade) {
-//					reply.put("opertype", "update");
-//				} else {
-//					reply.put("opertype", "create");
-//				}
-//			} catch (KettleDatabaseException dbe) {
-//				rep.rollback();
-//			}
-//		}
-		
 	}
 	
 	/**
@@ -402,7 +374,6 @@ public class DatabaseController {
 	@RequestMapping(method = RequestMethod.POST, value = "/schema")
 	protected void schema(@RequestParam String reposityInfo, @RequestParam boolean upgrade) throws IOException, KettleException {
 		JSONObject jsonObject = JSONObject.fromObject(reposityInfo);
-//		JSONObject reply = new JSONObject();
 		
 		StringBuffer sql = new StringBuffer();
 		KettleDatabaseRepositoryMeta repositoryMeta = (KettleDatabaseRepositoryMeta) RepositoryCodec.decode(jsonObject);
@@ -427,7 +398,6 @@ public class DatabaseController {
 					sql.append(statement).append(";").append(Const.CR).append(Const.CR);
 				}
 			}
-//			reply.put("statements", StringEscapeHelper.encode(sql.toString()));
 		}
 		
 		JsonUtils.success(StringEscapeHelper.encode(sql.toString()));
@@ -444,49 +414,53 @@ public class DatabaseController {
 	 */
 	@ResponseBody
 	@RequestMapping(method = RequestMethod.POST, value = "/explorer")
-	protected void explorer(@RequestParam String databaseInfo) throws IOException, KettleException, SQLException {
+	protected void explorer(@RequestParam String databaseInfo, @RequestParam String objType) throws IOException, KettleException, SQLException {
 		JSONObject databaseInfoJson = JSONObject.fromObject(databaseInfo);
 		DatabaseMeta databaseMeta = DatabaseCodec.decode(databaseInfoJson);
 		Database db = new Database( loggingObject, databaseMeta );
 		db.connect();
 		
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("id", "database_" + databaseMeta.getName());
-		jsonObject.put("text", databaseMeta.getName());
-		JSONArray jsonArray = new JSONArray();
-		
-		JSONObject schemasObject = new JSONObject();
-		schemasObject.put("id", "schemas_" + databaseMeta.getName());
-		schemasObject.put("text", "模式");
-		schemasObject.put("children", explorerSchema(db));
-		jsonArray.add(schemasObject);
-		
-		JSONObject tablesObject = new JSONObject();
-		tablesObject.put("id", "tables_" + databaseMeta.getName());
-		tablesObject.put("text", "数据表");
-		tablesObject.put("children", explorerTables(db));
-		jsonArray.add(tablesObject);
-		
-		JSONObject viewsObject = new JSONObject();
-		viewsObject.put("id", "views_" + databaseMeta.getName());
-		viewsObject.put("text", "视图");
-		viewsObject.put("children", explorerViews(db));
-		jsonArray.add(viewsObject);
-		
-		JSONObject synonymsObject = new JSONObject();
-		synonymsObject.put("id", "synonyms_" + databaseMeta.getName());
-		synonymsObject.put("text", "同义词");
-		synonymsObject.put("children", explorerSynonyms(db));
-		jsonArray.add(synonymsObject);
-		
-		jsonObject.put("children", jsonArray);
 		JSONArray jsonArray2 = new JSONArray();
-		jsonArray2.add(jsonObject);
+		if("schema".equals(objType)) {
+			jsonArray2 = explorerSchema(db, false);
+		} else {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", "database_" + databaseMeta.getName());
+			jsonObject.put("text", databaseMeta.getName());
+			JSONArray jsonArray = new JSONArray();
+			
+			JSONObject schemasObject = new JSONObject();
+			schemasObject.put("id", "schemas_" + databaseMeta.getName());
+			schemasObject.put("text", "模式");
+			schemasObject.put("children", explorerSchema(db, true));
+			jsonArray.add(schemasObject);
+			
+			JSONObject tablesObject = new JSONObject();
+			tablesObject.put("id", "tables_" + databaseMeta.getName());
+			tablesObject.put("text", "数据表");
+			tablesObject.put("children", explorerTables(db));
+			jsonArray.add(tablesObject);
+			
+			JSONObject viewsObject = new JSONObject();
+			viewsObject.put("id", "views_" + databaseMeta.getName());
+			viewsObject.put("text", "视图");
+			viewsObject.put("children", explorerViews(db));
+			jsonArray.add(viewsObject);
+			
+			JSONObject synonymsObject = new JSONObject();
+			synonymsObject.put("id", "synonyms_" + databaseMeta.getName());
+			synonymsObject.put("text", "同义词");
+			synonymsObject.put("children", explorerSynonyms(db));
+			jsonArray.add(synonymsObject);
+			
+			jsonObject.put("children", jsonArray);
+			jsonArray2.add(jsonObject);
+		}
 		
 		JsonUtils.response(jsonArray2);
 	}
 	
-	private JSONArray explorerSchema(Database db) throws SQLException, KettleDatabaseException {
+	private JSONArray explorerSchema(Database db, boolean getTable) throws SQLException, KettleDatabaseException {
 		DatabaseMeta databaseMeta = db.getDatabaseMeta();
 		DatabaseMetaData dbmd = db.getDatabaseMetaData();
 		
@@ -529,23 +503,28 @@ public class DatabaseController {
 				schemaObject.put("id", "schema_" + schemaName);
 				schemaObject.put("text", schemaName);
 				
-				JSONArray jsonArray2 = new JSONArray();
-				ResultSet rs = dbmd.getTables(null, schemaName, null, null);
-				try {
-					while (rs.next()) {
-						String tableName = rs.getString(3);
-						if (!db.isSystemTable(tableName)) {
-							JSONObject tableObject = new JSONObject();
-							tableObject.put("id", "schema_table_" + tableName);
-							tableObject.put("text", tableName);
-							tableObject.put("fullText", databaseMeta.getQuotedSchemaTableCombination( schemaName, tableName ));
-							tableObject.put("leaf", true);
-							jsonArray2.add(tableObject);
+				if(getTable) {
+					JSONArray jsonArray2 = new JSONArray();
+					ResultSet rs = dbmd.getTables(null, schemaName, null, null);
+					try {
+						while (rs.next()) {
+							String tableName = rs.getString(3);
+							if (!db.isSystemTable(tableName)) {
+								JSONObject tableObject = new JSONObject();
+								tableObject.put("id", "schema_table_" + tableName);
+								tableObject.put("text", tableName);
+								tableObject.put("schema", schemaName);
+//								tableObject.put("fullText", databaseMeta.getQuotedSchemaTableCombination( schemaName, tableName ));
+								tableObject.put("leaf", true);
+								jsonArray2.add(tableObject);
+							}
 						}
+						schemaObject.put("children", jsonArray2);
+					} finally {
+						rs.close();
 					}
-					schemaObject.put("children", jsonArray2);
-				} finally {
-					rs.close();
+				} else {
+					schemaObject.put("leaf", true);
 				}
 				
 				jsonArray.add(schemaObject);
@@ -567,7 +546,8 @@ public class DatabaseController {
 				JSONObject tableObject = new JSONObject();
 				tableObject.put("id", "table_" + tableName);
 				tableObject.put("text", tableName);
-				tableObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, tableName ));
+				tableObject.put("schema", schema);
+//				tableObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, tableName ));
 				tableObject.put("leaf", true);
 				jsonArray.add(tableObject);
 			}
@@ -588,7 +568,8 @@ public class DatabaseController {
 				JSONObject viewObject = new JSONObject();
 				viewObject.put("id", "view_" + viewName);
 				viewObject.put("text", viewName);
-				viewObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, viewName ));
+				viewObject.put("schema", schema);
+//				viewObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, viewName ));
 				viewObject.put("leaf", true);
 				jsonArray.add(viewObject);
 			}
@@ -609,7 +590,8 @@ public class DatabaseController {
 				JSONObject synonymObject = new JSONObject();
 				synonymObject.put("id", "synonym_" + synonymName);
 				synonymObject.put("text", synonymName);
-				synonymObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, synonymName ));
+				synonymObject.put("schema", synonym);
+//				synonymObject.put("fullText", db.getDatabaseMeta().getQuotedSchemaTableCombination( null, synonymName ));
 				synonymObject.put("leaf", true);
 				jsonArray.add(synonymObject);
 			}

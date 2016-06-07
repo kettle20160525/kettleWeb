@@ -17,13 +17,15 @@ DatabaseExplorerDialog = Ext.extend(Ext.Window, {
 			rootVisible: false
 		});
 		
-		this.initDatabase = function(databaseInfo) {
+		this.initDatabase = function(databaseInfo, objType) {
+			objType = objType ? objType :  "all";
 			var root = new Ext.tree.AsyncTreeNode({
 	    		id:'root', 
 	    		text: 'root',
 				loader: new Ext.tree.TreeLoader({
 					dataUrl: GetUrl('database/explorer.do'),
-					baseParams: {databaseInfo: Ext.encode(databaseInfo)},
+					baseParams: {databaseInfo: Ext.encode(databaseInfo), objType: objType},
+					timeout: 60000,
 					listeners: {
 						beforeload: function(l) {
 							var el = tree.getEl();
@@ -55,6 +57,7 @@ DatabaseExplorerDialog = Ext.extend(Ext.Window, {
 					alert('请选择有效节点！');
 					return;
 				}
+				
 				me.fireEvent('select', node);
 			}
 		});

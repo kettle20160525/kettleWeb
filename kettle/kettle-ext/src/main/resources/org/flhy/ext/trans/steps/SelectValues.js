@@ -1,209 +1,18 @@
-SelectValuesDialog = Ext.extend(Ext.Window, {
+SelectValuesDialog = Ext.extend(KettleTabDialog, {
 	title: '选择/改名值',
 	width: 600,
 	height: 400,
-	closeAction: 'close',
-	modal: true,
-	layout: 'border',
 	initComponent: function() {
-		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
+		var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
 		
-		var form = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 15px',
-			border: false,
-			region: 'north',
-			height: 50,
-			defaultType: 'textfield',
-			labelWidth: 150,
-			labelAlign: 'right',
-			items: [{
-				fieldLabel: '步骤名称',
-				anchor: '-10',
-				name: 'label',
-				value: cell.getAttribute('label')
-			}]
-		});
-		
-		var store = new Ext.data.JsonStore({
+		var selectStore = new Ext.data.JsonStore({
 			fields: ['name', 'rename', 'length', 'precision'],
 			data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
-		});
-		
-		var selectAndUpdate = new Ext.grid.EditorGridPanel({
-			title: '选择和修改',
-			tbar: [{
-				text: '获取选择的字段', handler: function() {
-					var stepName = cell.getAttribute('label');
-					
-					var enc = new mxCodec(mxUtils.createXmlDocument());
-					var node = enc.encode(graph.getModel());
-					var graphXml = mxUtils.getPrettyXml(node);
-					
-					Ext.Ajax.request({
-						url: GetUrl('trans/getFields.do'),
-						params: {stepName: stepName, graphXml: graphXml},
-						success: function(response, opts) {
-							var fields = Ext.decode(response.responseText);
-							if(fields.length == 0) return;
-							
-							if(store.getCount() > 0) {
-								var answerDialog = new AnswerDialog({has: store.getCount(), found: fields.length});
-								answerDialog.on('addNew', function() {
-									Ext.each(fields, function(field) {
-										if(store.query('name', field.name).getCount() < 1) {
-											var RecordType = store.recordType;
-							                var record = new RecordType({
-							                    name: field.name,
-							                    length: field.length,
-							                    precision: field.precision
-							                });
-							                store.insert(0, record);
-										}
-									});
-								});
-								answerDialog.on('addAll', function() {
-									Ext.each(fields, function(field) {
-										var RecordType = store.recordType;
-						                var record = new RecordType({
-						                    name: field.name,
-						                    length: field.length,
-						                    precision: field.precision
-						                });
-						                store.insert(0, record);
-									});
-								});
-								answerDialog.on('clearAddAll', function() {
-									store.removeAll();
-									
-									Ext.each(fields, function(field) {
-										var RecordType = store.recordType;
-						                var record = new RecordType({
-						                    name: field.name,
-						                    length: field.length,
-						                    precision: field.precision
-						                });
-						                store.insert(0, record);
-									});
-								});
-								answerDialog.show();
-							} else {
-								Ext.each(fields, function(field) {
-									var RecordType = store.recordType;
-					                var record = new RecordType({
-					                    name: field.name,
-					                    length: field.length,
-					                    precision: field.precision
-					                });
-					                store.insert(0, record);
-								});
-							}
-						},
-						failure: function() {
-							alert('与服务器交互失败！');
-						}
-					});
-				}
-			},{
-				text: '列映射'
-			}],
-			columns: [new Ext.grid.RowNumberer(), {
-				header: '字段名称', dataIndex: 'name', width: 150, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			}, {
-				header: '改名成', dataIndex: 'rename', width: 150, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			}, {
-				header: '长度', dataIndex: 'length', width: 70, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			}, {
-				header: '精度', dataIndex: 'precision', width: 70, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			}],
-			store: store
 		});
 		
 		var deleteStore = new Ext.data.JsonStore({
 			fields: ['name'],
 			data: Ext.decode(cell.getAttribute('remove') || Ext.encode([]))
-		});
-		
-		var deleteGrid = new Ext.grid.EditorGridPanel({
-			title: '移除',
-			tbar: [{
-				text: '获取移除的字段', handler: function() {
-					var stepName = cell.getAttribute('label');
-					
-					var enc = new mxCodec(mxUtils.createXmlDocument());
-					var node = enc.encode(graph.getModel());
-					var graphXml = mxUtils.getPrettyXml(node);
-					
-					Ext.Ajax.request({
-						url: GetUrl('trans/getFields.do'),
-						params: {stepName: stepName, graphXml: graphXml},
-						success: function(response, opts) {
-							var fields = Ext.decode(response.responseText);
-							if(fields.length == 0) return;
-							
-							if(deleteStore.getCount() > 0) {
-								var answerDialog = new AnswerDialog({has: deleteStore.getCount(), found: fields.length});
-								answerDialog.on('addNew', function() {
-									Ext.each(fields, function(field) {
-										if(deleteStore.query('name', field.name).getCount() < 1) {
-											var RecordType = deleteStore.recordType;
-							                var record = new RecordType({
-							                    name: field.name
-							                });
-							                deleteStore.insert(0, record);
-										}
-									});
-								});
-								answerDialog.on('addAll', function() {
-									Ext.each(fields, function(field) {
-										var RecordType = deleteStore.recordType;
-						                var record = new RecordType({
-						                    name: field.name
-						                });
-						                deleteStore.insert(0, record);
-									});
-								});
-								answerDialog.on('clearAddAll', function() {
-									deleteStore.removeAll();
-									
-									Ext.each(fields, function(field) {
-										var RecordType = deleteStore.recordType;
-						                var record = new RecordType({
-						                    name: field.name
-						                });
-						                deleteStore.insert(0, record);
-									});
-								});
-								answerDialog.show();
-							} else {
-								Ext.each(fields, function(field) {
-									var RecordType = deleteStore.recordType;
-					                var record = new RecordType({
-					                    name: field.name
-					                });
-					                deleteStore.insert(0, record);
-								});
-							}
-						},
-						failure: function() {
-							alert('与服务器交互失败！');
-						}
-					});
-				}
-			}],
-			columns: [new Ext.grid.RowNumberer(), {
-				header: '字段名称', dataIndex: 'name', width: 150, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			}],
-			store: deleteStore
 		});
 		
 		var metaStore = new Ext.data.JsonStore({
@@ -212,93 +21,80 @@ SelectValuesDialog = Ext.extend(Ext.Window, {
 			data: Ext.decode(cell.getAttribute('meta') || Ext.encode([]))
 		});
 		
-		var metaGrid = new Ext.grid.EditorGridPanel({
-			title: '元数据',
+		this.getValues = function(){
+			return {
+				fields: Ext.encode(selectStore.toJson()),
+				remove: Ext.encode(deleteStore.toJson()),
+				meta: Ext.encode(metaStore.toJson())
+			};
+		};
+		
+		this.tabItems = [{
+			title: '选择和修改',
+			xtype: 'editorgrid',
 			tbar: [{
-				text: '获取改变的字段', handler: function() {
-					var stepName = cell.getAttribute('label');
+				text: '新增字段', handler: function() {
 					
-					var enc = new mxCodec(mxUtils.createXmlDocument());
-					var node = enc.encode(graph.getModel());
-					var graphXml = mxUtils.getPrettyXml(node);
-					
-					Ext.Ajax.request({
-						url: GetUrl('trans/getFields.do'),
-						params: {stepName: stepName, graphXml: graphXml},
-						success: function(response, opts) {
-							var fields = Ext.decode(response.responseText);
-							if(fields.length == 0) return;
-							
-							if(metaStore.getCount() > 0) {
-								var answerDialog = new AnswerDialog({has: metaStore.getCount(), found: fields.length});
-								answerDialog.on('addNew', function() {
-									Ext.each(fields, function(field) {
-										if(metaStore.query('name', field.name).getCount() < 1) {
-											var RecordType = metaStore.recordType;
-							                var record = new RecordType({
-							                    name: field.name,
-							                    type: field.type,
-							                    length: field.length,
-							                    precision: field.precision
-							                });
-							                metaStore.insert(0, record);
-										}
-									});
-								});
-								answerDialog.on('addAll', function() {
-									Ext.each(fields, function(field) {
-										var RecordType = metaStore.recordType;
-						                var record = new RecordType({
-						                    name: field.name,
-						                    type: field.type,
-						                    length: field.length,
-						                    precision: field.precision
-						                });
-						                metaStore.insert(0, record);
-									});
-								});
-								answerDialog.on('clearAddAll', function() {
-									metaStore.removeAll();
-									
-									Ext.each(fields, function(field) {
-										var RecordType = metaStore.recordType;
-						                var record = new RecordType({
-						                    name: field.name,
-						                    type: field.type,
-						                    length: field.length,
-						                    precision: field.precision
-						                });
-						                metaStore.insert(0, record);
-									});
-								});
-								answerDialog.show();
-							} else {
-								Ext.each(fields, function(field) {
-									var RecordType = metaStore.recordType;
-					                var record = new RecordType({
-					                    name: field.name,
-					                    type: field.type,
-					                    length: field.length,
-					                    precision: field.precision
-					                });
-					                metaStore.insert(0, record);
-								});
-							}
-						},
-						failure: function() {
-							alert('与服务器交互失败！');
-						}
+				}
+			},{
+				text: '删除字段', handler: function(btn) {
+					var sm = btn.findParentByType('editorgrid').getSelectionModel();
+					if(sm.hasSelection()) {
+						var row = sm.getSelectedCell()[0];
+						var col = sm.getSelectedCell()[1];
+						selectStore.removeAt(row);
+						
+						if(selectStore.getCount() > row)
+							sm.select(row, col);
+					}
+				}
+			},{
+				text: '获取选择的字段', handler: function() {
+					getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(store) {
+						selectStore.merge(store, 'name');
+					});
+				}
+			},{
+				text: '列映射'
+			}],
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '字段名称', dataIndex: 'name', width: 150, editor: new Ext.form.TextField()
+			}, {
+				header: '改名成', dataIndex: 'rename', width: 150, editor: new Ext.form.TextField()
+			}, {
+				header: '长度', dataIndex: 'length', width: 70, editor: new Ext.form.TextField()
+			}, {
+				header: '精度', dataIndex: 'precision', width: 70, editor: new Ext.form.TextField()
+			}],
+			store: selectStore
+		},{
+			xtype: 'editorgrid',
+			title: '移除',
+			tbar: [{
+				text: '获取移除的字段', handler: function() {
+					getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(store) {
+						deleteStore.merge(store, 'name');
 					});
 				}
 			}],
 			columns: [new Ext.grid.RowNumberer(), {
-				header: '名称', dataIndex: 'name', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
+				header: '字段名称', dataIndex: 'name', width: 150, editor: new Ext.form.TextField()
+			}],
+			store: deleteStore
+		},{
+			title: '元数据',
+			xtype: 'editorgrid',
+			tbar: [{
+				text: '获取改变的字段', handler: function() {
+					getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(store) {
+						metaStore.merge(store, ['name', 'type', 'length', 'precision']);
+					});
+				}
+			}],
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '名称', dataIndex: 'name', width: 100, editor: new Ext.form.TextField()
 			}, {
-				header: '改名成', dataIndex: 'rename', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
+				header: '改名成', dataIndex: 'rename', width: 100, editor: new Ext.form.TextField()
 			},{
 				header: '类型', dataIndex: 'type', width: 100, editor: new Ext.form.ComboBox({
 			        store: Ext.StoreMgr.get('valueMetaStore'),
@@ -490,43 +286,7 @@ SelectValuesDialog = Ext.extend(Ext.Window, {
 				header: '货币', dataIndex: 'currency_symbol', width: 100, editor: new Ext.form.TextField()
 			}],
 			store: metaStore
-		});
-		
-		var tab = new Ext.TabPanel({
-			region: 'center',
-			activeTab: 0,
-			items: [selectAndUpdate, deleteGrid, metaGrid]
-		});
-		
-		this.items = [form, tab];
-		
-		var bCancel = new Ext.Button({
-			text: '取消', handler: function() {
-				me.close();
-			}
-		});
-		var bOk = new Ext.Button({
-			text: '确定', handler: function() {
-				graph.getModel().beginUpdate();
-                try
-                {
-                	var formValues = form.getForm().getValues();
-                	formValues.compatibilityMode = formValues.compatibilityMode ? true : false;
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
-                    	graph.getModel().execute(edit);
-					}
-                }
-                finally
-                {
-                    graph.getModel().endUpdate();
-                }
-                
-				me.close();
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bOk];
+		}];
 		
 		SelectValuesDialog.superclass.initComponent.call(this);
 	}
