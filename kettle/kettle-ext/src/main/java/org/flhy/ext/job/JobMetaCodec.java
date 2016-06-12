@@ -7,6 +7,7 @@ import java.util.Set;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.BaseGraphCodec;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.JobEntryDecoder;
 import org.flhy.ext.job.step.JobEntryEncoder;
 import org.flhy.ext.utils.SvgImageUrl;
@@ -80,10 +81,22 @@ public class JobMetaCodec extends BaseGraphCodec {
 			for(int i=0; i<jobMeta.nrJobHops(); i++) {
 				JobHopMeta jobHopMeta = jobMeta.getJobHop(i);
 				
-				Object v1 = cells.get(jobHopMeta.getFromEntry());
-				Object v2 = cells.get(jobHopMeta.getToEntry());
+				mxCell source = (mxCell) cells.get(jobHopMeta.getFromEntry());
+				mxCell target = (mxCell) cells.get(jobHopMeta.getToEntry());
+				Element val = JobHopMetaCodec.encode(jobHopMeta);
+				String label = "";
+				if(jobHopMeta.isUnconditional())
+					label = "<img src=\"" + SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "UnconditionalHop_image" )) + "\" width=\"16\" height=\"16\"/>";
+				else if(jobHopMeta.getEvaluation())
+					label = "<img src=\"" + SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "True_image" )) +"\" width=\"16\" height=\"16\"/>";
+				else
+					label = "<img src=\"" + SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "False_image" )) +"\" width=\"16\" height=\"16\"/>";
 				
-				graph.insertEdge(parent, null, null, v1, v2);
+				if("Y".equalsIgnoreCase(source.getAttribute("parallel")))
+					label += "<img src=\"" + SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ParallelHop_image" )) + "\" width=\"16\" height=\"16\"/>";
+				
+				val.setAttribute("label", label);
+				graph.insertEdge(parent, null, val, source, target);
 			}
 		} finally {
 			graph.getModel().endUpdate();
@@ -116,9 +129,8 @@ public class JobMetaCodec extends BaseGraphCodec {
 		for(int i=0; i<count; i++) {
 			mxCell cell = (mxCell) graph.getModel().getChildAt(root, i);
 			if(cell.isVertex()) {
-				
 				Element e = (Element) cell.getValue();
-				if("Step".equals(e.getTagName())) {
+				if(PropsUI.JOB_JOBENTRY_NAME.equals(e.getTagName())) {
 					JobEntryDecoder jobEntryDecoder = (JobEntryDecoder) PluginFactory.getBean(cell.getAttribute("ctype"));
 					JobEntryCopy je = jobEntryDecoder.decodeStep(cell, jobMeta.getDatabases(), jobMeta.getMetaStore());
 					if (je.isSpecial() && je.isMissing()) {
@@ -143,24 +155,18 @@ public class JobMetaCodec extends BaseGraphCodec {
 					}
 					jobMeta.addJobEntry( je );
 				}
-			}
-		}
-		
-		count = graph.getModel().getChildCount(root);
-		for(int i=0; i<count; i++) {
-			mxCell cell = (mxCell) graph.getModel().getChildAt(root, i);
-			if (cell.isEdge()) {
-				mxCell source = (mxCell) cell.getSource();
-				mxCell target = (mxCell) cell.getTarget();
+			} else if(cell.isEdge()) {
+//				mxCell source = (mxCell) cell.getSource();
+//				mxCell target = (mxCell) cell.getTarget();
 
-				JobHopMeta hopinf = new JobHopMeta();
-				for (int j = 0; j < jobMeta.nrJobEntries(); j++) {
-					JobEntryCopy jobEntry = jobMeta.getJobEntry(j);
-					if (jobEntry.getName().equalsIgnoreCase(source.getAttribute("label")))
-						hopinf.setFromEntry(jobEntry);
-					if (jobEntry.getName().equalsIgnoreCase(target.getAttribute("label")))
-						hopinf.setToEntry(jobEntry);
-				}
+				JobHopMeta hopinf = JobHopMetaCodec.decode(jobMeta, cell);//new JobHopMeta();
+//				for (int j = 0; j < jobMeta.nrJobEntries(); j++) {
+//					JobEntryCopy jobEntry = jobMeta.getJobEntry(j);
+//					if (jobEntry.getName().equalsIgnoreCase(source.getAttribute("label")))
+//						hopinf.setFromEntry(jobEntry);
+//					if (jobEntry.getName().equalsIgnoreCase(target.getAttribute("label")))
+//						hopinf.setToEntry(jobEntry);
+//				}
 				jobMeta.addJobHop(hopinf);
 			}
 		}

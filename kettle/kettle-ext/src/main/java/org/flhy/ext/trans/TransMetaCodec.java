@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.BaseGraphCodec;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.StepDecoder;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.JSONArray;
@@ -281,7 +282,7 @@ public class TransMetaCodec extends BaseGraphCodec {
 				Object v1 = cells.get(transHopMeta.getFromStep());
 				Object v2 = cells.get(transHopMeta.getToStep());
 				
-				graph.insertEdge(parent, null, null, v1, v2);
+				graph.insertEdge(parent, null, TransHopMetaCodec.encode(transHopMeta), v1, v2);
 			}
 		} finally {
 			graph.getModel().endUpdate();
@@ -301,7 +302,7 @@ public class TransMetaCodec extends BaseGraphCodec {
 		
 		TransMeta transMeta = new TransMeta();
 		decodeCommRootAttr(root, transMeta);
-		transMeta.setTransstatus(Integer.parseInt(root.getAttribute("trans_status")));
+		transMeta.setTransstatus(Const.toInt( root.getAttribute( "trans_status" ), -1 ));
 		transMeta.setTransversion(root.getAttribute("trans_version"));
 		
 		if(transMeta.getRepository() != null)
@@ -319,7 +320,7 @@ public class TransMetaCodec extends BaseGraphCodec {
 			mxCell cell = (mxCell) graph.getModel().getChildAt(root, i);
 			if(cell.isVertex()) {
 				Element e = (Element) cell.getValue();
-				if("Step".equals(e.getTagName())) {
+				if(PropsUI.TRANS_STEP_NAME.equals(e.getTagName())) {
 					StepDecoder stepDecoder = (StepDecoder) PluginFactory.getBean(cell.getAttribute("ctype"));
 					StepMeta stepMeta = stepDecoder.decodeStep(cell, transMeta.getDatabases(), transMeta.getMetaStore());
 					stepMeta.setParentTransMeta( transMeta );

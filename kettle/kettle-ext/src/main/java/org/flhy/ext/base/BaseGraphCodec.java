@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.flhy.ext.App;
 import org.flhy.ext.cluster.SlaveServerCodec;
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.core.database.DatabaseCodec;
 import org.flhy.ext.utils.ColorUtils;
 import org.flhy.ext.utils.JSONArray;
@@ -40,7 +41,7 @@ import com.mxgraph.view.mxGraph;
 public abstract class BaseGraphCodec implements GraphCodec {
 	
 	public Element encodeCommRootAttr(AbstractMeta meta, Document doc) throws UnknownParamException {
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement("Info");
 		e.setAttribute("name", meta.getName());
 		e.setAttribute("fileName", meta.getFilename());
 		e.setAttribute("description", meta.getDescription());
@@ -123,7 +124,7 @@ public abstract class BaseGraphCodec implements GraphCodec {
 			for (NotePadMeta ni : meta.getNotes()) {
 				Point location = ni.getLocation();
 				
-				Element note = doc.createElement("Note");
+				Element note = doc.createElement(PropsUI.NOTEPAD);
 				note.setAttribute("label", StringEscapeHelper.encode(ni.getNote()));
 				String style = "shape=note";
 				
@@ -186,6 +187,8 @@ public abstract class BaseGraphCodec implements GraphCodec {
 			if(repository instanceof KettleFileRepository) {
 				KettleFileRepository ktr = (KettleFileRepository) repository;
 				ObjectId fileId = ktr.getTransformationID(root.getAttribute("name"), path);
+				if(fileId == null)
+					fileId = ktr.getJobId(root.getAttribute("name"), path);
 				String realPath = ktr.calcFilename(fileId);
 				meta.setFilename(realPath);
 			}
@@ -240,7 +243,7 @@ public abstract class BaseGraphCodec implements GraphCodec {
 			mxCell cell = (mxCell) graph.getModel().getChildAt(graph.getDefaultParent(), i);
 			if(cell.isVertex()) {
 				Element e = (Element) cell.getValue();
-				if("Note".equals(e.getTagName())) {
+				if(PropsUI.NOTEPAD.equals(e.getTagName())) {
 					String n = e.getAttribute("label");
 					n = StringEscapeHelper.decode(n);
 					int x = (int) cell.getGeometry().getX();

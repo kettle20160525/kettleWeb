@@ -2,6 +2,7 @@ package org.flhy.ext.job.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.AbstractJobEntry;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -22,9 +23,11 @@ public class JobEntrySpecial extends AbstractJobEntry {
 	@Override
 	public void decode(JobEntryInterface jobEntry, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
 		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
+		
+		jobEntrySpecial.setStart("Y".equalsIgnoreCase(cell.getAttribute("start")));
+		jobEntrySpecial.setDummy("Y".equalsIgnoreCase(cell.getAttribute("dummy")));
 		jobEntrySpecial.setRepeat("Y".equalsIgnoreCase(cell.getAttribute("repeat")));
-		jobEntrySpecial.setSchedulerType(Const.toInt( cell.getAttribute( "schedulerType" ), 
-				org.pentaho.di.job.entries.special.JobEntrySpecial.NOSCHEDULING ));
+		jobEntrySpecial.setSchedulerType(Const.toInt( cell.getAttribute( "schedulerType" ),  org.pentaho.di.job.entries.special.JobEntrySpecial.NOSCHEDULING ));
 		
 		jobEntrySpecial.setIntervalSeconds( Const.toInt( cell.getAttribute( "intervalSeconds" ), 0 ) );
 		jobEntrySpecial.setIntervalMinutes( Const.toInt( cell.getAttribute( "intervalMinutes" ), 0 ) );
@@ -38,8 +41,10 @@ public class JobEntrySpecial extends AbstractJobEntry {
 	public Element encode(JobEntryInterface jobEntry) throws Exception {
 		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.JOB_JOBENTRY_NAME);
 		
+		e.setAttribute("start", jobEntrySpecial.isStart() ? "Y" : "N");
+		e.setAttribute("dummy", jobEntrySpecial.isDummy() ? "Y" : "N");
 		e.setAttribute("repeat", jobEntrySpecial.isRepeat() ? "Y" : "N");
 		e.setAttribute("schedulerType", jobEntrySpecial.getSchedulerType() + "");
 		e.setAttribute("intervalSeconds", jobEntrySpecial.getIntervalSeconds() + "");

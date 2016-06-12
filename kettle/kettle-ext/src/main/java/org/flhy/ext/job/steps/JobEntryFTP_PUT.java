@@ -2,6 +2,7 @@ package org.flhy.ext.job.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.AbstractJobEntry;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -37,7 +38,7 @@ public class JobEntryFTP_PUT extends AbstractJobEntry{
 	public Element encode(JobEntryInterface jobEntry) throws Exception {
 //		org.pentaho.di.job.entries.special.JobEntrySpecial jobEntrySpecial = (org.pentaho.di.job.entries.special.JobEntrySpecial) jobEntry;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.JOB_JOBENTRY_NAME);
 		
 //		e.setAttribute("repeat", jobEntrySpecial.isRepeat() ? "Y" : "N");
 //		e.setAttribute("schedulerType", jobEntrySpecial.getSchedulerType() + "");

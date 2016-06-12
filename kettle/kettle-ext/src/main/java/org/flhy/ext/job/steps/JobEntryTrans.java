@@ -2,12 +2,12 @@ package org.flhy.ext.job.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.AbstractJobEntry;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.pentaho.di.core.ObjectLocationSpecificationMethod;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
@@ -36,7 +36,7 @@ public class JobEntryTrans extends AbstractJobEntry {
 	@Override
 	public Element encode(JobEntryInterface jobEntry) throws Exception {
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.JOB_JOBENTRY_NAME);
 		org.pentaho.di.job.entries.trans.JobEntryTrans jobEntryTrans = (org.pentaho.di.job.entries.trans.JobEntryTrans) jobEntry;
 		
 		ObjectLocationSpecificationMethod specificationMethod = jobEntryTrans.getSpecificationMethod();

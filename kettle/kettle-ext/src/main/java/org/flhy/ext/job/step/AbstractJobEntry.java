@@ -7,7 +7,6 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
-import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.metastore.api.IMetaStore;
@@ -25,14 +24,6 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 		PluginRegistry registry = PluginRegistry.getInstance();
 		PluginInterface jobPlugin = registry.findPluginWithId(JobEntryPluginType.class, stepid);
 		JobEntryInterface entry = registry.loadClass(jobPlugin, JobEntryInterface.class);
-//		if(entry == null) {
-//			if(JobMeta.STRING_SPECIAL.equals(stepid)) {
-//				if(JobMeta.STRING_SPECIAL_START.equals(stepname)) {
-//					entry = JobMeta.createStartEntry().getEntry();
-//				} else if(JobMeta.STRING_SPECIAL_DUMMY.equals(stepname))
-//					entry = JobMeta.createDummyEntry().getEntry();
-//			}
-//		}
 		
 		if(entry != null) {
 			decode(entry, cell, databases, metaStore);
@@ -55,8 +46,7 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 			je.setDrawn("Y".equalsIgnoreCase(cell.getAttribute("draw")));
 			je.setLocation((int) cell.getGeometry().getX(), (int) cell.getGeometry().getY());
 
-//			attributesMap = AttributesUtil.loadAttributes(XMLHandler
-//					.getSubNode(entrynode, AttributesUtil.XML_TAG));
+//			attributesMap = AttributesUtil.loadAttributes(XMLHandler.getSubNode(entrynode, AttributesUtil.XML_TAG));
 
 			return je;
 		}
@@ -65,14 +55,14 @@ public abstract class AbstractJobEntry implements JobEntryEncoder, JobEntryDecod
 	}
 
 	@Override
-	public Element encodeStep(JobEntryCopy jobEntryCopy) throws Exception {
-		Element e = encode(jobEntryCopy.getEntry());
+	public Element encodeStep(JobEntryCopy je) throws Exception {
+		Element e = encode(je.getEntry());
 		
-		e.setAttribute("label", jobEntryCopy.getName());
-		e.setAttribute("ctype", jobEntryCopy.getEntry().getPluginId());
-		e.setAttribute("draw", jobEntryCopy.isDrawn() ? "Y" : "N");
-		e.setAttribute("start", jobEntryCopy.isStart() ? "Y" : "N");
-		e.setAttribute("dummy", jobEntryCopy.isDummy() ? "Y" : "N");
+		e.setAttribute("label", je.getName());
+		e.setAttribute("ctype", je.getEntry().getPluginId());
+		e.setAttribute("draw", je.isDrawn() ? "Y" : "N");
+		e.setAttribute("nr", String.valueOf(je.getNr()));
+		e.setAttribute("parallel", je.isLaunchingInParallel() ? "Y" : "N");
 		
 		return e;
 	}

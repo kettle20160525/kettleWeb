@@ -2,6 +2,7 @@ package org.flhy.ext.job.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.job.step.AbstractJobEntry;
 import org.flhy.ext.utils.StringEscapeHelper;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -28,7 +29,7 @@ public class JobEntryEval extends AbstractJobEntry {
 	@Override
 	public Element encode(JobEntryInterface jobEntry) throws Exception {
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.JOB_JOBENTRY_NAME);
 		org.pentaho.di.job.entries.eval.JobEntryEval jobEntryEval = (org.pentaho.di.job.entries.eval.JobEntryEval) jobEntry;
 		e.setAttribute("script", StringEscapeHelper.encode(jobEntryEval.getScript()));
 		return e;
