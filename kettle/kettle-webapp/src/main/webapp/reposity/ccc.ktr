@@ -67,7 +67,7 @@
   <created_user>-</created_user>
   <created_date>2016&#x2f;06&#x2f;01 22&#x3a;27&#x3a;15.365</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;07 00&#x3a;45&#x3a;30.131</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;07 19&#x3a;35&#x3a;15.471</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
@@ -100,7 +100,9 @@
     </attributes>
   </connection>
   <order>
-  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x5b57;&#x6bb5;&#x9009;&#x62e9;</to><enabled>Y</enabled> </hop>
+  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x8868;&#x8f93;&#x51fa;</to><enabled>Y</enabled> </hop>
+  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x66f4;&#x65b0;</to><enabled>Y</enabled> </hop>
+  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x63d2;&#x5165; &#x2f; &#x66f4;&#x65b0;</to><enabled>Y</enabled> </hop>
   </order>
   <step>
     <name>fjtdp69 - &#x8868;&#x8f93;&#x5165;</name>
@@ -123,14 +125,14 @@
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>100</xloc>
-      <yloc>70</yloc>
+      <yloc>170</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>&#x5b57;&#x6bb5;&#x9009;&#x62e9;</name>
-    <type>SelectValues</type>
+    <name>&#x63d2;&#x5165; &#x2f; &#x66f4;&#x65b0;</name>
+    <type>InsertUpdate</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -139,19 +141,313 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <fields>      <field>        <name>USERID</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
-      </field>      <field>        <name>USERNAME</name>
-        <rename/>
-        <length>-2</length>
-        <precision>-2</precision>
-      </field>        <select_unspecified>N</select_unspecified>
-    </fields>     <cluster_schema/>
+    <connection>fjtdp</connection>
+    <commit>100</commit>
+    <update_bypassed>N</update_bypassed>
+    <lookup>
+      <schema>PLATFORM</schema>
+      <table>JIABAN</table>
+      <key>
+        <name>USERALIAS</name>
+        <field>APPLYNO</field>
+        <condition>&#x3d;</condition>
+        <name2/>
+      </key>
+      <value>
+        <name>APPLYNO</name>
+        <rename>USERNAME</rename>
+        <update>Y</update>
+      </value>
+    </lookup>
+     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>310</xloc>
-      <yloc>70</yloc>
+      <xloc>250</xloc>
+      <yloc>290</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>&#x66f4;&#x65b0;</name>
+    <type>Update</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <connection>fjtdp</connection>
+    <skip_lookup>N</skip_lookup>
+    <commit>100</commit>
+    <use_batch>N</use_batch>
+    <error_ignored>N</error_ignored>
+    <ignore_flag_field/>
+    <lookup>
+      <schema>PLATFORM</schema>
+      <table>T_TBP_DICTCODE</table>
+      <key>
+        <name>ISADMIN</name>
+        <field>CODE</field>
+        <condition>&#x3d;</condition>
+        <name2/>
+        </key>
+      <value>
+        <name>ISADMIN</name>
+        <rename>ISADMIN</rename>
+        </value>
+      <value>
+        <name>USERID</name>
+        <rename>USERID</rename>
+        </value>
+      <value>
+        <name>USERNAME</name>
+        <rename>USERNAME</rename>
+        </value>
+      <value>
+        <name>USERALIAS</name>
+        <rename>USERALIAS</rename>
+        </value>
+      <value>
+        <name>PASSWORD</name>
+        <rename>PASSWORD</rename>
+        </value>
+      <value>
+        <name>ISENABLED</name>
+        <rename>ISENABLED</rename>
+        </value>
+      <value>
+        <name>BEGINTIME</name>
+        <rename>BEGINTIME</rename>
+        </value>
+      <value>
+        <name>ENDTIME</name>
+        <rename>ENDTIME</rename>
+        </value>
+      <value>
+        <name>MAC</name>
+        <rename>MAC</rename>
+        </value>
+      <value>
+        <name>ISADMIN</name>
+        <rename>ISADMIN</rename>
+        </value>
+      <value>
+        <name>EMPLOYEEID</name>
+        <rename>EMPLOYEEID</rename>
+        </value>
+      <value>
+        <name>WELCOMEURL</name>
+        <rename>WELCOMEURL</rename>
+        </value>
+      <value>
+        <name>ISPROHIBITED</name>
+        <rename>ISPROHIBITED</rename>
+        </value>
+      <value>
+        <name>FAILURENUMBER</name>
+        <rename>FAILURENUMBER</rename>
+        </value>
+      <value>
+        <name>LASTLOGINTIME</name>
+        <rename>LASTLOGINTIME</rename>
+        </value>
+      <value>
+        <name>ISREMIND</name>
+        <rename>ISREMIND</rename>
+        </value>
+      <value>
+        <name>REMINDTIME</name>
+        <rename>REMINDTIME</rename>
+        </value>
+      <value>
+        <name>REMINDCYCLE</name>
+        <rename>REMINDCYCLE</rename>
+        </value>
+      <value>
+        <name>IPADDRESS</name>
+        <rename>IPADDRESS</rename>
+        </value>
+      <value>
+        <name>MACADDRESS</name>
+        <rename>MACADDRESS</rename>
+        </value>
+      <value>
+        <name>BOUNDTYPE</name>
+        <rename>BOUNDTYPE</rename>
+        </value>
+      <value>
+        <name>ISNEWUSER</name>
+        <rename>ISNEWUSER</rename>
+        </value>
+      <value>
+        <name>PLAINTEXTPASSWORD</name>
+        <rename>PLAINTEXTPASSWORD</rename>
+        </value>
+      <value>
+        <name>TELEPHONE</name>
+        <rename>TELEPHONE</rename>
+        </value>
+      <value>
+        <name>REMARK</name>
+        <rename>REMARK</rename>
+        </value>
+      <value>
+        <name>MOBILEPHONE</name>
+        <rename>MOBILEPHONE</rename>
+        </value>
+      <value>
+        <name>OFFICEPHONE</name>
+        <rename>OFFICEPHONE</rename>
+        </value>
+      <value>
+        <name>EMAILADDRESS</name>
+        <rename>EMAILADDRESS</rename>
+        </value>
+      <value>
+        <name>ORGANSHORTNAME</name>
+        <rename>ORGANSHORTNAME</rename>
+        </value>
+      <value>
+        <name>SEX</name>
+        <rename>SEX</rename>
+        </value>
+      <value>
+        <name>BIRTHDAY</name>
+        <rename>BIRTHDAY</rename>
+        </value>
+      <value>
+        <name>NATIONALITY</name>
+        <rename>NATIONALITY</rename>
+        </value>
+      <value>
+        <name>NATIVEPLACE</name>
+        <rename>NATIVEPLACE</rename>
+        </value>
+      <value>
+        <name>POLICITALSTATUS</name>
+        <rename>POLICITALSTATUS</rename>
+        </value>
+      <value>
+        <name>JOB</name>
+        <rename>JOB</rename>
+        </value>
+      <value>
+        <name>POST</name>
+        <rename>POST</rename>
+        </value>
+      <value>
+        <name>TITLE</name>
+        <rename>TITLE</rename>
+        </value>
+      <value>
+        <name>SKILLLEVEL</name>
+        <rename>SKILLLEVEL</rename>
+        </value>
+      <value>
+        <name>IDNUMBER</name>
+        <rename>IDNUMBER</rename>
+        </value>
+      <value>
+        <name>WORKTIME</name>
+        <rename>WORKTIME</rename>
+        </value>
+      <value>
+        <name>EDUCATION</name>
+        <rename>EDUCATION</rename>
+        </value>
+      <value>
+        <name>DEGREE</name>
+        <rename>DEGREE</rename>
+        </value>
+      <value>
+        <name>MAJOR</name>
+        <rename>MAJOR</rename>
+        </value>
+      <value>
+        <name>GRADUATECOLLEGES</name>
+        <rename>GRADUATECOLLEGES</rename>
+        </value>
+      <value>
+        <name>HIGHESTEDUCATION</name>
+        <rename>HIGHESTEDUCATION</rename>
+        </value>
+      <value>
+        <name>HIGHESTDEGREE</name>
+        <rename>HIGHESTDEGREE</rename>
+        </value>
+      <value>
+        <name>HIGHESTMAJOR</name>
+        <rename>HIGHESTMAJOR</rename>
+        </value>
+      <value>
+        <name>HOMEPHONE</name>
+        <rename>HOMEPHONE</rename>
+        </value>
+      <value>
+        <name>PICTURE</name>
+        <rename>PICTURE</rename>
+        </value>
+      <value>
+        <name>ISHOLDER</name>
+        <rename>ISHOLDER</rename>
+        </value>
+      <value>
+        <name>USERTYPE</name>
+        <rename>USERTYPE</rename>
+        </value>
+      <value>
+        <name>DISPATCHDEPTID</name>
+        <rename>DISPATCHDEPTID</rename>
+        </value>
+      <value>
+        <name>DISPATCHORGANID</name>
+        <rename>DISPATCHORGANID</rename>
+        </value>
+      </lookup>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>250</xloc>
+      <yloc>170</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>&#x8868;&#x8f93;&#x51fa;</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <connection>fjtdp</connection>
+    <schema>PLATFORM</schema>
+    <table>T_TBP_ORGAN</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>N</specify_fields>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>Y</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <fields>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>250</xloc>
+      <yloc>50</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
