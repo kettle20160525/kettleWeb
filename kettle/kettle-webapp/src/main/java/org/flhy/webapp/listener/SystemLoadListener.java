@@ -4,6 +4,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.flhy.ext.App;
+import org.flhy.ext.core.PropsUI;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.Props;
 import org.pentaho.di.core.exception.KettleException;
@@ -25,7 +26,8 @@ public class SystemLoadListener implements ServletContextListener {
 			// 日志缓冲不超过5000行，缓冲时间不超过720秒
 			KettleLogStore.init( 5000, 720 );
 			KettleEnvironment.init();
-			Props.init( Props.TYPE_PROPERTIES_KITCHEN );
+//			Props.init( Props.TYPE_PROPERTIES_KITCHEN );
+			PropsUI.init( "KettleWebConsole", Props.TYPE_PROPERTIES_KITCHEN );
 			
 			String path = context.getServletContext().getRealPath("/reposity/");
 			KettleFileRepositoryMeta meta = new KettleFileRepositoryMeta();

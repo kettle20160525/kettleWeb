@@ -5,6 +5,19 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
 		
+		var wConnection = new Ext.form.ComboBox({
+			flex: 1,
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: getActiveGraph().getDatabaseStore(),
+			value: cell.getAttribute('connection')
+		});
+		
 		var onDatabaseCreate = function(dialog) {
 			var root = graph.getDefaultParent();
 			var databases = root.getAttribute('databases');
@@ -24,18 +37,6 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
             dialog.close();
 		};
 		
-		var wConnection = new Ext.form.ComboBox({
-			flex: 1,
-			displayField: 'name',
-			valueField: 'name',
-			typeAhead: true,
-	        mode: 'local',
-	        forceSelection: true,
-	        triggerAction: 'all',
-	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
-			value: cell.getAttribute('connection')
-		});
 		var wSchema = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('schema')});
 		var wTable = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('table')});
 		var wCommit = new Ext.form.TextField({ fieldLabel: '提交的记录数量', anchor: '-10', value: cell.getAttribute('commit')});
@@ -73,22 +74,6 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 		});
 		
 		this.getValues = function(){
-			var args = [], args2 = [];
-			searchStore.each(function(rec) {
-				args.push({
-					field: rec.get('field'),
-					condition: rec.get('condition'),
-					name: rec.get('name'),
-					name2: rec.get('name2')
-				});
-			});
-			updateStore.each(function(rec) {
-				args2.push({
-					name: rec.get('name'),
-					rename: rec.get('rename'),
-					update: rec.get('update')
-				});
-			});
 			return {
 				connection: wConnection.getValue(),
 				schema: wSchema.getValue(),
@@ -102,8 +87,8 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 				order_update: wOrderUpdate.getValue(),
 				order_delete: wOrderDelete.getValue(),
 				perform_lookup: wPerformLookup.getValue() ? "Y" : "N",
-				searchFields: Ext.encode(args),
-				updateFields: Ext.encode(args2)
+				searchFields: Ext.encode(searchStore.toJson()),
+				updateFields: Ext.encode(updateStore.toJson())
 			};
 		};
 		
@@ -180,7 +165,7 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 					text: '新增字段', handler: function(btn) {
 						var grid = btn.findParentByType('editorgrid');
 						var RecordType = grid.getStore().recordType;
-		                var rec = new RecordType({  field: '', condition: '',  name: ''  });
+		                var rec = new RecordType({ field: '', condition: '=',  name: '', name2: '' });
 		                grid.stopEditing();
 		                grid.getStore().insert(0, rec);
 		                grid.startEditing(0, 0);
@@ -262,10 +247,7 @@ SynchronizeAfterMergeDialog = Ext.extend(KettleTabDialog, {
 				store: searchStore
 			}, {
 				title: '更新字段',
-				region: 'south',
 				xtype: 'editorgrid',
-				height: 150,
-				collapsible: true,
 				tbar: [{
 					text: '新增字段', handler: function(btn) {
 						var grid = btn.findParentByType('editorgrid');

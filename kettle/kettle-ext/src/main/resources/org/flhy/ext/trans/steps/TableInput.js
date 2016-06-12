@@ -7,6 +7,19 @@ TableInputDialog = Ext.extend(KettleDialog, {
 	
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
+		var wConnection = new Ext.form.ComboBox({
+			flex: 1,
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: getActiveGraph().getDatabaseStore(),
+			name: 'connection',
+			value: cell.getAttribute('connection')
+		});
 		
 		var onDatabaseCreate = function(dialog) {
 			var root = graph.getDefaultParent();
@@ -27,19 +40,6 @@ TableInputDialog = Ext.extend(KettleDialog, {
             dialog.close();
 		};
 		
-		var wConnection = new Ext.form.ComboBox({
-			flex: 1,
-			displayField: 'name',
-			valueField: 'name',
-			typeAhead: true,
-	        mode: 'local',
-	        forceSelection: true,
-	        triggerAction: 'all',
-	        selectOnFocus:true,
-			store: getActiveGraph().getDatabaseStore(),
-			name: 'connection',
-			value: cell.getAttribute('connection')
-		});
 		var wSQL = new Ext.form.TextArea({ region: 'center', emptyText: '执行查询的SQL语句' });
 		if(!Ext.isEmpty(cell.getAttribute('sql')))
 			wSQL.setValue(decodeURIComponent(cell.getAttribute('sql')));

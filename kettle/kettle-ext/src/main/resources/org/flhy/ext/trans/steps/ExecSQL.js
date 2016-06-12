@@ -3,9 +3,7 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 	width: 600,
 	height: 400,
 	initComponent: function() {
-		var me = this, transGraph = getActiveGraph(),
-			graph = transGraph.getGraph(), 
-			cell = graph.getSelectionCell();
+		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
 		
 		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
@@ -16,9 +14,28 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: transGraph.getDatabaseStore(),
+			store: getActiveGraph().getDatabaseStore(),
 			value: cell.getAttribute('connection')
 		});
+		
+		var onDatabaseCreate = function(dialog) {
+			var root = graph.getDefaultParent();
+			var databases = root.getAttribute('databases');
+			var jsonArray = Ext.decode(databases);
+			jsonArray.push(dialog.getValue());
+			graph.getModel().beginUpdate();
+            try
+            {
+				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
+            	graph.getModel().execute(edit);
+            } finally
+            {
+                graph.getModel().endUpdate();
+            }
+			
+            wConnection.setValue(dialog.getValue().name);
+            dialog.close();
+		};
 		
 		var wSQL = new Ext.form.TextArea({
 			emptyText: 'SQL语句，多个语句之间请用;分割',
@@ -43,10 +60,6 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 		});
 		
 		this.getValues = function(){
-			var args = [];
-			store.each(function(rec) {
-				args.push({name: rec.get('name')});
-			});
 			return {
 				connection: wConnection.getValue(),
 				sql: encodeURIComponent(wSQL.getValue()),
@@ -59,7 +72,7 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 				update_field: wUpdateField.getValue(),
 				delete_field:  wDeleteField.getValue(),
 				read_field:  wReadField.getValue(),
-				arguments: Ext.encode(args)
+				arguments: Ext.encode(store.toJson())
 			};
 		};
 		
@@ -83,25 +96,6 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 			store: store
 		});
 		
-		var onDatabaseCreate = function(dialog) {
-			var root = graph.getDefaultParent();
-			var databases = root.getAttribute('databases');
-			var jsonArray = Ext.decode(databases);
-			jsonArray.push(dialog.getValue());
-			graph.getModel().beginUpdate();
-            try
-            {
-				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
-            	graph.getModel().execute(edit);
-            } finally
-            {
-                graph.getModel().endUpdate();
-            }
-			
-            wConnection.setValue(dialog.getValue().name);
-            dialog.close();
-		};
-		
 		this.tabItems = [{
 			title: '基本配置',
 			layout: 'border',
@@ -118,7 +112,7 @@ ExecSQLDialog = Ext.extend(KettleTabDialog, {
 					anchor: '-10',
 					items: [wConnection, {
 						xtype: 'button', text: '编辑...', handler: function() {
-							transGraph.getDatabaseStore().each(function(item) {
+							getActiveGraph().getDatabaseStore().each(function(item) {
 								if(item.get('name') == wConnection.getValue()) {
 									var databaseDialog = new DatabaseDialog();
 									databaseDialog.on('create', onDatabaseCreate);

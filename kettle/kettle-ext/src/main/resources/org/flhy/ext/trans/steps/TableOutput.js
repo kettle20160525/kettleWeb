@@ -1,18 +1,11 @@
-TableOutputDialog = Ext.extend(Ext.Window, {
-	title: '表输入',
+TableOutputDialog = Ext.extend(KettleTabDialog, {
+	title: '表输出',
 	width: 600,
-	height: 590,
-	closeAction: 'close',
-	modal: true,
-	layout: 'border',
+	height: 420,
 	initComponent: function() {
-		var me = this, 
-			transGraph = getActiveGraph(),
-			graph = transGraph.getGraph(), 
-			cell = graph.getSelectionCell(), 
-			store = transGraph.getDatabaseStore();
+		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
 		
-		var combo = new Ext.form.ComboBox({
+		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
 			displayField: 'name',
 			valueField: 'name',
@@ -21,249 +14,266 @@ TableOutputDialog = Ext.extend(Ext.Window, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: store,
-			name: 'connection',
+	        store: getActiveGraph().getDatabaseStore(),
 			value: cell.getAttribute('connection')
 		});
 		
-		var form = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 10px',
-			region: 'north',
-			baseCls: 'x-plain',
-			height: 220,
-			labelWidth: 1,
-			items: [{
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 36px',
-            		text: '步骤名称：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1,
-            		name: 'label',
-    				value: cell.getAttribute('label')
-            	}]
-            },{
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 24px',
-            		text: '数据库连接：'
-            	},{
-    				xtype: 'compositefield',
-    				flex: 1,
-    				items: [combo, {
-    					xtype: 'button', text: '编辑...', handler: function() {
-    						store.each(function(item) {
-    							if(item.get('name') == combo.getValue()) {
-    								var databaseDialog = new DatabaseDialog();
-        							databaseDialog.show(null, function() {
-        								databaseDialog.initDatabase(item.json);
-        							});
-    							}
-    						});
-    					}
-    				}, {
-    					xtype: 'button', text: '新建...', handler: function() {
-    						var databaseDialog = new DatabaseDialog();
-    						databaseDialog.show();
-    					}
-    				}, {
-    					xtype: 'button',
-    					text: '向导...'
-    				}]
-    			}]
-	        }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 36px',
-            		text: '目标模式：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1,
-            		name: 'schema',
-					value: cell.getAttribute('schema')
-            	}, {
-					xtype: 'button',
-					text: '浏览'
-				}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 48px',
-            		text: '目标表：'
-            	},{
-            		xtype: 'textfield',			// extjs bug
-            		flex: 1,
-            		name: 'table',
-					value: cell.getAttribute('table')
-            	}, {
-					xtype: 'button',
-					text: '浏览'
-				}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 12px',
-            		text: '提交记录数量：'
-            	},{
-            		xtype: 'textfield',
-            		flex: 1,
-            		name: 'commit',
-    				value: cell.getAttribute('commit')
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 48px',
-            		text: '裁剪表：'
-            	},{
-            		xtype: 'checkbox',
-            		name: 'truncate',
-    				checked: cell.getAttribute('truncate') == 'Y'
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;padding-left: 12px',
-            		text: '忽略插入错误：'
-            	},{
-            		xtype: 'checkbox',
-            		name: 'ignore_errors',
-            		checked: cell.getAttribute('ignore_errors') == 'Y'
-            	}]
-            }, {
-            	xtype: 'compositefield',
-            	items: [{
-            		xtype: 'label',
-            		style: 'line-height: 22px;',
-            		text: '指定数据库字段：'
-            	},{
-            		xtype: 'checkbox',
-            		name: 'specify_fields',
-            		checked: cell.getAttribute('specify_fields') == 'Y'
-            	}]
-            }]
+		var onDatabaseCreate = function(dialog) {
+			var root = graph.getDefaultParent();
+			var databases = root.getAttribute('databases');
+			var jsonArray = Ext.decode(databases);
+			jsonArray.push(dialog.getValue());
+			graph.getModel().beginUpdate();
+            try
+            {
+				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
+            	graph.getModel().execute(edit);
+            } finally
+            {
+                graph.getModel().endUpdate();
+            }
+			
+            wConnection.setValue(dialog.getValue().name);
+            dialog.close();
+		};
+		
+		var wSchema = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('schema')});
+		var wTable = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('table')});
+		var wCommit = new Ext.form.TextField({ fieldLabel: '提交记录数量', anchor: '-10', value: cell.getAttribute('commit')});
+		var wTruncate = new Ext.form.Checkbox({ fieldLabel: '裁剪表', checked: cell.getAttribute('truncate') == 'Y' });
+		var wIgnore = new Ext.form.Checkbox({ fieldLabel: '忽略插入错误', checked: cell.getAttribute('ignore_errors') == 'Y' });
+		var wSpecifyFields = new Ext.form.Checkbox({ fieldLabel: '指定数据库字段' });
+		
+		var wUsePart = new Ext.form.Checkbox({ fieldLabel: '表分区数据'});
+		var wPartField = new Ext.form.ComboBox({
+			fieldLabel: '分区字段',
+			anchor: '-10',
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+			disabled: true,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: getActiveGraph().inputOutputFields(cell.getAttribute('label'), true),
+			value: cell.getAttribute('partitioning_field')
+		});
+		var wPartMonthly = new Ext.form.Radio({ fieldLabel: '每个月分区数据', name: 'partitioning_pl', disabled: true, checked: cell.getAttribute('partitioning_monthly') == 'Y' });
+		var wPartDaily = new Ext.form.Radio({ fieldLabel: '每天分区数据', name: 'partitioning_pl', disabled: true, checked: cell.getAttribute('partitioning_daily') == 'Y' });
+		var wBatch = new Ext.form.Checkbox({ fieldLabel: '使用批量插入', checked: cell.getAttribute('use_batch') == 'Y' });
+		var wNameInField = new Ext.form.Checkbox({ fieldLabel: '表名定义在一个字段里' });
+		var wNameField = new Ext.form.ComboBox({
+			fieldLabel: '包含表名的字段',
+			anchor: '-10',
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        forceSelection: true,
+	        disabled: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: getActiveGraph().inputOutputFields(cell.getAttribute('label'), true),
+			value: cell.getAttribute('tablename_field')
+		});
+		var wNameInTable = new Ext.form.Checkbox({ fieldLabel: '存储表名字段', checked: cell.getAttribute('tablename_in_table') == 'Y' });
+		var wReturnKeys = new Ext.form.Checkbox({ fieldLabel: '返回一个自动产生的关键字', checked: cell.getAttribute('return_keys') == 'Y' });
+		var wReturnField = new Ext.form.TextField({ fieldLabel: '自动产生的关键字的字段名称', anchor: '-10', value: cell.getAttribute('return_field')});
+		
+		var fieldStore = new Ext.data.JsonStore({
+			fields: ['column_name', 'stream_name'],
+			data: Ext.decode(cell.getAttribute('fields'))
 		});
 		
-		var mainForm = new Ext.form.FormPanel({
-			title: '主选项',
-			bodyStyle: 'padding: 20px 10px',
-			labelWidth: 180,
-			labelAlign: 'right',
-			defaultType: 'textfield',
-			items: [{
-				xtype: 'checkbox',
-				fieldLabel: '表分区数据',
-				name: 'partitioning_enabled',
-				checked: cell.getAttribute('partitioning_enabled') == 'Y'
-			}, {
-				fieldLabel: '分区字段',
-				anchor: '-10',
-				name: 'partitioning_field',
-				value: cell.getAttribute('partitioning_field')
-			}, {
-				xtype: 'radio',
-				fieldLabel: '每个月分区数据',
-				name: 'partitioning_monthly',
-				checked: cell.getAttribute('partitioning_monthly') == 'Y'
-			}, {
-				xtype: 'radio',
-				fieldLabel: '每天分区数据',
-				name: 'partitioning_daily',
-				checked: cell.getAttribute('partitioning_daily') == 'Y'
-			}, {
-				xtype: 'checkbox',
-				fieldLabel: '使用批量插入',
-				name: 'use_batch',
-				checked: cell.getAttribute('use_batch') == 'Y'
-			}, {
-				xtype: 'checkbox',
-				fieldLabel: '表名定义在一个字段里?',
-				name: 'tablename_in_field',
-				checked: cell.getAttribute('tablename_in_field') == 'Y'
-			}, {
-				fieldLabel: '包含表名的字段',
-				anchor: '-10',
-				name: 'tablename_field',
-				value: cell.getAttribute('tablename_field')
-			}, {
-				xtype: 'checkbox',
-				fieldLabel: '存储表名字段',
-				name: 'tablename_in_table',
-				checked: cell.getAttribute('tablename_in_table') == 'Y'
-			}, {
-				xtype: 'checkbox',
-				fieldLabel: '返回一个自动产生的关键字',
-				name: 'return_keys',
-				checked: cell.getAttribute('return_keys') == 'Y'
-			}, {
-				fieldLabel: '自动产生的关键字的字段名称',
-				anchor: '-10',
-				name: 'return_field',
-				value: cell.getAttribute('return_field')
-			}]
+		wSpecifyFields.on('check', function(cb, checked) {
+			var grid = me.findByType('editorgrid')[0];
+			if(checked) grid.enable();
+			else grid.disable();
 		});
-		
-		var grid = new Ext.grid.EditorGridPanel({
-			title: '数据库字段',
-			columns: [new Ext.grid.RowNumberer(), {
-				header: '表字段', dataIndex: 'column_name', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			},{
-				header: '流字段', dataIndex: 'stream_name', width: 100, editor: new Ext.form.TextField()
-			}],
-			store: new Ext.data.JsonStore({
-				fields: ['column_name', 'stream_name'],
-				data: Ext.decode(cell.getAttribute('fields'))
-			})
-		});
-		
-		this.items = [form, new Ext.TabPanel({
-			region: 'center',
-			activeTab: 0,
-			plain: true,
-			deferredRender: false,
-			items: [mainForm, grid]
-		})];
-		
-		var bCancel = new Ext.Button({
-			text: '取消', handler: function() {
-				me.close();
+		wUsePart.on('check', function(cb, checked) {
+			if(checked) {
+				wPartField.enable();
+				wPartMonthly.enable();
+				wPartDaily.enable();
+			} else {
+				wPartField.disable();
+				wPartMonthly.disable();
+				wPartDaily.disable();
 			}
 		});
-		var bOk = new Ext.Button({
-			text: '确定', handler: function() {
-				graph.getModel().beginUpdate();
-                try
-                {
-                	var formValues = form.getForm().getValues();
-                	//formValues.compatibilityMode = formValues.compatibilityMode ? true : false;
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
-                    	graph.getModel().execute(edit);
+		wNameInField.on('check', function(cb, checked) {
+			if(checked) wNameField.enable();
+			else wNameField.disable();
+		});
+		
+		this.on('afterrender', function() {
+			wSpecifyFields.setValue(cell.getAttribute('specify_fields') == 'Y' );
+			wUsePart.setValue(cell.getAttribute('partitioning_enabled') == 'Y' );
+			wNameInField.setValue(cell.getAttribute('tablename_in_field') == 'Y' );
+		});
+		
+		this.getValues = function(){
+			return {
+				connection: wConnection.getValue(),
+				schema: wSchema.getValue(),
+				table: wTable.getValue(),
+				commit: wCommit.getValue(),
+				truncate: wTruncate.getValue() ? "Y" : "N",
+				ignore_errors: wIgnore.getValue() ? "Y" : "N",
+				specify_fields: wSpecifyFields.getValue() ? "Y" : "N",				
+				partitioning_enabled: wUsePart.getValue() ? "Y" : "N",
+				partitioning_field: wPartField.getValue(),	
+				partitioning_monthly: wPartMonthly.getValue() ? "Y" : "N",				
+				partitioning_daily: wPartDaily.getValue() ? "Y" : "N",		
+				use_batch: wBatch.getValue() ? "Y" : "N",		
+				tablename_in_field: wNameInField.getValue() ? "Y" : "N",
+				tablename_field: wNameField.getValue(),	
+				tablename_in_table: wNameInTable.getValue() ? "Y" : "N",		
+				return_keys: wReturnKeys.getValue() ? "Y" : "N",
+				return_field: wReturnField.getValue(),	
+				fields: Ext.encode(fieldStore.toJson())
+			};
+		};
+		
+		this.tabItems = [{
+			title: '基本配置',
+			xtype: 'KettleForm',
+			bodyStyle: 'padding: 10px 0px',
+			items: [{
+				xtype: 'compositefield',
+				fieldLabel: '数据库连接',
+				anchor: '-10',
+				items: [wConnection, {
+					xtype: 'button', text: '编辑...', handler: function() {
+						var store = getActiveGraph().getDatabaseStore();
+						store.each(function(item) {
+							if(item.get('name') == wConnection.getValue()) {
+								var databaseDialog = new DatabaseDialog();
+								databaseDialog.on('create', onDatabaseCreate);
+								databaseDialog.show(null, function() {
+									databaseDialog.initDatabase(item.json);
+								});
+							}
+						});
 					}
-                	
-                }
-                finally
-                {
-                    graph.getModel().endUpdate();
-                }
-                
-				me.close();
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bOk];
+				}, {
+					xtype: 'button', text: '新建...', handler: function() {
+						var databaseDialog = new DatabaseDialog();
+						databaseDialog.on('create', onDatabaseCreate);
+						databaseDialog.show();
+					}
+				}, {
+					xtype: 'button', text: '向导...'
+				}]
+			},{
+				fieldLabel: '目的模式',
+				xtype: 'compositefield',
+				anchor: '-10',
+				items: [wSchema, {
+					xtype: 'button', text: '浏览...', handler: function() {
+						var store = getActiveGraph().getDatabaseStore();
+						store.each(function(item) {
+							if(item.get('name') == wConnection.getValue()) {
+								me.getSQL(item.json, 'schema', wSchema);
+								
+							}
+						});
+					}
+				}]
+			},{
+				fieldLabel: '目标表',
+				xtype: 'compositefield',
+				anchor: '-10',
+				items: [wTable, {
+					xtype: 'button', text: '浏览...', handler: function() {
+						var store = getActiveGraph().getDatabaseStore();
+						store.each(function(item) {
+							if(item.get('name') == wConnection.getValue()) {
+								me.getSQL(item.json, 'all', wSchema, wTable);
+							}
+						});
+					}
+				}]
+			}, wCommit, wTruncate, wIgnore, wSpecifyFields]
+		}, {
+			title: '主选项',
+			xtype: 'KettleForm',
+			bodyStyle: 'padding: 10px 0px',
+			labelWidth: 200,
+			items: [wUsePart, wPartField, wPartMonthly, wPartDaily, wBatch, wNameInField, wNameField, wNameInTable, wReturnKeys, wReturnField]
+		}, {
+			title: '数据库字段',
+			xtype: 'editorgrid',
+			disabled: true,
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '表字段', dataIndex: 'column_name', width: 200, editor: new Ext.form.ComboBox({
+					displayField: 'name',
+					valueField: 'name',
+					typeAhead: true,
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true,
+					store: getActiveGraph().tableFields(wConnection.getValue(), wSchema.getValue(), wTable.getValue()),
+					listeners : {
+					     beforequery: function(qe){
+					    	 delete qe.combo.lastQuery;
+					     }
+					} 
+				})
+			},{
+				header: '流字段', dataIndex: 'stream_name', width: 200, editor: new Ext.form.ComboBox({
+					displayField: 'name',
+					valueField: 'name',
+					typeAhead: true,
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true,
+					store: getActiveGraph().inputOutputFields(cell.getAttribute('label'), true)
+				})
+			}],
+			tbar: [{
+				text: '新增字段', handler: function(btn) {
+					var grid = btn.findParentByType('editorgrid');
+					var RecordType = grid.getStore().recordType;
+	                var rec = new RecordType({  column_name: '', stream_name: '' });
+	                grid.stopEditing();
+	                grid.getStore().insert(0, rec);
+	                grid.startEditing(0, 0);
+				}
+			},{
+				text: '删除字段', handler: function(btn) {
+					var sm = btn.findParentByType('editorgrid').getSelectionModel();
+					if(sm.hasSelection()) {
+						var row = sm.getSelectedCell()[0];
+						fieldStore.removeAt(row);
+					}
+				}
+			},{
+				text: '获取字段', handler: function() {
+					getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(store) {
+						fieldStore.merge(store, [{name: 'column_name', field: 'name'}, {name:'stream_name', field: 'name'}]);
+					});
+				}
+			},{
+				text: '输入字段映射', handler: function() {
+					
+				}
+			}],
+			store: fieldStore
+		}];
 		
 		TableOutputDialog.superclass.initComponent.call(this);
+	},
+	
+	getSQL: function(dbInfo, objType, wSchema, wTable) {
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(node) {
+			wSchema.setValue(node.attributes.schema || node.text);
+			if(wTable) wTable.setValue(node.text);
+			dialog.close();
+		});
+		dialog.show(null, function() {
+			dialog.initDatabase(dbInfo, objType);
+		});
 	}
 });
 

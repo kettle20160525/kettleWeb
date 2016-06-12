@@ -1,229 +1,210 @@
-SQLFileOutputDialog = Ext.extend(Ext.Window, {
+SQLFileOutputDialog = Ext.extend(KettleTabDialog, {
 	title: 'SQL 文件输出',
 	width: 600,
 	height: 650,
-	closeAction: 'close',
-	modal: true,
-	layout: 'border',
 	initComponent: function() {
-		var me = this, 
-			transGraph = getActiveGraph(),
-			graph = transGraph.getGraph(), 
-			cell = graph.getSelectionCell(), 
-			store = transGraph.getDatabaseStore();
+		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
 		
-		var form = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 15px',
-			border: false,
-			region: 'north',
-			height: 50,
-			defaultType: 'textfield',
-			labelWidth: 100,
-			labelAlign: 'right',
-			items: [{
-				fieldLabel: '步骤名称',
-				anchor: '-10',
-				name: 'label',
-				value: cell.getAttribute('label')
-			}]
+		var wConnection = new Ext.form.ComboBox({
+			flex: 1,
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+	        store: getActiveGraph().getDatabaseStore(),
+			name: 'connection',
+			value: cell.getAttribute('connection')
 		});
 		
-		var normal = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 10px',
-			labelWidth: 150,
-			labelAlign: 'right',
+		var onDatabaseCreate = function(dialog) {
+			var root = graph.getDefaultParent();
+			var databases = root.getAttribute('databases');
+			var jsonArray = Ext.decode(databases);
+			jsonArray.push(dialog.getValue());
+			graph.getModel().beginUpdate();
+            try
+            {
+				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
+            	graph.getModel().execute(edit);
+            } finally
+            {
+                graph.getModel().endUpdate();
+            }
+			
+            wConnection.setValue(dialog.getValue().name);
+            dialog.close();
+		};
+		
+		var wSchema = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('schema')});
+		var wTable = new Ext.form.TextField({ flex: 1, value: cell.getAttribute('table')});
+		
+		var wAddCreate = new Ext.form.Checkbox({ fieldLabel: '增加 创建表 语句', checked: cell.getAttribute('create') == 'Y' });
+		var wTruncate = new Ext.form.Checkbox({ fieldLabel: '增加 清空表 语句', checked: cell.getAttribute('truncate') == 'Y' });
+		var wStartNewLine = new Ext.form.Checkbox({ fieldLabel: '每个语句另起一行', checked: cell.getAttribute('startnewline') == 'Y' });
+		var wFilename = new Ext.form.TextField({ fieldLabel: '文件名', flex: 1, value: cell.getAttribute('name')});
+		var wCreateParentFolder = new Ext.form.Checkbox({ fieldLabel: '创建父目录', checked: cell.getAttribute('create_parent_folder') == 'Y' });
+		var wDoNotOpenNewFileInit = new Ext.form.Checkbox({ fieldLabel: '启动时不创建文件', checked: cell.getAttribute('DoNotOpenNewFileInit') == 'Y' });
+		
+		var wExtension = new Ext.form.TextField({ fieldLabel: '扩展名', anchor: '-10', value: cell.getAttribute('extention')});
+		var wAddStepnr = new Ext.form.Checkbox({ fieldLabel: '文件名中包含步骤号', checked: cell.getAttribute('split') == 'Y' });
+		var wAddDate = new Ext.form.Checkbox({ fieldLabel: '文件名中包含日期', checked: cell.getAttribute('add_date') == 'Y' });
+		var wAddTime = new Ext.form.Checkbox({ fieldLabel: '文件名中包含时间', checked: cell.getAttribute('add_time') == 'Y' });
+		var wAppend = new Ext.form.Checkbox({ fieldLabel: '追加方式', checked: cell.getAttribute('append') == 'Y' });
+		var wSplitEvery = new Ext.form.TextField({ fieldLabel: '每...行拆分', anchor: '-10', value: cell.getAttribute('splitevery')});
+		var wAddToResult = new Ext.form.Checkbox({ fieldLabel: '将文件加入到结果文件中', checked: cell.getAttribute('addtoresult') == 'Y' });
+		var wFormat = new Ext.form.ComboBox({
+			fieldLabel: '日期格式',
+			anchor: '-10',
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: Ext.StoreMgr.get('datetimeFormatStore'),
+			value: cell.getAttribute('dateformat')
+		});
+		var wEncoding = new Ext.form.ComboBox({
+			fieldLabel: '编码',
+			anchor: '-10',
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: Ext.StoreMgr.get('availableCharsetsStore'),
+			value: cell.getAttribute('encoding')
+		});
+		
+		this.getValues = function(){
+			return {
+				connection: wConnection.getValue(),
+				schema: wSchema.getValue(),
+				table: wTable.getValue(),
+				
+				create: wAddCreate.getValue() ? "Y" : "N",
+				truncate: wTruncate.getValue() ? "Y" : "N",
+				startnewline: wStartNewLine.getValue() ? "Y" : "N",
+				name: wFilename.getValue(),
+				create_parent_folder: wCreateParentFolder.getValue() ? "Y" : "N",
+				DoNotOpenNewFileInit: wDoNotOpenNewFileInit.getValue() ? "Y" : "N",
+				extention: wExtension.getValue(),
+				split: wAddStepnr.getValue() ? "Y" : "N",
+				add_date: wAddDate.getValue() ? "Y" : "N",
+				add_time: wAddTime.getValue() ? "Y" : "N",
+				append: wAppend.getValue() ? "Y" : "N",
+				splitevery: wSplitEvery.getValue(),
+				addtoresult: wAddToResult.getValue() ? "Y" : "N",
+								
+				dateformat: wFormat.getValue(),
+				encoding: wEncoding.getValue()
+			};
+		};
+		
+		this.tabItems = [{
 			title: '一般',
+			xtype: 'KettleForm',
+			bodyStyle: 'padding: 10px 10px',
+			labelWidth: 140,
 			items: [{
 				xtype: 'fieldset',
 				title: '连接',
 				items: [{
-	            	xtype: 'compositefield',
-	            	anchor: '-30',
-	            	fieldLabel: '数据库连接',
-	            	items: [{
-	    				xtype: 'compositefield',
-	    				flex: 1,
-	    				items: [new Ext.form.ComboBox({
-	    					flex: 1,
-	    					displayField: 'name',
-	    					valueField: 'name',
-	    					typeAhead: true,
-	    			        mode: 'local',
-	    			        forceSelection: true,
-	    			        triggerAction: 'all',
-	    			        selectOnFocus:true,
-	    					store: store,
-	    					name: 'connection',
-	    					value: cell.getAttribute('connection')
-	    				}), {
-	    					xtype: 'button', text: '编辑...', handler: function() {
-	    						var databaseDialog = new DatabaseDialog({database: cell.getAttribute('connection')});
-	    						databaseDialog.show();
-	    					}
-	    				}, {
-	    					xtype: 'button', text: '新建...', handler: function() {
-	    						var databaseDialog = new DatabaseDialog();
-	    						databaseDialog.show();
-	    					}
-	    				}, {
-	    					xtype: 'button',
-	    					text: '向导...'
-	    				}]
-	    			}]
-		        }, {
-		        	fieldLabel: '目标模式',
-		        	xtype: 'textfield',
-		        	anchor: '-30',
-					value: cell.getAttribute('schema')
-		        },{
-	            	xtype: 'compositefield',
-	            	anchor: '-30',
-	            	fieldLabel: '目标表',
-	            	items: [{
-	    				xtype: 'compositefield',
-	    				flex: 1,
-	    				items: [{
-	    					xtype: 'textfield',
-	    					flex: 1,
-	    					value: cell.getAttribute('table')
-	    				},{
-	    					xtype: 'button',
-	    					text: '浏览...'
-	    				}]
-	    			}]
-		        }]
+					xtype: 'compositefield',
+					fieldLabel: '数据库连接',
+					anchor: '-10',
+					items: [wConnection, {
+						xtype: 'button', text: '编辑...', handler: function() {
+							var store = getActiveGraph().getDatabaseStore();
+							store.each(function(item) {
+								if(item.get('name') == wConnection.getValue()) {
+									var databaseDialog = new DatabaseDialog();
+									databaseDialog.on('create', onDatabaseCreate);
+									databaseDialog.show(null, function() {
+										databaseDialog.initDatabase(item.json);
+									});
+								}
+							});
+						}
+					}, {
+						xtype: 'button', text: '新建...', handler: function() {
+							var databaseDialog = new DatabaseDialog();
+							databaseDialog.on('create', onDatabaseCreate);
+							databaseDialog.show();
+						}
+					}, {
+						xtype: 'button', text: '向导...'
+					}]
+				},{
+					fieldLabel: '目的模式',
+					xtype: 'compositefield',
+					anchor: '-10',
+					items: [wSchema, {
+						xtype: 'button', text: '浏览...', handler: function() {
+							var store = getActiveGraph().getDatabaseStore();
+							store.each(function(item) {
+								if(item.get('name') == wConnection.getValue()) {
+									me.getSQL(item.json, 'schema', wSchema);
+									
+								}
+							});
+						}
+					}]
+				},{
+					fieldLabel: '目标表',
+					xtype: 'compositefield',
+					anchor: '-10',
+					items: [wTable, {
+						xtype: 'button', text: '浏览...', handler: function() {
+							var store = getActiveGraph().getDatabaseStore();
+							store.each(function(item) {
+								if(item.get('name') == wConnection.getValue()) {
+									me.getSQL(item.json, 'all', wSchema, wTable);
+								}
+							});
+						}
+					}]
+				}]
 			}, {
 				xtype: 'fieldset',
 				title: '输出文件',
-				items: [{
-					xtype: 'checkbox',
-					fieldLabel: '增加 创建表 语句',
-					checked: cell.getAttribute('create') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '增加 清空表 语句',
-					checked: cell.getAttribute('truncate') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '每个语句另起一行',
-					checked: cell.getAttribute('startnewline') == 'Y'
-				},{
+				items: [wAddCreate, wTruncate, wStartNewLine, {
 					xtype: 'compositefield',
 					fieldLabel: '文件名',
-					anchor: '-30',
-					items: [{
-	    				xtype: 'compositefield',
-	    				flex: 1,
-	    				items: [{
-	    					xtype: 'textfield',
-	    					flex: 1,
-	    					checked: cell.getAttribute('name')
-	    				},{
-	    					xtype: 'button',
-	    					text: '浏览...'
-	    				},{
-	    					xtype: 'button',
-	    					text: '显示文件夹'
-	    				}]
-	    			}]
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '创建父目录',
-					checked: cell.getAttribute('create_parent_folder') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '启动时不创建文件',
-					checked: cell.getAttribute('DoNotOpenNewFileInit') == 'Y'
-				},{
-					xtype: 'textfield',
-					fieldLabel: '扩展名',
-					anchor: '-30',
-					value: cell.getAttribute('extention')
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '文件名中包含步骤号',
-					checked: cell.getAttribute('split') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '文件名中包含日期',
-					checked: cell.getAttribute('add_date') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '文件名中包含时间',
-					checked: cell.getAttribute('add_time') == 'Y'
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '追加方式',
-					checked: cell.getAttribute('append') == 'Y'
-				},{
-					xtype: 'textfield',
-					fieldLabel: '每...行拆分',
-					anchor: '-30',
-					value: cell.getAttribute('splitevery')
-				},{
-					xtype: 'checkbox',
-					fieldLabel: '将文件加入到结果文件中',
-					checked: cell.getAttribute('addtoresult') == 'Y'
-				}]
+					anchor: '-10',
+					items: [wFilename,{
+    					xtype: 'button',
+    					text: '浏览...'
+    				},{
+    					xtype: 'button',
+    					text: '显示文件夹'
+    				}]
+				}, wCreateParentFolder, wDoNotOpenNewFileInit, wExtension, wAddStepnr, wAddDate, wAddTime, wAppend, wSplitEvery, wAddToResult]
 			}]
-		});
-		
-		var content = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 10px',
-			labelWidth: 150,
-			labelAlign: 'right',
+		},{
 			title: '内容',
-			items: [{
-				xtype: 'textfield',
-				fieldLabel: '日期格式',
-				anchor: '-30',
-				checked: cell.getAttribute('dateformat')
-			},{
-				xtype: 'textfield',
-				fieldLabel: '编码',
-				anchor: '-30',
-				checked: cell.getAttribute('encoding')
-			}]
-		});
-		
-		var tab = new Ext.TabPanel({
-			activeTab: 0,
-			deferredRender: false,
-			region: 'center',
-			items: [normal, content]
-		});
-		
-		this.items = [form, tab];
-		
-		var bCancel = new Ext.Button({
-			text: '取消', handler: function() {
-				me.close();
-			}
-		});
-		var bOk = new Ext.Button({
-			text: '确定', handler: function() {
-				graph.getModel().beginUpdate();
-                try
-                {
-                	var formValues = form.getForm().getValues();
-                	formValues.compatibilityMode = formValues.compatibilityMode ? true : false;
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
-                    	graph.getModel().execute(edit);
-					}
-                }
-                finally
-                {
-                    graph.getModel().endUpdate();
-                }
-                
-				me.close();
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bOk];
+			xtype: 'KettleForm',
+			bodyStyle: 'padding: 10px 10px',
+			items: [wFormat, wEncoding]
+		}];
 		
 		SQLFileOutputDialog.superclass.initComponent.call(this);
+	},
+	
+	getSQL: function(dbInfo, objType, wSchema, wTable) {
+		var dialog = new DatabaseExplorerDialog();
+		dialog.on('select', function(node) {
+			wSchema.setValue(node.attributes.schema || node.text);
+			if(wTable) wTable.setValue(node.text);
+			dialog.close();
+		});
+		dialog.show(null, function() {
+			dialog.initDatabase(dbInfo, objType);
+		});
 	}
 });
 

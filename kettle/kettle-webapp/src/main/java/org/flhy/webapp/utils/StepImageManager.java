@@ -48,10 +48,6 @@ public class StepImageManager {
 		}
 	}
 	
-//	public static void main(String[] args) {
-//		getUniversalImage(PluginRegistry.class.getClassLoader(), "ui/images/SYS.PNG");
-//	}
-
 	public static BufferedImage getUniversalImage(ClassLoader classLoader, String filename, String size) throws IOException {
 
 		if (StringUtils.isBlank(filename)) {

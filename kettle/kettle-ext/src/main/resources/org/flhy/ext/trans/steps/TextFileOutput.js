@@ -196,21 +196,6 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 		});
 		
 		this.getValues = function(){
-			var args = [];
-			store.each(function(rec) {
-				args.push({
-					name: rec.get('name'),
-					type: rec.get('type'),
-					format: rec.get('format'),
-					length: rec.get('length'),
-					precision: rec.get('precision'),
-					currency: rec.get('currency'),
-					decimal: rec.get('decimal'),
-					group: rec.get('group'),
-					trim_type: rec.get('trim_type'),
-					nullif: rec.get('nullif'),
-				});
-			});
 			return {
 				file_name: wFilename.getValue(),
 				is_command: wFileIsCommand.getValue() ? "Y" : "N",
@@ -242,7 +227,7 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 				fast_dump: wFastDump.getValue() ? "Y" : "N",
 				splitevery: wSplitEvery.getValue(),
 				endedLine: wEndedLine.getValue(),
-				fields: Ext.encode(args)
+				fields: Ext.encode(store.toJson())
 			};
 		};
 		

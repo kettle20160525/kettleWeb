@@ -1,39 +1,21 @@
-SystemInfoDialog = Ext.extend(Ext.Window, {
+SystemInfoDialog = Ext.extend(KettleDialog, {
 	title: '获取系统信息',
 	width: 600,
 	height: 400,
-	closeAction: 'close',
-	modal: true,
-	layout: 'fit',
 	initComponent: function() {
-		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
+		var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
 		
-		var form = new Ext.form.FormPanel({
-			bodyStyle: 'padding: 15px',
-			border: false,
-			region: 'north',
-			height: 50,
-			defaultType: 'textfield',
-			labelWidth: 100,
-			labelAlign: 'right',
-			items: [{
-				fieldLabel: '步骤名称',
-				anchor: '-10',
-				name: 'label',
-				value: cell.getAttribute('label')
-			}]
+		var store = new Ext.data.JsonStore({
+			fields: ['name', 'type'],
+			data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
 		});
 		
-		var grid = new Ext.grid.EditorGridPanel({
+		var grid = this.fitItems = new Ext.grid.EditorGridPanel({
 			title: '字段',
 			region :'center',
 			tbar: [{
 				iconCls: 'add', text: '添加字段', handler: function() {
-					var RecordType = grid.getStore().recordType;
-	                var record = new RecordType({
-	                    name: '',
-	                    type: ''
-	                });
+	                var record = new store.recordType({ name: '',  type: '' });
 	                grid.stopEditing();
 	                grid.getStore().insert(0, record);
 	                grid.startEditing(0, 0);
@@ -54,14 +36,11 @@ SystemInfoDialog = Ext.extend(Ext.Window, {
 					return store.getAt(n).get('descrp');
 				}
 			}],
-			store: new Ext.data.JsonStore({
-				fields: ['name', 'type'],
-				data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
-			})
+			store: store
 		});
 		
-		grid.on('cellclick', function(g, r, c) {
-			if(c == 2) {
+		grid.on('cellclick', function(g, row, col) {
+			if(col == 2) {
 				var listBox = new ListBox({
 					height: 80,
 					displayField: 'descrp',
@@ -73,53 +52,30 @@ SystemInfoDialog = Ext.extend(Ext.Window, {
 					width: 250,
 					height: 500,
 					model: true,
+					title: '选择信息类型',
 					closeAction: 'close',
 					layout: 'fit',
-					items: listBox
+					items: listBox,
+					bbar: ['->',{
+						text: '确定', handler: function() {
+							if(listBox.getValue()) {
+								var rec = store.getAt(row);
+								rec.set('type', listBox.getValue());
+								win.close();
+							}
+						}
+					}]
 				});
 				
 				win.show();
 			}
 		});
 		
-		this.items = {
-			layout: 'fit',
-			border: false,
-			bodyStyle: 'padding: 5px;',
-			items: {
-				layout: 'border',
-				border: false,
-				items: [form, grid]
-			}
+		this.getValues = function(){
+			return {
+				fields: Ext.encode(store.toJson())
+			};
 		};
-		
-		var bCancel = new Ext.Button({
-			text: '取消', handler: function() {
-				me.close();
-			}
-		});
-		var bOk = new Ext.Button({
-			text: '确定', handler: function() {
-				graph.getModel().beginUpdate();
-                try
-                {
-                	var formValues = form.getForm().getValues();
-                	formValues.compatibilityMode = formValues.compatibilityMode ? true : false;
-                	for(var fieldName in formValues) {
-						var edit = new mxCellAttributeChange(cell, fieldName, formValues[fieldName]);
-                    	graph.getModel().execute(edit);
-					}
-                }
-                finally
-                {
-                    graph.getModel().endUpdate();
-                }
-                
-				me.close();
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bOk];
 		
 		SystemInfoDialog.superclass.initComponent.call(this);
 	}

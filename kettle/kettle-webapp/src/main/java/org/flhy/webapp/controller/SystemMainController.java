@@ -28,6 +28,7 @@ import org.flhy.webapp.utils.JsonUtils;
 import org.pentaho.di.core.Condition;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.compress.CompressionProviderFactory;
+import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.plugins.JobEntryPluginType;
 import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
@@ -37,6 +38,7 @@ import org.pentaho.di.core.row.ValueMetaAndData;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaPluginType;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.sftp.SFTPClient;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
@@ -351,6 +353,52 @@ public class SystemMainController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/proxyType")
+	protected void proxyType() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		for (String str : new String[] { SFTPClient.PROXY_TYPE_HTTP, SFTPClient.PROXY_TYPE_SOCKS5 }) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", str);
+			jsonArray.add(jsonObject);
+		}
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/logLabel")
+	protected void logLabel() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+	    for (LogLevel level : new LogLevel[]{LogLevel.NOTHING, LogLevel.ERROR, LogLevel.MINIMAL, 
+	    		LogLevel.BASIC, LogLevel.DETAILED, LogLevel.DEBUG, LogLevel.ROWLEVEL}) {
+	    	
+	    	JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", level.getLevel());
+			jsonObject.put("code", level.getCode());
+			jsonObject.put("desc", level.getDescription());
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/images")
+	protected void images() throws Exception {
+		JSONObject jsonObject = new JSONObject();
+		
+		// from org.pentaho.di.core.gui.SwingGC
+		jsonObject.put("imageUnconditionalHop", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "UnconditionalHop_image" )));
+		jsonObject.put("imageParallelHop", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ParallelHop_image" )));
+		
+		jsonObject.put("imageTrue", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "True_image" )));
+		jsonObject.put("imageFalse", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "False_image" )));
+		
+		
+		JsonUtils.response(jsonObject);
+	}
+	
+	@ResponseBody
 	@RequestMapping(method=RequestMethod.GET, value="/text2image")
 	protected void text2image(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String text = request.getParameter("text");
@@ -381,6 +429,5 @@ public class SystemMainController {
 		FontMetrics fm = j.getFontMetrics(f);
 		
 		response.getWriter().write(String.valueOf(fm.stringWidth(text)));
-		
 	}
 }
