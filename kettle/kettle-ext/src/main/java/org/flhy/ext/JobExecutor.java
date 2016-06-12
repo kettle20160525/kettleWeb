@@ -1,17 +1,33 @@
 package org.flhy.ext;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.flhy.ext.utils.JSONArray;
+import org.flhy.ext.utils.JSONObject;
+import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.Result;
+import org.pentaho.di.core.gui.JobTracker;
+import org.pentaho.di.core.logging.KettleLogLayout;
+import org.pentaho.di.core.logging.KettleLogStore;
+import org.pentaho.di.core.logging.KettleLoggingEvent;
 import org.pentaho.di.core.logging.LoggingObjectType;
+import org.pentaho.di.core.logging.LoggingRegistry;
 import org.pentaho.di.core.logging.SimpleLoggingObject;
+import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobEntryResult;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.ui.spoon.job.JobEntryCopyResult;
+import org.pentaho.di.www.SlaveServerTransStatus;
 
 public class JobExecutor implements Runnable {
 
@@ -19,6 +35,7 @@ public class JobExecutor implements Runnable {
 	private JobExecutionConfiguration executionConfiguration;
 	private JobMeta jobMeta = null;
 	private Job job = null;
+	private static final Class PKG = JobEntryCopyResult.class;
 //	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
 	
 	private JobExecutor(JobExecutionConfiguration executionConfiguration, JobMeta jobMeta) {
@@ -197,69 +214,118 @@ public class JobExecutor implements Runnable {
 //			stepLogMap.clear();
 //		}
 //	}
-//	
-//	private String carteObjectId = null;
-//
-//	public boolean isFinished() {
-//		return finished;
-//	}
-//	
-//	public JSONArray getStepMeasure() throws Exception {
-//    	JSONArray jsonArray = new JSONArray();
-//    	
-//    	if(executionConfiguration.isExecutingLocally()) {
-//    		for (int i = 0; i < trans.nrSteps(); i++) {
-//    			StepInterface baseStep = trans.getRunThread(i);
-//    			StepStatus stepStatus = new StepStatus(baseStep);
-//
-//    			String[] fields = stepStatus.getTransLogFields();
-//
-//    			JSONArray childArray = new JSONArray();
-//    			for (int f = 1; f < fields.length; f++) {
-//    				childArray.add(fields[f]);
-//    			}
-//    			jsonArray.add(childArray);
-//    		}
-//    	} else {
-//    		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
-//			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
-//			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
-//        	for (int i = 0; i < stepStatusList.size(); i++) {
-//				StepStatus stepStatus = stepStatusList.get(i);
-//				String[] fields = stepStatus.getTransLogFields();
-//	
-//				JSONArray childArray = new JSONArray();
-//				for (int f = 1; f < fields.length; f++) {
-//					childArray.add(fields[f]);
-//				}
-//				jsonArray.add(childArray);
-//			}
-//    	}
-//    	
-//    	return jsonArray;
-//	}
-//	
-//	public String getExecutionLog() throws Exception {
-//		
-//		if(executionConfiguration.isExecutingLocally()) {
-//			StringBuffer sb = new StringBuffer();
-//			KettleLogLayout logLayout = new KettleLogLayout( true );
-//			List<String> childIds = LoggingRegistry.getInstance().getLogChannelChildren( trans.getLogChannelId() );
-//			List<KettleLoggingEvent> logLines = KettleLogStore.getLogBufferFromTo( childIds, true, -1, KettleLogStore.getLastBufferLineNr() );
-//			 for ( int i = 0; i < logLines.size(); i++ ) {
-//	             KettleLoggingEvent event = logLines.get( i );
-//	             String line = logLayout.format( event ).trim();
-//	             sb.append(line).append("\n");
-//			 }
-//			 return sb.toString();
-//    	} else {
-//    		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
-//			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
-//			return transStatus.getLoggingString();
-//    	}
-//		
-//	}
-//	
+	
+	private String carteObjectId = null;
+	
+	public int previousNrItems;
+	public JSONArray getJobMeasure() throws Exception {
+    	JSONArray jsonArray = new JSONArray();
+    	JobTracker jobTracker = job.getJobTracker();
+    	int nrItems = jobTracker.getTotalNumberOfItems();
+    	if ( nrItems != previousNrItems ) {
+            // Re-populate this...
+            String jobName = jobTracker.getJobName();
+
+			if (Const.isEmpty(jobName)) {
+				if (!Const.isEmpty(jobTracker.getJobFilename())) {
+					jobName = jobTracker.getJobFilename();
+				} else {
+					jobName = BaseMessages.getString(PKG, "JobLog.Tree.StringToDisplayWhenJobHasNoName");
+				}
+			}
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", jobName);
+			jsonObject.put("expanded", true);
+
+			JSONArray children = new JSONArray();
+            for ( int i = 0; i < jobTracker.nrJobTrackers(); i++ ) {
+            	JSONObject jsonObject2 = addTrackerToTree(jobTracker.getJobTracker(i));
+            	if(jsonObject2 != null)
+            		children.add(jsonObject2);
+            }
+            jsonObject.put("children", children);
+            jsonArray.add(jsonObject);
+            
+            previousNrItems = nrItems;
+    	}
+    	
+    	return jsonArray;
+	}
+	
+	private JSONObject addTrackerToTree( JobTracker jobTracker ) {
+		JSONObject jsonObject = new JSONObject();
+		if ( jobTracker != null ) {
+			if ( jobTracker.nrJobTrackers() > 0 ) {
+	    		  // This is a sub-job: display the name at the top of the list...
+	    		  jsonObject.put("name", BaseMessages.getString( PKG, "JobLog.Tree.JobPrefix" ) + jobTracker.getJobName() );
+	    		  jsonObject.put("expanded", true);
+	    		  JSONArray children = new JSONArray();
+	    		  // then populate the sub-job entries ...
+	    		  for ( int i = 0; i < jobTracker.nrJobTrackers(); i++ ) {
+	    			  JSONObject jsonObject2 = addTrackerToTree( jobTracker.getJobTracker( i ) );
+	    			  if(jsonObject2 != null)
+	    				  children.add(jsonObject2);
+	    		  }
+	    		  jsonObject.put("children", children);
+			} else {
+	        	JobEntryResult result = jobTracker.getJobEntryResult();
+	        	if ( result != null ) {
+	        		String jobEntryName = result.getJobEntryName();
+					if (!Const.isEmpty(jobEntryName)) {
+						jsonObject.put("name", jobEntryName);
+						jsonObject.put("fileName", Const.NVL(result.getJobEntryFilename(), ""));
+					} else {
+						jsonObject.put("name", BaseMessages.getString(PKG, "JobLog.Tree.JobPrefix2") + jobTracker.getJobName());
+					}
+					String comment = result.getComment();
+					if (comment != null) {
+						jsonObject.put("comment", comment);
+					}
+					Result res = result.getResult();
+					if ( res != null ) {
+						jsonObject.put("result",  res.getResult() ? BaseMessages.getString( PKG, "JobLog.Tree.Success" ) : BaseMessages.getString(PKG, "JobLog.Tree.Failure" ));
+	              		jsonObject.put("number", Long.toString( res.getEntryNr()));
+					}
+					String reason = result.getReason();
+					if (reason != null) {
+						jsonObject.put("reason", reason);
+					}
+					Date logDate = result.getLogDate();
+					if (logDate != null) {
+						jsonObject.put("logDate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(logDate));
+					}
+					jsonObject.put("leaf", true);
+	          } else 
+	        	  return null;
+	        }
+	      } else 
+	    	  return null;
+		return jsonObject;
+	}
+	
+	
+	public String getExecutionLog() throws Exception {
+		
+		if(executionConfiguration.isExecutingLocally()) {
+			StringBuffer sb = new StringBuffer();
+			KettleLogLayout logLayout = new KettleLogLayout( true );
+			List<String> childIds = LoggingRegistry.getInstance().getLogChannelChildren( job.getLogChannelId() );
+			List<KettleLoggingEvent> logLines = KettleLogStore.getLogBufferFromTo( childIds, true, -1, KettleLogStore.getLastBufferLineNr() );
+			 for ( int i = 0; i < logLines.size(); i++ ) {
+	             KettleLoggingEvent event = logLines.get( i );
+	             String line = logLayout.format( event ).trim();
+	             sb.append(line).append("\n");
+			 }
+			 return sb.toString();
+    	} else {
+    		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
+			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(job.getName(), carteObjectId, 0);
+			return transStatus.getLoggingString();
+    	}
+		
+	}
+	
 //	public JSONArray getStepStatus() throws Exception {
 //		JSONArray jsonArray = new JSONArray();
 //		

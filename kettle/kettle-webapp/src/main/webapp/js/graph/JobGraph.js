@@ -34,10 +34,11 @@ JobGraph = Ext.extend(BaseGraph, {
 			iconCls: 'exploredb'
 		},'-',{
 			iconCls: 'show-results', scope: this, handler: function() {
-				resultPanel.setVisible(!resultPanel.isVisible());
-				this.doLayout();
+				this.showResultPanel();
 			}
 		}];
+		
+		this.resultPanel = new JobResult();
 		
 		JobGraph.superclass.initComponent.call(this);
 	},

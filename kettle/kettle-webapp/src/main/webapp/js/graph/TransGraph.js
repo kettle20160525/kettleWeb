@@ -42,6 +42,8 @@ TransGraph = Ext.extend(BaseGraph, {
 		},'-',{
 			iconCls: 'show-results', scope: this, handler: function() {this.showResultPanel();}
 		}];
+		
+		this.resultPanel = new TransResult();
 		TransGraph.superclass.initComponent.call(this);
 	},
 	

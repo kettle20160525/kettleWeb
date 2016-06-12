@@ -18,6 +18,7 @@
 		</div>
 		
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/ext-patch.css" />
+	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/treegrid/treegrid.css" />
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/mxgraph2/js/mxClient3.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/adapter/ext/ext-base.js"></script>
@@ -26,6 +27,8 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/ListBox.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/ConditionEditor.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/DynamicEditorGrid.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/treegrid/TreeGridNodeUI.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/ux/treegrid/TreeGrid.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransLogTransPanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/trans/TransLogStepPanel.js"></script>
@@ -71,7 +74,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/TransGraph.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/JobGraph.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/KettleDialog.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/ResultPanel.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/TransResult.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/JobResult.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>

@@ -14,6 +14,7 @@ import org.flhy.ext.job.JobExecutionConfigurationCodec;
 import org.flhy.ext.job.step.JobEntryEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.flhy.ext.utils.StringEscapeHelper;
 import org.flhy.webapp.utils.JsonUtils;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.RowMetaAndData;
@@ -317,13 +318,13 @@ public class JobGraphController {
 		if(jobExecutor.isFinished()) {
 			executions.remove(executionId);
 			
-//			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
-//			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("jobMeasure", jobExecutor.getJobMeasure());
+			jsonObject.put("log", StringEscapeHelper.encode(jobExecutor.getExecutionLog()));
 //			jsonObject.put("stepStatus", transExecutor.getStepStatus());
 //			jsonObject.put("previewData", transExecutor.getPreviewData());
 		} else {
-//			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
-//			jsonObject.put("log", transExecutor.getExecutionLog());
+			jsonObject.put("jobMeasure", jobExecutor.getJobMeasure());
+			jsonObject.put("log", StringEscapeHelper.encode(jobExecutor.getExecutionLog()));
 //			jsonObject.put("stepStatus", transExecutor.getStepStatus());
 //			jsonObject.put("previewData", transExecutor.getPreviewData());
 		}

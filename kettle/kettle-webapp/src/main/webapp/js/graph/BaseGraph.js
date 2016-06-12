@@ -5,12 +5,9 @@ BaseGraph = Ext.extend(Ext.Panel, {
 
 	initComponent: function() {
 		var me = this;
-		var resultPanel = new Ext.Panel({
-			region: 'south',
-			hidden: true,
-			height: 250,
-			layout: 'fit'
-		});
+		
+		var resultPanel = this.resultPanel;
+		delete this.resultItem;
 		
 		var graphPanel = new Ext.Panel({
 			region: 'center',
@@ -31,22 +28,15 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		this.addEvents('doRun');
 		
 		this.showResultPanel = function() {
-			if(!resultPanel.isVisible()) {
-				resultPanel.show();
-				me.doLayout();
-			}
+			resultPanel.setVisible( !resultPanel.isVisible() );
+			me.doLayout();
 		};
 		
 		this.on('doRun', function(executionId) {
-			me.showResultPanel();
-			var rp = this.getResultPanel();
-			if(rp) {
-				resultPanel.removeAll();
-				resultPanel.add(rp);
-				resultPanel.doLayout();
-			}
+			if(resultPanel.isVisible() === false)
+				me.showResultPanel();
 			
-			rp.loadResult(executionId);
+			resultPanel.loadResult(executionId);
 		}, this);
 		
 
