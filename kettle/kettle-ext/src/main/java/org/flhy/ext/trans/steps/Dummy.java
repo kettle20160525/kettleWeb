@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
@@ -26,7 +27,7 @@ public class Dummy extends AbstractStep {
 	@Override
 	public Element encode(StepMetaInterface stepMetaInterface) throws Exception {
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		return e;
 	}
 

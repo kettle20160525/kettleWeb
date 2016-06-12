@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -53,8 +54,7 @@ public class SwitchCase extends AbstractStep {
 		SwitchCaseMeta switchCaseMeta = (SwitchCaseMeta) stepMetaInterface;
 		
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
-		
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("fieldname", switchCaseMeta.getFieldname());
 		e.setAttribute("use_contains", switchCaseMeta.isContains() ? "Y" : "N");

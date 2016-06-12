@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -107,7 +108,7 @@ public class JsonInput extends AbstractStep {
 	public Element encode(StepMetaInterface stepMetaInterface) throws Exception {
 		JsonInputMeta jsonInputMeta = (JsonInputMeta) stepMetaInterface;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("include", jsonInputMeta.includeFilename() ? "Y" : "N");
 		e.setAttribute("include_field", jsonInputMeta.getFilenameField());

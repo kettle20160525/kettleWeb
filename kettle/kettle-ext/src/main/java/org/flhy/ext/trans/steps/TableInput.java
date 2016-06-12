@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.StringEscapeHelper;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -44,7 +45,7 @@ public class TableInput extends AbstractStep {
 		TableInputMeta tableInputMeta = (TableInputMeta) stepMetaInterface;
 		
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("connection", tableInputMeta.getDatabaseMeta() == null ? "" : tableInputMeta.getDatabaseMeta().getName());
 		e.setAttribute("sql", StringEscapeHelper.encode(tableInputMeta.getSQL()));

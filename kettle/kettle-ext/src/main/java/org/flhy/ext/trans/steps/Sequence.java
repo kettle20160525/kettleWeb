@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
@@ -41,7 +42,7 @@ public class Sequence extends AbstractStep {
 		AddSequenceMeta addSequenceMeta = (AddSequenceMeta) stepMetaInterface;
 		
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("valuename", addSequenceMeta.getValuename());
 		e.setAttribute("use_database", addSequenceMeta.isDatabaseUsed() ? "Y" : "N");

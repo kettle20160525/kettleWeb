@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -54,7 +55,7 @@ public class SynchronizeAfterMerge extends AbstractStep {
 		synchronizeAfterMergeMeta.setKeyLookup(keyLookup);
 		synchronizeAfterMergeMeta.setKeyStream2(keyStream2);
 		
-		jsonArray = JSONArray.fromObject(cell.getAttribute("searchFields"));
+		jsonArray = JSONArray.fromObject(cell.getAttribute("updateFields"));
 		String[] updateLookup = new String[jsonArray.size()];
 		String[] updateStream = new String[jsonArray.size()];
 		Boolean[] update = new Boolean[jsonArray.size()];
@@ -63,7 +64,7 @@ public class SynchronizeAfterMerge extends AbstractStep {
 
 			updateLookup[i] = jsonObject.optString("name");
 			updateStream[i] = jsonObject.optString("rename");
-			update[i] = jsonObject.optBoolean("update");
+			update[i] = "Y".equalsIgnoreCase(jsonObject.optString("update"));
 		}
 
 		synchronizeAfterMergeMeta.setUpdateLookup(updateLookup);
@@ -82,7 +83,7 @@ public class SynchronizeAfterMerge extends AbstractStep {
 	public Element encode(StepMetaInterface stepMetaInterface) throws Exception {
 		SynchronizeAfterMergeMeta synchronizeAfterMergeMeta = (SynchronizeAfterMergeMeta) stepMetaInterface;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("connection", synchronizeAfterMergeMeta.getDatabaseMeta() == null ? "" : synchronizeAfterMergeMeta.getDatabaseMeta().getName());
 		e.setAttribute("schema", synchronizeAfterMergeMeta.getSchemaName());
@@ -111,7 +112,7 @@ public class SynchronizeAfterMerge extends AbstractStep {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("name", updateLookup[j]);
 			jsonObject.put("rename", synchronizeAfterMergeMeta.getUpdateStream()[j]);
-			jsonObject.put("update", synchronizeAfterMergeMeta.getUpdate()[j]);
+			jsonObject.put("update", synchronizeAfterMergeMeta.getUpdate()[j] ? "Y" : "N");
 			jsonArray.add(jsonObject);
 		}
 		e.setAttribute("updateFields", jsonArray.toString());

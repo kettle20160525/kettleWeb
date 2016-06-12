@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -50,7 +51,7 @@ public class SQLFileOutput extends AbstractStep {
 	public Element encode(StepMetaInterface stepMetaInterface) throws Exception {
 		SQLFileOutputMeta sqlFileOutputMeta = (SQLFileOutputMeta) stepMetaInterface;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("connection", sqlFileOutputMeta.getDatabaseMeta() == null ? "" : sqlFileOutputMeta.getDatabaseMeta().getName());
 		e.setAttribute("schema", sqlFileOutputMeta.getSchemaName());

@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -53,7 +54,7 @@ public class Update extends AbstractStep {
 		updateMeta.setKeyLookup(keyLookup);
 		updateMeta.setKeyStream2(keyStream2);
 		
-		jsonArray = JSONArray.fromObject(cell.getAttribute("searchFields"));
+		jsonArray = JSONArray.fromObject(cell.getAttribute("updateFields"));
 		String[] updateLookup = new String[jsonArray.size()];
 		String[] updateStream = new String[jsonArray.size()];
 		for (int i = 0; i < jsonArray.size(); i++) {
@@ -71,7 +72,7 @@ public class Update extends AbstractStep {
 	public Element encode(StepMetaInterface stepMetaInterface) throws Exception {
 		UpdateMeta updateMeta = (UpdateMeta) stepMetaInterface;
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		e.setAttribute("connection", updateMeta.getDatabaseMeta() == null ? "" : updateMeta.getDatabaseMeta().getName());
 		e.setAttribute("schema", updateMeta.getSchemaName());

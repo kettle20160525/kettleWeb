@@ -2,6 +2,7 @@ package org.flhy.ext.trans.steps;
 
 import java.util.List;
 
+import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.AbstractStep;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -31,7 +32,7 @@ public class InsertUpdate extends AbstractStep {
 		insertUpdateMeta.setCommitSize(cell.getAttribute("commit"));
 		insertUpdateMeta.setUpdateBypassed("Y".equalsIgnoreCase(cell.getAttribute("update_bypassed")));
 		
-		JSONArray jsonArray = JSONArray.fromObject(cell.getAttribute("key"));
+		JSONArray jsonArray = JSONArray.fromObject(cell.getAttribute("searchFields"));
 		String[] keyLookup = new String[jsonArray.size()];
 		String[] keyCondition = new String[jsonArray.size()];
 		String[] keyStream1 = new String[jsonArray.size()];
@@ -50,7 +51,7 @@ public class InsertUpdate extends AbstractStep {
 		insertUpdateMeta.setKeyStream(keyStream1);
 		insertUpdateMeta.setKeyStream2(keyStream2);
 		
-		jsonArray = JSONArray.fromObject(cell.getAttribute("value"));
+		jsonArray = JSONArray.fromObject(cell.getAttribute("updateFields"));
 		String[] updateLookup = new String[jsonArray.size()];
 		String[] updateStream = new String[jsonArray.size()];
 		Boolean[] update = new Boolean[jsonArray.size()];
@@ -59,7 +60,7 @@ public class InsertUpdate extends AbstractStep {
 
 			updateLookup[i] = jsonObject.optString("updateLookup");
 			updateStream[i] = jsonObject.optString("updateStream");
-			update[i] = jsonObject.optBoolean("update");
+			update[i] = "Y".equalsIgnoreCase(jsonObject.optString("update"));
 		}
 
 		insertUpdateMeta.setUpdateLookup(updateLookup);
@@ -72,7 +73,7 @@ public class InsertUpdate extends AbstractStep {
 		InsertUpdateMeta insertUpdateMeta = (InsertUpdateMeta) stepMetaInterface;
 		
 		Document doc = mxUtils.createDocument();
-		Element e = doc.createElement("Step");
+		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
 		DatabaseMeta databaseMeta = insertUpdateMeta.getDatabaseMeta();
 		e.setAttribute("connection", databaseMeta == null ? "" : databaseMeta.getName());
@@ -94,7 +95,7 @@ public class InsertUpdate extends AbstractStep {
 			jsonObject.put("keyStream2", keyStream2[i]);
 			jsonArray.add(jsonObject);
 		}
-		e.setAttribute("key", jsonArray.toString());
+		e.setAttribute("searchFields", jsonArray.toString());
 		
 		jsonArray = new JSONArray();
 		Boolean[] update = insertUpdateMeta.getUpdate();
@@ -104,10 +105,10 @@ public class InsertUpdate extends AbstractStep {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("updateLookup", updateLookup[i]);
 			jsonObject.put("updateStream", updateStream[i]);
-			jsonObject.put("update", update[i]);
+			jsonObject.put("update", update[i] ? "Y" : "N");
 			jsonArray.add(jsonObject);
 		}
-		e.setAttribute("value", jsonArray.toString());
+		e.setAttribute("updateFields", jsonArray.toString());
 		
 		return e;
 	}

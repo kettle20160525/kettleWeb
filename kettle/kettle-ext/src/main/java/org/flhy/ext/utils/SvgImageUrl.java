@@ -33,20 +33,6 @@ public class SvgImageUrl {
 		return imageFile + "?scale=" + SvgImageUrl.Size_Middle; 
 	}
 	
-//	public static String getSize(String url) {
-//		if(url.startsWith("/"))
-//			url = url.substring(1);
-//		
-//		return url.substring(0, url.indexOf("/"));
-//	}
-//	
-//	public static String getPluginId(String url) {
-//		if(url.startsWith("/"))
-//			url = url.substring(1);
-//		
-//		return url.substring(url.indexOf("/") + 1, url.indexOf("."));
-//	}
-	
 	public static int getHeight(String size) {
 		if(Size_Small.equals(size)) return 16;
 		return 40;
@@ -63,11 +49,4 @@ public class SvgImageUrl {
 		};
 		return new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
 	}
-	
-//	public static void main(String[] args) {
-//		String url = getUrl("Dummy", SvgImageUrl.Size_Small);
-//		System.out.println(url);
-//		System.out.println("Size = " + getSize(url));
-//		System.out.println("StepId = " + getPluginId(url));
-//	}
 }
