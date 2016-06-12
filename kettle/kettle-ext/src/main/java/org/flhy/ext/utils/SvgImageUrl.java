@@ -10,11 +10,11 @@ public class SvgImageUrl {
 	public static final String Size_Middle = "middle";
 	
 	public static String getSmallUrl(PluginInterface plugin) {
-		return url(plugin.getImageFile(), Size_Middle);
+		return url(plugin.getImageFile(), Size_Small);
 	}
 	
 	public static String getSmallUrl(String imageFile) {
-		return url(imageFile, Size_Middle);
+		return url(imageFile, Size_Small);
 	}
 	
 	public static String getMiddleUrl(String imageFile) {
@@ -30,7 +30,7 @@ public class SvgImageUrl {
 	}
 	
 	public static String url(String imageFile, String scale) {
-		return imageFile + "?scale=" + SvgImageUrl.Size_Middle; 
+		return imageFile + "?scale=" + scale; 
 	}
 	
 	public static int getHeight(String size) {

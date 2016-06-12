@@ -390,10 +390,8 @@ public class SystemMainController {
 		// from org.pentaho.di.core.gui.SwingGC
 		jsonObject.put("imageUnconditionalHop", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "UnconditionalHop_image" )));
 		jsonObject.put("imageParallelHop", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ParallelHop_image" )));
-		
 		jsonObject.put("imageTrue", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "True_image" )));
 		jsonObject.put("imageFalse", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "False_image" )));
-		
 		
 		JsonUtils.response(jsonObject);
 	}

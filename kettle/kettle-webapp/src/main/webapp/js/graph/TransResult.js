@@ -11,15 +11,18 @@ TransResult = Ext.extend(Ext.TabPanel, {
 		
 		this.items = [{
 			title: '执行历史',
+			iconCls: 'imageShowHistory',
 			disabled: true,
 		}, {
 			xtype: 'form',
 			title: '日志',
+			iconCls: 'imageShowLog',
 			layout: 'fit',
 			items: log
 		}, {
 			xtype: 'grid',
 			title: '步骤度量',
+			iconCls: 'imageShowGrid',
 			columns: [new Ext.grid.RowNumberer(), {
 				header: '步骤名称', dataIndex: 'name', width: 150
 			},{
@@ -50,12 +53,15 @@ TransResult = Ext.extend(Ext.TabPanel, {
 			store: measureStore
 		}, {
 			title: '性能图',
+			iconCls: 'imageShowPerf',
 			disabled: true
 		},{
 			title: 'Metrics',
+			iconCls: 'imageGantt',
 			disabled: true
 		}, {
 			title: 'Preview Data',
+			iconCls: 'imagePreview',
 			disabled: true
 		}];
 		

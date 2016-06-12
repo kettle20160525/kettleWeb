@@ -19,6 +19,7 @@
 		
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/ext-patch.css" />
 	    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/ux/treegrid/treegrid.css" />
+	    <link rel="stylesheet" type="text/css" href="public/system.css2" />
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/mxgraph2/js/mxClient3.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/ext3/adapter/ext/ext-base.js"></script>

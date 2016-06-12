@@ -7,6 +7,7 @@ JobResult = Ext.extend(Ext.TabPanel, {
 		var me = this;
 		var jobMeasure = new TreeGrid({
 	        title: '作业度量',
+	        iconCls: 'imageShowGrid',
 	        columns:[{
 	            header: '任务/任务条目', dataIndex: 'name', width: 150
 	        },{
@@ -28,14 +29,17 @@ JobResult = Ext.extend(Ext.TabPanel, {
 		
 		this.items = [{
 			title: '历史',
+			iconCls: 'imageShowHistory',
 			disabled: true
 		}, {
 			xtype: 'form',
 			title: '日志',
+			iconCls: 'imageShowLog',
 			layout: 'fit',
 			items: log
 		}, jobMeasure, {
 			title: 'Metrics',
+			iconCls: 'imageGantt',
 			disabled: true
 		}];
 

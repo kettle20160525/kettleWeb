@@ -43,6 +43,16 @@
 		<servlet-name>JavaScriptServlet</servlet-name>
 		<url-pattern>*.js2</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>CssServlet</servlet-name>
+		<servlet-class>org.flhy.webapp.servlet.CssServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>CssServlet</servlet-name>
+		<url-pattern>*.css2</url-pattern>
+	</servlet-mapping>
 
 	<listener>
 		<listener-class>org.flhy.webapp.listener.SystemLoadListener</listener-class>
