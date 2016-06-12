@@ -84,29 +84,34 @@ BaseGraph = Ext.extend(Ext.Panel, {
 
 			return false;
 		};
-		
 		var doInsert = mxCell.prototype.insert, me = this;
 		mxCell.prototype.insert = function(child, index) {
-			var i = 2, name = child.getAttribute('label');
-			while(cellExist(name)) {
-				name = child.getAttribute('label') + i;
-				i++;
+			if(child.isVertex() && child.value) {
+				if(child.value.nodeName == 'Step'
+					|| child.value.nodeName == 'JobEntry') {
+					var i = 2, name = child.getAttribute('label');
+					while(cellExist(name)) {
+						name = child.getAttribute('label') + i;
+						i++;
+					}
+					child.setAttribute('label', name);
+				}
 			}
-			child.setAttribute('label', name);
 			
 			child = doInsert.apply(this, arguments);
 			
-			if(child.getValue() != null) {
-				if(child.value && child.value.nodeName && 'Note' == child.value.nodeName) {
-					child.setConnectable(false);
-				}
+			if(child.value) {
 				if(child.getAttribute('draw') == 'N') {
 					child.setVisible(false);
 				}
 				if(child.getAttribute('ctype'))
 					loadPluginScript(child.getAttribute('ctype'));
 				
-				me.cellAdded(graph, child);
+				if(child.value.nodeName == 'NotePad') {
+					child.setConnectable(false);
+				} else if(child.value.nodeName == 'Step') {
+					me.cellAdded(graph, child);
+				}
 			}
 			
 			return child;
@@ -118,12 +123,75 @@ BaseGraph = Ext.extend(Ext.Panel, {
 					var cell = change.cell, root = graph.getDefaultParent();
 					if(cell.getId() == root.getId())
 						me.getDatabaseStore();
+					
+					if(cell.isEdge() && cell.value.nodeName == 'JobHop') {
+						if(change.attribute == 'label') return;
+						
+						var label = '';
+						if(cell.getAttribute('unconditional') == 'Y')
+							label = '<img src="' + system.get('imageUnconditionalHop') + '" width="16" height="16"/>';
+						else if(cell.getAttribute('evaluation') == 'Y')
+							label = '<img src="' + system.get('imageTrue') + '" width="16" height="16"/>';
+						else
+							label = '<img src="' + system.get('imageFalse') + '" width="16" height="16"/>';
+						
+						if(cell.source.getAttribute('parallel') == 'Y')
+							label += '<img src="' + system.get('imageParallelHop') + '" width="16" height="16"/>';
+						
+						setTimeout(function() {
+							graph.getModel().beginUpdate();
+					        try
+					        {
+					        	var edit = new mxCellAttributeChange(cell, 'label', label);
+					        	graph.getModel().execute(edit);
+					        } finally
+					        {
+					            graph.getModel().endUpdate();
+					        }
+						}, 100);
+					}
+					
+					if(cell.isVertex() && cell.value.nodeName == 'JobEntry' && change.attribute == 'parallel') {
+						Ext.each(graph.getOutgoingEdges(cell), function(edge) {
+							var label = '';
+							if(edge.getAttribute('unconditional') == 'Y')
+								label = '<img src="' + system.get('imageUnconditionalHop') + '" width="16" height="16"/>';
+							else if(edge.getAttribute('evaluation') == 'Y')
+								label = '<img src="' + system.get('imageTrue') + '" width="16" height="16"/>';
+							else
+								label = '<img src="' + system.get('imageFalse') + '" width="16" height="16"/>';
+							
+							if(edge.source.getAttribute('parallel') == 'Y')
+								label += '<img src="' + system.get('imageParallelHop') + '" width="16" height="16"/>';
+							
+							setTimeout(function() {
+								graph.getModel().beginUpdate();
+						        try
+						        {
+						        	var edit = new mxCellAttributeChange(edge, 'label', label);
+						        	graph.getModel().execute(edit);
+						        } finally
+						        {
+						            graph.getModel().endUpdate();
+						        }
+							}, 100);
+						});
+					}
 				}
 			});
 		});
+		graph.addListener(mxEvent.ADD_CELLS, function(sender, evt){  
+			var cells = evt.getProperty('cells');
+			Ext.each(cells, function(cell) {
+				if(cell.isEdge() && !cell.value) {
+					me.newHop(cell);
+				}
+			});
+		});
+
 		graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt){  
 			var cell = evt.getProperty('cell');
-			if(cell) {
+			if(cell && cell.isVertex()) {
 				me.editCell(cell);
 			}
 		});
@@ -328,38 +396,12 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	
 	initContextMenu: Ext.emptyFn,
 	cellAdded: Ext.emptyFn,
+	newHop: Ext.emptyFn,
 	
 	toXml: function() {
 		var enc = new mxCodec(mxUtils.createXmlDocument());
 		var node = enc.encode(this.getGraph().getModel());
 		return mxUtils.getPrettyXml(node);
-	},
-	
-	inputOutputFields: function(stepName, before, cb) {
-		var graph = this.getGraph();
-		var store = new Ext.data.JsonStore({
-			fields: ['name', 'type', 'length', 'precision', 'origin', 'storageType', 'conversionMask', 'currencySymbol', 'decimalSymbol', 'groupingSymbol', 'trimType', 'comments'],
-			proxy: new Ext.data.HttpProxy({
-				url: GetUrl('trans/inputOutputFields.do'),
-				method: 'POST'
-			})
-		});
-		
-		store.on('loadexception', function(misc, s, response) {
-			failureResponse(response);
-		});
-		
-		store.on('load', function() {
-			if(Ext.isFunction(cb))
-				cb(store);
-		});
-		
-		store.baseParams.stepName = encodeURIComponent(stepName);
-		store.baseParams.graphXml = this.toXml();
-		store.baseParams.before = before;
-		store.load();
-		
-		return store;
 	},
 	
 	getDatabaseStore: function() {

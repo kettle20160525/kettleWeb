@@ -214,6 +214,33 @@ TransGraph = Ext.extend(BaseGraph, {
 		return this.resultview;
 	},
 	
+	inputOutputFields: function(stepName, before, cb) {
+		var graph = this.getGraph();
+		var store = new Ext.data.JsonStore({
+			fields: ['name', 'type', 'length', 'precision', 'origin', 'storageType', 'conversionMask', 'currencySymbol', 'decimalSymbol', 'groupingSymbol', 'trimType', 'comments'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('trans/inputOutputFields.do'),
+				method: 'POST'
+			})
+		});
+		
+		store.on('loadexception', function(misc, s, response) {
+			failureResponse(response);
+		});
+		
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
+		
+		store.baseParams.stepName = encodeURIComponent(stepName);
+		store.baseParams.graphXml = this.toXml();
+		store.baseParams.before = before;
+		store.load();
+		
+		return store;
+	},
+	
 	updateStatus: function(status) {
 		var graph = this.getGraph();
 		

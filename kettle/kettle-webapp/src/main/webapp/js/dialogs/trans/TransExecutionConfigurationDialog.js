@@ -42,10 +42,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
                 		        forceSelection: true,
                 		        triggerAction: 'all',
                 		        selectOnFocus:true,
-                				store: new Ext.data.JsonStore({
-                		        	fields: ['name'],
-                		        	data: getActiveGraph().getSlaveServerStore()
-                			    }),
+                				store: getActiveGraph().getSlaveServerStore(),
                 			    hiddenName: 'remoteServer'
                 			})]
                         },
@@ -216,7 +213,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			}],
 			store: new Ext.data.JsonStore({
 				fields: ['var_name', 'var_value'],
-				data: Ext.decode(root.getAttribute('variables'))
+				data: Ext.decode(root.getAttribute('variables') || '[]')
 			})
 		});
 		
@@ -255,8 +252,6 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 				};
 				
 				me.setDisabled(true);
-//				var enc = new mxCodec(mxUtils.createXmlDocument());
-//				var node = enc.encode(graph.getModel());
 				Ext.Ajax.request({
 					url: GetUrl('trans/run.do'),
 					params: {graphXml: getActiveGraph().toXml(), executionConfig: Ext.encode(executionConfig)},

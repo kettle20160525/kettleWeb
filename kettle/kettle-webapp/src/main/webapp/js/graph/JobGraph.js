@@ -19,8 +19,10 @@ JobGraph = Ext.extend(BaseGraph, {
 			}
 		},'-',{
 			iconCls: 'run', handler: function() {
-				var dialog = new TransExecutionConfigurationDialog();
-				dialog.show();
+				var dialog = new JobExecutionConfigurationDialog();
+				dialog.show(null, function() {
+					dialog.initData();
+				});
 			}
 		},{
 			iconCls: 'stop'
@@ -90,6 +92,24 @@ JobGraph = Ext.extend(BaseGraph, {
 			menu.addItem('删除所有该作业入口的副本', null, function(){alert(1);}, null, null, true);
 			menu.addItem('隐藏作业入口', null, function(){alert(1);}, null, null, true);
 			menu.addItem('拆开节点', null, function(){alert(1);}, null, null, true);
+			menu.addSeparator(null);
+			
+			var text = 'Run Next Entries in Parallel';
+			if('Y' == cell.getAttribute('parallel'))
+				text = "[√]Run Next Entries in Parallel";
+			
+			menu.addItem(text, null, function(){
+				graph.getModel().beginUpdate();
+		        try
+		        {
+		        	var edit = new mxCellAttributeChange(cell, 'parallel', 'Y' == cell.getAttribute('parallel') ? 'N' : "Y");
+		        	graph.getModel().execute(edit);
+		        } finally
+		        {
+		            graph.getModel().endUpdate();
+		        }
+		        
+			}, null, null, true);
 		}
 	},
 	
@@ -97,7 +117,7 @@ JobGraph = Ext.extend(BaseGraph, {
 		var graph = this.getGraph();
 		Ext.Ajax.request({
 			url: GetUrl('job/newJobEntry.do'),
-			params: {graphXml: graphXml, pluginId: node.attributes.pluginId, name: node.text},
+			params: {graphXml: graphXml, pluginId: node.attributes.pluginId, name: encodeURIComponent(node.text)},
 			method: 'POST',
 			success: function(response) {
 				var doc = response.responseXML;
@@ -114,6 +134,38 @@ JobGraph = Ext.extend(BaseGraph, {
 		});
 	},
 	
+	newHop: function(cell) {
+		var doc = mxUtils.createXmlDocument();
+		var hop = doc.createElement('JobHop');
+		
+		hop.setAttribute('from', cell.source.getAttribute('label'));
+		hop.setAttribute('to', cell.target.getAttribute('label'));
+		hop.setAttribute('from_nr', cell.source.getAttribute('nr'));
+		hop.setAttribute('to_nr', cell.target.getAttribute('nr'));
+		cell.setValue(hop);
+		
+		var graph = this.getGraph();
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+        	var edit = new mxCellAttributeChange(cell, 'enabled', 'Y');
+        	graph.getModel().execute(edit);
+        	edit = new mxCellAttributeChange(cell, 'evaluation', 'Y');
+        	graph.getModel().execute(edit);
+        	if(cell.source.getAttribute('ctype') == 'SPECIAL' && cell.source.getAttribute('start') == 'Y') {
+        		edit = new mxCellAttributeChange(cell, 'unconditional', 'Y');
+            	graph.getModel().execute(edit);
+        	} else {
+        		edit = new mxCellAttributeChange(cell, 'unconditional', 'N');
+            	graph.getModel().execute(edit);
+        	}
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
 	editCell: function(cell) {
 		if(cell.getAttribute('dummy') == 'Y')
 			return;
@@ -123,9 +175,32 @@ JobGraph = Ext.extend(BaseGraph, {
 	
 	getResultPanel: function() {
 		if(!this.resultview)
-			this.resultview = new ResultPanel();
+			this.resultview = new JobResult();
+		
 		return this.resultview;
+	},
+	
+	getEntries: function(cb) {
+		var store = new Ext.data.JsonStore({
+			idProperty: 'name',
+			fields: ['name'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('job/entries.do'),
+				method: 'POST'
+			})
+		});
+		
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
+		
+		store.baseParams.graphXml = this.toXml();
+		store.load();
+		
+		return store;
 	}
+	
 });
 
 Ext.reg('JobGraph', JobGraph);

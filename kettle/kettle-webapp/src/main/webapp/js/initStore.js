@@ -1,3 +1,5 @@
+var system = new Ext.util.MixedCollection();
+
 Ext.onReady(function() {
 	
 	new Ext.data.JsonStore({
@@ -73,6 +75,24 @@ Ext.onReady(function() {
 	}).load();
 	
 	new Ext.data.JsonStore({
+		storeId: 'proxyTypeStore',
+		fields: ['name'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/proxyType.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'logLabelStore',
+		fields: ['id', 'code', 'desc'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/logLabel.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
 		storeId: 'databaseAccessMethod',
 		fields: ['value','text'],
 		proxy: new Ext.data.HttpProxy({
@@ -80,4 +100,13 @@ Ext.onReady(function() {
 			method: 'POST'
 		})
 	});
+	
+	Ext.Ajax.request({
+		url: GetUrl('system/images.do'),
+		method: 'POST',
+		success: function(response) {
+			system.addAll(Ext.decode(response.responseText));
+		}
+	});
+	
 });
