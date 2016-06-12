@@ -218,9 +218,57 @@ public class JobGraphController {
 			}
 			sftpclient.login(password);
 
+			JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.Connected.Title.Ok" ), 
+					BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.Connected.OK", sftp.getServerName() ) + Const.CR);
+			return;
+		} catch (Exception e) {
+			if (sftpclient != null) {
+				try {
+					sftpclient.disconnect();
+				} catch (Exception ignored) {
+				}
+				sftpclient = null;
+			}
+			info = e.getMessage();
+		}
+		
+		JsonUtils.fail(BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.ErrorConnect.Title.Bad" ), 
+				 BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.ErrorConnect.NOK", sftp.getServerName(), info) + Const.CR);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/sftpdirtest")
+	protected void sftpdirtest(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
+		
+		JobEntryCopy jobEntryCopy = jobMeta.findJobEntry(stepName);
+		JobEntrySFTP sftp = (JobEntrySFTP) jobEntryCopy.getEntry();
+		 
+		String info = "";
+		SFTPClient sftpclient = null;
+		try {
+			String servername = jobMeta.environmentSubstitute(sftp.getServerName());
+			String serverport = jobMeta.environmentSubstitute(sftp.getServerPort());
+			String username = jobMeta.environmentSubstitute(sftp.getUserName());
+			String password = jobMeta.environmentSubstitute(sftp.getPassword());
+			String keyFilename = jobMeta.environmentSubstitute(sftp.getKeyFilename());
+			String keyFilePass = jobMeta.environmentSubstitute(sftp.getKeyPassPhrase());
+
+			sftpclient = new SFTPClient(InetAddress.getByName(servername), Const.toInt(serverport, 22), username, keyFilename, keyFilePass);
+			String proxyHost = jobMeta.environmentSubstitute(sftp.getProxyHost());
+			String proxyPort = jobMeta.environmentSubstitute(sftp.getProxyPort());
+			String proxyUsername = jobMeta.environmentSubstitute(sftp.getProxyUsername());
+			String proxyPass = jobMeta.environmentSubstitute(sftp.getProxyPassword());
+			String proxyType = jobMeta.environmentSubstitute(sftp.getProxyType());
+			if (!Const.isEmpty(proxyHost)) {
+				sftpclient.setProxy(proxyHost, proxyPort, proxyUsername, proxyPass, proxyType);
+			}
+			sftpclient.login(password);
+
 			if(sftpclient.folderExists(sftp.getScpDirectory())) {
-				JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.Connected.Title.Ok" ), 
-						BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.Connected.OK", sftp.getServerName() ) + Const.CR);
+				JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.FolderExists.Title.Ok" ), 
+						BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.FolderExists.OK", sftp.getScpDirectory() ) + Const.CR);
 				return;
 			}
 		} catch (Exception e) {

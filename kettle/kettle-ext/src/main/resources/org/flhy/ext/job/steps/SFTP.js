@@ -102,7 +102,21 @@ JobEntrySFTPDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '代理密码',
 					anchor: '-10',
 					items: [wProxyPassword, {
-						xtype: 'button', text: '测试代理'
+						xtype: 'button', text: '测试连接', handler: function() {
+							me.onSure(false);
+							
+							Ext.Ajax.request({
+								url: GetUrl('job/sftptest.do'),
+								method: 'POST',
+								params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+								success: function(response) {
+									decodeResponse(response, function(resObj) {
+										Ext.Msg.alert(resObj.title, resObj.message);
+									});
+								},
+								failure: failureResponse
+							});
+						}
 					}]
 				}]
 			},wCompression]
@@ -120,10 +134,10 @@ JobEntrySFTPDialog = Ext.extend(KettleTabDialog, {
 					anchor: '-10',
 					items: [wScpDirectory, {
 						xtype: 'button', text: '测试文件夹', handler: function() {
-							me.onSure();
+							me.onSure(false);
 							
 							Ext.Ajax.request({
-								url: GetUrl('job/sftptest.do'),
+								url: GetUrl('job/sftpdirtest.do'),
 								method: 'POST',
 								params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 								success: function(response) {

@@ -42,7 +42,7 @@ KettleDialog = Ext.extend(Ext.Window, {
 		});
 		var bOk = new Ext.Button({
 			text: '确定', handler: function() {
-				me.onSure();
+				me.onSure(true);
 			}
 		});
 		
@@ -80,7 +80,7 @@ KettleDialog = Ext.extend(Ext.Window, {
 		KettleDialog.superclass.initComponent.call(this);
 	},
 	
-	onSure: function() {
+	onSure: function(closed) {
 		var graph = getActiveGraph().getGraph();
 		
 		graph.getModel().beginUpdate();
@@ -98,7 +98,8 @@ KettleDialog = Ext.extend(Ext.Window, {
             graph.getModel().endUpdate();
         }
         
-		this.close();
+        if(closed === true)
+        	this.close();
 	},
 	
 	getValues: function() {
