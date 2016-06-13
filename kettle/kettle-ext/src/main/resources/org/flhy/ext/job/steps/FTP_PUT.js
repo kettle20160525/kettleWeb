@@ -1,4 +1,3 @@
-
 JobEntryFTP_PUT = Ext.extend(Ext.Window, {
 	title: 'FTP上传',
 	width: 700,
