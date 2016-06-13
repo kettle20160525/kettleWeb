@@ -51,7 +51,7 @@ JobEntrySFTPDialog = Ext.extend(KettleTabDialog, {
 		var wWildcard = new Ext.form.TextField({fieldLabel: '通配符(正则表达式)', anchor: '-10', value: cell.getAttribute('wildcard')});
 		var wRemove = new Ext.form.Checkbox({fieldLabel: '获取后删除服务器文件', checked: cell.getAttribute('remove') == 'Y'});
 		
-		var wTargetDirectory = new Ext.form.TextField({fieldLabel: '目标目录', anchor: '-10', value: cell.getAttribute('targetdirectory')});
+		var wTargetDirectory = new Ext.form.TextField({flex: 1, value: cell.getAttribute('targetdirectory')});
 		var wCreateTargetFolder = new Ext.form.Checkbox({fieldLabel: '创建目标文件', checked: cell.getAttribute('createtargetfolder') == 'Y'});
 		var wAddFilenameToResult = new Ext.form.Checkbox({fieldLabel: '添加文件名到结果', checked: cell.getAttribute('isaddresult') == 'Y'});
 		
@@ -95,7 +95,14 @@ JobEntrySFTPDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '私钥文件',
 					anchor: '-10',
 					items: [wKeyFilename, {
-						xtype: 'button', text: '浏览...'
+						xtype: 'button', text: '浏览...', handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wKeyFilename.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
 					}]
 				}, wkeyfilePass, wProxyType, wProxyHost, wProxyPort, wProxyUsername, {
 					xtype: 'compositefield',
@@ -153,7 +160,21 @@ JobEntrySFTPDialog = Ext.extend(KettleTabDialog, {
 			}, {
 				xtype: 'fieldset',
 				title: '目标文件',
-				items: [wTargetDirectory, wCreateTargetFolder, wAddFilenameToResult]
+				items: [{
+					xtype: 'compositefield',
+					fieldLabel: '目标目录',
+					anchor: '-10',
+					items: [wTargetDirectory, {
+						xtype: 'button', text: '浏览...', handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wTargetDirectory.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
+					}]
+				}, wCreateTargetFolder, wAddFilenameToResult]
 			}]
 		}];
 		JobEntrySFTPDialog.superclass.initComponent.call(this);

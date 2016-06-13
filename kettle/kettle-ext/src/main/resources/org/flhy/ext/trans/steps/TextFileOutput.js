@@ -241,8 +241,14 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 				fieldLabel: '文件名称',
 				anchor: '-10',
 				items: [wFilename, {
-					xtype: 'button',
-					text: '浏览..'
+					xtype: 'button', text: '浏览..', handler: function() {
+						var dialog = new FileExplorerWindow();
+						dialog.on('ok', function(path) {
+							wFilename.setValue(path);
+							dialog.close();
+						});
+						dialog.show();
+					}
 				}]
 			}, wFileIsCommand, wServletOutput, wCreateParentFolder, wDoNotOpenNewFileInit, wFileNameInField, wFileNameField,
 			wExtension, wAddStepnr, wAddPartnr, wAddDate, wAddTime, wSpecifyFormat, wDateTimeFormat, wAddToResult]
@@ -256,8 +262,9 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 				fieldLabel: '分割符',
 				anchor: '-10',
 				items: [wSeparator, {
-					xtype: 'button',
-					text: '插入TAB'
+					xtype: 'button', text: '插入TAB', handler: function() {
+						wSeparator.setValue('\t' + wSeparator.getValue());
+					}
 				}]
 			},wEnclosure, wEnclForced, wDisableEnclosureFix, wHeader, wFooter, wFormat, wCompression, 
 			wEncoding, wPad, wFastDump, wSplitEvery, wEndedLine]

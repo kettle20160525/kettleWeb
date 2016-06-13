@@ -78,7 +78,14 @@ JobEntrySFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '私钥文件',
 					anchor: '-10',
 					items: [wKeyFilename, {
-						xtype: 'button', text: '浏览...'
+						xtype: 'button', text: '浏览...', handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wKeyFilename.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
 					}]
 				}, wkeyfilePass, wProxyType, wProxyHost, wProxyPort, wProxyUsername, {
 					xtype: 'compositefield',
@@ -116,14 +123,28 @@ JobEntrySFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '本地目录',
 					anchor: '-10',
 					items: [wLocalDirectory, {
-						xtype: 'button', text: '文件夹'
+						xtype: 'button', text: '文件夹', handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wLocalDirectory.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
 					}]
 				}, wWildcard, wSuccessWhenNoFile, wAfterFTPPut, {
 					xtype: 'compositefield',
 					fieldLabel: '目标文件夹',
 					anchor: '-10',
 					items: [wDestinationFolder, {
-						xtype: 'button', text: '文件夹'
+						xtype: 'button', text: '文件夹', handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wDestinationFolder.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
 					}]
 				}, wCreateDestinationFolder, wAddFilenameToResult]
 			}, {
