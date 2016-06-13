@@ -77,7 +77,7 @@
   <created_user/>
   <created_date>2014&#x2f;02&#x2f;26 16&#x3a;25&#x3a;18.397</created_date>
   <modified_user/>
-  <modified_date>2016&#x2f;06&#x2f;07 00&#x3a;57&#x3a;07.346</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;13 20&#x3a;20&#x3a;29.780</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
@@ -96,9 +96,6 @@
     <data_tablespace/>
     <index_tablespace/>
     <attributes>
-      <attribute><code>EXTRA_OPTION_H2.ddd</code><attribute>11</attribute></attribute>
-      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
       <attribute><code>INITIAL_POOL_SIZE</code><attribute>10</attribute></attribute>
       <attribute><code>MAXIMUM_POOL_SIZE</code><attribute>5</attribute></attribute>
       <attribute><code>POOLING_accessToUnderlyingConnectionAllowed</code><attribute>false</attribute></attribute>
@@ -106,11 +103,6 @@
       <attribute><code>POOLING_initialSize</code><attribute>0</attribute></attribute>
       <attribute><code>POOLING_maxOpenPreparedStatements</code><attribute>-1</attribute></attribute>
       <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
-      <attribute><code>PREFERRED_SCHEMA_NAME</code><attribute>sss</attribute></attribute>
-      <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
-      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
-      <attribute><code>SQL_CONNECT</code><attribute>select &#x2a; from N&#x3b;&#xd;&#xa;select &#x2a; from Y&#x3b;</attribute></attribute>
-      <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>
@@ -206,8 +198,8 @@
            <schema_name/>
            </partitioning>
     <connection>Sampledata</connection>
-    <sql>SELECT&#xd;&#xa;  CUSTOMERNUMBER&#xd;&#xa;, CUSTOMERNAME&#xd;&#xa;, CONTACTLASTNAME&#xd;&#xa;, CONTACTFIRSTNAME&#xd;&#xa;, PHONE&#xd;&#xa;, ADDRESSLINE1&#xd;&#xa;, ADDRESSLINE2&#xd;&#xa;, CITY&#xd;&#xa;, STATE&#xd;&#xa;, POSTALCODE&#xd;&#xa;, COUNTRY&#xd;&#xa;, SALESREPEMPLOYEENUMBER&#xd;&#xa;, CREDITLIMIT&#xd;&#xa;FROM CUSTOMERS_TABLE_OUT&#xd;&#xa;</sql>
-    <limit/>
+    <sql>SELECT&#xa;  CUSTOMERNUMBER&#xa;, CUSTOMERNAME&#xa;, CONTACTLASTNAME&#xa;, CONTACTFIRSTNAME&#xa;, PHONE&#xa;, ADDRESSLINE1&#xa;, ADDRESSLINE2&#xa;, CITY&#xa;, STATE&#xa;, POSTALCODE&#xa;, COUNTRY&#xa;, SALESREPEMPLOYEENUMBER&#xa;, CREDITLIMIT&#xa;FROM CUSTOMERS_TABLE_OUT&#xa;</sql>
+    <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
     <variables_active>N</variables_active>
