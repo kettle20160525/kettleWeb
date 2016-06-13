@@ -48,36 +48,43 @@ KettleDialog = Ext.extend(Ext.Window, {
 		
 		this.bbar = ['->', bCancel];
 		if(this.showPreview)
-			this.bbar.push({text: '预览', handler: function() {
-				Ext.Ajax.request({
-					url: GetUrl('trans/previewData.do'),
-					params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label'), rowLimit: 100},
-					method: 'POST',
-					success: function(response) {
-						var record = Ext.decode(response.responseText);
-						
-						var previewGrid = new DynamicEditorGrid({
-							rowNumberer: true
-						});
-						
-						var win = new Ext.Window({
-							title: '预览数据',
-							width: 700,
-							height: 500,
-							layout: 'fit',
-							items: previewGrid
-						});
-						win.show();
-						
-						var records = Ext.decode(response.responseText);
-						previewGrid.loadMetaAndValue(records);
-						
-					}
-				});
-			}});
+			this.bbar.push({text: '预览', scope: this, handler: this.preview});
 		this.bbar.push(bOk);
 		
 		KettleDialog.superclass.initComponent.call(this);
+	},
+	
+	preview: function() {
+		Ext.getBody().mask('正在生成预览数据，请稍后...');
+		var graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell(), me = this;
+		Ext.Ajax.request({
+			url: GetUrl('trans/previewData.do'),
+			params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label'), rowLimit: 100},
+			method: 'POST',
+			success: function(response) {
+				try {
+					var records = Ext.decode(response.responseText);
+					
+					var previewGrid = new DynamicEditorGrid({
+						rowNumberer: true
+					});
+					
+					var win = new Ext.Window({
+						title: '预览数据',
+						width: records.width,
+						height: 500,
+						layout: 'fit',
+						items: previewGrid
+					});
+					win.show();
+					
+					previewGrid.loadMetaAndValue(records);
+				} finally {
+					Ext.getBody().unmask();
+				}
+			},
+			failure: failureResponse
+		});
 	},
 	
 	onSure: function(closed) {

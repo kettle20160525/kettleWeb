@@ -376,18 +376,19 @@ public class TransGraphController {
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		StepMeta stepMeta = getStep(transMeta, stepName);
 		TransMeta previewMeta = TransPreviewFactory.generatePreviewTransformation( transMeta, stepMeta.getStepMetaInterface(), stepName );
-		TransPreviewProgress progressDialog = new TransPreviewProgress(previewMeta, new String[] {stepName }, new int[] { rowLimit } );
+		TransPreviewProgress progresser = new TransPreviewProgress(previewMeta, new String[] {stepName }, new int[] { rowLimit } );
 		
-		RowMetaInterface rowMeta = progressDialog.getPreviewRowsMeta(stepName);
-		List<Object[]> rowsData = progressDialog.getPreviewRows(stepName);
+		RowMetaInterface rowMeta = progresser.getPreviewRowsMeta(stepName);
+		List<Object[]> rowsData = progresser.getPreviewRows(stepName);
 		
 		Font f = new Font("Arial", Font.PLAIN, 12);
 		FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(f);
 			
 		if (rowMeta != null) {
-			JSONObject stepJson = new JSONObject();
+			JSONObject jsonObject = new JSONObject();
 			List<ValueMetaInterface> valueMetas = rowMeta.getValueMetaList();
 			
+			int width = 0;
 			JSONArray columns = new JSONArray();
 			JSONObject metaData = new JSONObject();
 			JSONArray fields = new JSONArray();
@@ -396,13 +397,16 @@ public class TransGraphController {
 				fields.add(valueMeta.getName());
 				String header = valueMeta.getComments() == null ? valueMeta.getName() : valueMeta.getComments();
 				
+				int hWidth = fm.stringWidth(header) + 10;
+				width += hWidth;
 				JSONObject column = new JSONObject();
 				column.put("dataIndex", valueMeta.getName());
-				column.put("width", 100);
 				column.put("header", header);
-				column.put("width", fm.stringWidth(header) + 10);
+				column.put("width", hWidth);
 				columns.add(column);
 			}
+			metaData.put("fields", fields);
+			metaData.put("root", "firstRecords");
 			
 			JSONArray firstRecords = new JSONArray();
 			for (int rowNr = 0; rowNr < rowsData.size(); rowNr++) {
@@ -433,13 +437,14 @@ public class TransGraphController {
 				}
 			}
 			
-			metaData.put("fields", fields);
-			metaData.put("root", "firstRecords");
-			stepJson.put("metaData", metaData);
-			stepJson.put("columns", columns);
-			stepJson.put("firstRecords", firstRecords);
+			jsonObject.put("metaData", metaData);
+			jsonObject.put("columns", columns);
+			jsonObject.put("firstRecords", firstRecords);
+			jsonObject.put("width", width < 1000 ? width : 1000);
 			
-			JsonUtils.response(stepJson);
+			JsonUtils.response(jsonObject);
+		} else {
+			
 		}
 		
 	}

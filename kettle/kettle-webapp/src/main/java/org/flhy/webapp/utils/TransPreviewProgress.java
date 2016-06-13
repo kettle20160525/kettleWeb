@@ -22,7 +22,7 @@ public class TransPreviewProgress {
 	  private String loggingText;
 	  private TransDebugMeta transDebugMeta;
 
-	  public TransPreviewProgress( TransMeta transMeta, String[] previewStepNames, int[] previewSize ) {
+	  public TransPreviewProgress( TransMeta transMeta, String[] previewStepNames, int[] previewSize ) throws Exception {
 	    this.transMeta = transMeta;
 	    this.previewStepNames = previewStepNames;
 	    this.previewSize = previewSize;
@@ -31,18 +31,14 @@ public class TransPreviewProgress {
 	  }
 
 
-	  private void doPreview() {
+	  private void doPreview() throws KettleException {
 	    // This transformation is ready to run in preview!
 	    trans = new Trans( transMeta );
 	    trans.setPreview( true );
 
 	    // Prepare the execution...
 	    //
-		try {
-			trans.prepareExecution(null);
-		} catch (KettleException e) {
-			e.printStackTrace();
-		}
+		trans.prepareExecution(null);
 
 	    // Add the preview / debugging information...
 	    //
@@ -61,11 +57,7 @@ public class TransPreviewProgress {
 
 	    // Fire off the step threads... start running!
 	    //
-		try {
-			trans.startThreads();
-		} catch (KettleException e) {
-			e.printStackTrace();
-		}
+		trans.startThreads();
 
 //	    int previousPct = 0;
 	    final List<String> previewComplete = new ArrayList<String>();

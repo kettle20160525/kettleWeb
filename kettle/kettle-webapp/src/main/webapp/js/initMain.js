@@ -153,16 +153,9 @@ function failureResponse(response) {
 					   title: '详细错误',
 					   modal: true,
 					   layout: 'fit',
-					   items: new Ext.form.HtmlEditor({
-						   	value: response.responseText,
-						   	enableAlignments : false,
-							enableColors : false,
-							enableFont : false,
-							enableFontSize : false,
-							enableFormat : false,
-							enableLinks : false,
-							enableLists : false,
-							enableSourceEdit : false
+					   items: new Ext.form.TextArea({
+						   	value: decodeURIComponent(response.responseText),
+							readOnly : true
 					   }),
 					   bbar: ['->', {
 						   text: '确定', handler: function() {win.close();}
