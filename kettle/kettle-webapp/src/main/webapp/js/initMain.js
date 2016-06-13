@@ -154,8 +154,8 @@ function failureResponse(response) {
 					   modal: true,
 					   layout: 'fit',
 					   items: new Ext.form.HtmlEditor({
-						   value: response.responseText,
-						   enableAlignments : false,
+						   	value: response.responseText,
+						   	enableAlignments : false,
 							enableColors : false,
 							enableFont : false,
 							enableFontSize : false,
@@ -164,7 +164,7 @@ function failureResponse(response) {
 							enableLists : false,
 							enableSourceEdit : false
 					   }),
-					   bbar: [{
+					   bbar: ['->', {
 						   text: '确定', handler: function() {win.close();}
 					   }]
 				   });
