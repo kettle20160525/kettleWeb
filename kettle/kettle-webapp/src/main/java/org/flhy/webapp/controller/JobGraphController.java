@@ -102,6 +102,8 @@ public class JobGraphController {
 		}
 		
 		repository.save( jobMeta, versionComment, null);
+		
+		JsonUtils.success("作业保存成功！");
 	}
 	
 	/**

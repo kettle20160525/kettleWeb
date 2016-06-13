@@ -104,6 +104,8 @@ public class TransGraphController {
 		}
 		
 		repository.save( transMeta, versionComment, null);
+		
+		JsonUtils.success("转换保存成功！");
 	}
 	
 	/**

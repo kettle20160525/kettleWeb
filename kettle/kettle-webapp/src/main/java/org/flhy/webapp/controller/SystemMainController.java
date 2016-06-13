@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -394,6 +396,42 @@ public class SystemMainController {
 		jsonObject.put("imageFalse", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "False_image" )));
 		
 		JsonUtils.response(jsonObject);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/fileexplorer")
+	protected void fileexplorer(@RequestParam String path) throws Exception {
+		JSONArray jsonArray = new JSONArray();
+		if(StringUtils.hasText(path)) {
+			File[] files = new File(path).listFiles();
+			for(File file : files) {
+				if(file.isHidden())
+					continue;
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("id", file.getAbsolutePath());
+				jsonObject.put("text", file.getName());
+				if(file.isFile()) {
+					jsonObject.put("leaf", true);
+					jsonArray.add(jsonArray.size(), jsonObject);
+				} else {
+					jsonArray.add(0, jsonObject);
+				}
+			}
+		} else {
+			File[] files = File.listRoots();
+			for(File file : files) {
+				if(file.isHidden()) {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("id", file.getAbsolutePath());
+					jsonObject.put("text", file.getCanonicalFile());
+					if(file.isFile())
+						jsonObject.put("leaf", true);
+					jsonArray.add(jsonObject);
+				}
+			}
+		}
+		
+		JsonUtils.response(jsonArray);
 	}
 	
 	@ResponseBody

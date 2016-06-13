@@ -9,8 +9,11 @@ TransGraph = Ext.extend(BaseGraph, {
 					params: {graphXml: this.graphXml()},
 					method: 'POST',
 					success: function(response) {
-						
-					}
+						decodeResponse(response, function(resObj) {
+							Ext.Msg.alert('系统提示', resObj.message);
+						});
+					},
+					failure: failureResponse
 				});
 			}
 		},'-',{

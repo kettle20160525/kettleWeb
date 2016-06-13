@@ -64,6 +64,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/DebugWin.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextFieldDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextAreaDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/FileExplorerWindow.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/AnswerDialog.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/StepFieldsDialog.js"></script>
