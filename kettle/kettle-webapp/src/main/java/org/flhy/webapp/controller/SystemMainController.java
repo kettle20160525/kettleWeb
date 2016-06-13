@@ -90,7 +90,7 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
 				child.put("pluginId", p.getIds()[0]);
-				child.put("icon", SvgImageUrl.getSmallUrl(p));
+				child.put("icon", SvgImageUrl.getMiddleUrl(p));
 				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);
@@ -134,7 +134,7 @@ public class SystemMainController {
 				child.put("id", startEntry.getEntry().getPluginId());
 				child.put("text", startEntry.getName());
 				child.put("pluginId", startEntry.getEntry().getPluginId());
-				child.put("icon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "STR_image" )));
+				child.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" )));
 				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", startEntry.getDescription());
@@ -146,7 +146,7 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", dummyEntry.getName());
 				child.put("pluginId", dummyEntry.getEntry().getPluginId());
-				child.put("icon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "DUM_image" )));
+				child.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" )));
 				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", dummyEntry.getDescription());
@@ -174,7 +174,7 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
 				child.put("pluginId", p.getIds()[0]);
-				child.put("icon", SvgImageUrl.getSmallUrl(p));
+				child.put("icon", SvgImageUrl.getMiddleUrl(p));
 				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);

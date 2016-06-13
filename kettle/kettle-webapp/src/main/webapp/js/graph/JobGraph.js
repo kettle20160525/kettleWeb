@@ -1,5 +1,5 @@
 JobGraph = Ext.extend(BaseGraph, {
-	iconCls: 'job',
+	iconCls: 'jobGraphIcon',
 	
 	initComponent: function() {
 		var me = this;
@@ -48,10 +48,10 @@ JobGraph = Ext.extend(BaseGraph, {
 		
 		if(cell == null) {
 			menu.addItem('新建注释', null, function(){alert(1);}, null, null, true);
-			menu.addItem('从剪贴板粘贴步骤', null, function(){alert(1);}, null, null, true);
+			menu.addItem('从剪贴板粘贴步骤', null, function(){alert(1);}, null, null, !mxClipboard.isEmpty());
 			menu.addSeparator(null);
-			menu.addItem('全选', null, function(){alert(1);}, null, null, true);
-			menu.addItem('清除选择', null, function(){alert(1);}, null, null, true);
+			menu.addItem('全选', null, function(){me.getGraph().selectVertices();}, null, null, true);
+			menu.addItem('清除选择', null, function(){me.getGraph().clearSelection();}, null, null, !graph.isSelectionEmpty());
 			menu.addSeparator(null);
 			menu.addItem('查看图形文件', null, function(){
 				var enc = new mxCodec(mxUtils.createXmlDocument());
@@ -88,9 +88,9 @@ JobGraph = Ext.extend(BaseGraph, {
 			}, null, null, true);
 			menu.addItem('编辑作业入口描述信息', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);
-			menu.addItem('复制被选择的作业入口到剪贴板', null, function(){alert(1);}, null, null, true);
-			menu.addItem('复制作业入口', null, function(){alert(1);}, null, null, true);
-			menu.addItem('删除所有该作业入口的副本', null, function(){alert(1);}, null, null, true);
+			menu.addItem('复制被选择的作业入口到剪贴板', null, function(){mxClipboard.copy(graph);}, null, null, true);
+			menu.addItem('复制作业入口', null, function(){mxClipboard.copy(graph);mxClipboard.paste(graph);}, null, null, true);
+			menu.addItem('删除所有该作业入口的副本', null, function(){graph.removeCells();}, null, null, true);
 			menu.addItem('隐藏作业入口', null, function(){alert(1);}, null, null, true);
 			menu.addItem('拆开节点', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);

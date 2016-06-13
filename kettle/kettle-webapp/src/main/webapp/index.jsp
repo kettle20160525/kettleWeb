@@ -5,11 +5,12 @@
 	  	<title>KettleConsole</title>
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ext3/resources/css/ext-all.css" />
 	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/ui/css/public.css" />
-	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/common.css" />
-	  	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/mxgraph2/css/explorer.css" />
 	</head>
 	<body>
-		<div id="loading-mask"></div>
+		<div id="loading-mask">
+			<input type="hidden" id="context-path" value="${pageContext.request.contextPath}" />
+			<script type="text/javascript" src="${pageContext.request.contextPath}/js/other/init.js"></script>
+		</div>
 		<div id="loading">
 		    <div class="loading-indicator">
 		        <img src="ui/resources/extanim32.gif" width="32" height="32" style="margin-right:8px;" align="absmiddle" />
@@ -81,7 +82,5 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initStore.js"></script>
-	    
-	    <input type="hidden" id="context-path" value="${pageContext.request.contextPath}" />
 	</body>
 </html>

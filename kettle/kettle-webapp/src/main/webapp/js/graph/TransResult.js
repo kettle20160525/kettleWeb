@@ -4,6 +4,7 @@ TransResult = Ext.extend(Ext.TabPanel, {
 	height: 250,
 	activeTab: 2,
 	initComponent: function() {
+		var me = this;
 		var measureStore = new Ext.data.ArrayStore({
 			fields: ['name', 'num', 'r', 'x', 'i', 'o', 'u', 'f', 'e', 'a', 't', 's', 'pio']
 		});

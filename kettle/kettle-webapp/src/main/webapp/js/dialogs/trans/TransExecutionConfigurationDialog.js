@@ -1,277 +1,265 @@
 TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	width: 600,
-	height: 400,
+	height: 530,
 	layout: 'fit',
 	title: '执行转换',
 	modal: true,
 	bodyStyle: 'padding: 5px',
+	iconCls: 'transGraphIcon',
 	
 	initComponent: function() {
-		var  root = getActiveGraph().getGraph().getDefaultParent();
-		var executeMethod = new Ext.form.FormPanel({
-			title: '执行方式',
-			labelWidth: 1,
-			bodyStyle: 'padding: 10px 15px;',
-			items: [{
-                    xtype: 'radio',
-                    name: 'execMethod',
-                    boxLabel: '本地执行',
-                    inputValue: 1
-            	},{
-                    xtype: 'radio',
-                    name: 'execMethod',
-                    boxLabel: '远程执行',
-                    inputValue: 2
-            	},{
-            		xtype: 'radiogroup',
-                    itemCls: 'x-check-group-alt',
-                    columns: 1,
-                    width: 300,
-                    items: [
-                        {
-                            xtype     : 'compositefield',
-                            items: [{
-                            	xtype: 'label',
-                            	style: 'line-height: 22px',
-                            	text: '远程机器：'
-                            }, new Ext.form.ComboBox({
-                				displayField: 'name',
-                				valueField: 'name',
-                				typeAhead: true,
-                		        mode: 'local',
-                		        forceSelection: true,
-                		        triggerAction: 'all',
-                		        selectOnFocus:true,
-                				store: getActiveGraph().getSlaveServerStore(),
-                			    hiddenName: 'remoteServer'
-                			})]
-                        },
-                        {
-                            xtype     : 'checkbox',
-                            name	  : 'passingExport',
-                            boxLabel  : '将导出的文件发送到远程服务器'
-                        }
-                    ]
-                },{
-                    xtype: 'radio',
-                    name: 'execMethod',
-                    boxLabel: '集群方式执行',
-                    inputValue: 3
-            	},{
-                    xtype: 'checkboxgroup',
-                    columns: 1,
-                    itemCls: 'x-check-group-alt',
-                    width: 100,
-                    items: [
-                        {boxLabel: '提交转换', name: 'clusterPosting', checked: true},
-                        {boxLabel: '准备执行', name: 'clusterPreparing', checked: true},
-                        {boxLabel: '开始执行', name: 'clusterStarting', checked: true},
-                        {boxLabel: '显示转换', name: 'clusterShowingTransformation'}
-                    ]
-                }]
+		var  root = getActiveGraph().getGraph().getDefaultParent(), me = this;
+		
+		var wExecLocal = new Ext.form.Radio({name: 'execMethod', fieldLabel: '本地执行'});
+		var wExecRemote = new Ext.form.Radio({name: 'execMethod', fieldLabel: '远程执行'});
+		var wExecCluster = new Ext.form.Radio({name: 'execMethod', fieldLabel: '集群方式执行'});
+		var wRemoteHost = new Ext.form.ComboBox({
+			fieldLabel: '远程主机',
+			displayField: 'name',
+			valueField: 'name',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+	        store: getActiveGraph().getSlaveServerStore()
+		});
+		var wPassExport = new Ext.form.Checkbox({fieldLabel: '将导出的文件发送到远程服务器'});
+		
+		var wPrepareExecution = new Ext.form.Checkbox({boxLabel: '提交转换'});
+		var wPostTransformation = new Ext.form.Checkbox({boxLabel: '准备执行'});
+		var wStartExecution = new Ext.form.Checkbox({boxLabel: '开始执行'});
+		var wShowTransformations = new Ext.form.Checkbox({boxLabel: '显示转换'});
+		var wClusterChcGroup = new Ext.form.CheckboxGroup({
+            columns: 1,
+            width: 100,
+            items: [wPrepareExecution, wPostTransformation, wStartExecution, wShowTransformations]
 		});
 		
-		this.on('afterrender', function() {
-			var arrays = executeMethod.find('name', 'execMethod');
-			var rbChecked = function(rb) {
-				var v = rb.getRawValue();
-				
-				if(v == 1) {
-					Ext.each(executeMethod.find('itemCls', 'x-check-group-alt'), function(group) {
-						group.disable();
-					});
-				} else if(v == 2) {
-					Ext.each(executeMethod.find('xtype', 'radiogroup'), function(group) {
-						group.enable();
-					});
-					Ext.each(executeMethod.find('xtype', 'checkboxgroup'), function(group) {
-						group.disable();
-					});
-				} else if(v == 3) {
-					Ext.each(executeMethod.find('xtype', 'radiogroup'), function(group) {
-						group.disable();
-					});
-					Ext.each(executeMethod.find('xtype', 'checkboxgroup'), function(group) {
-						group.enable();
-					});
-				}
-				
-			};
+		var wSafeMode = new Ext.form.Checkbox({fieldLabel: '使用安全模式'});
+		var wGatherMetrics = new Ext.form.Checkbox({fieldLabel: 'Gather performance metrics'});
+		var wLogLevel = new Ext.form.ComboBox({
+			fieldLabel: '日志级别',
+			displayField: 'desc',
+			valueField: 'code',
+			anchor: '-20',
+			typeAhead: true,
+	        mode: 'local',
+	        forceSelection: true,
+	        triggerAction: 'all',
+	        selectOnFocus:true,
+			store: Ext.StoreMgr.get('logLabelStore'),
+		    hiddenName: 'logLevel',
+		    value: 3
+		});
+		var wReplayDate = new Ext.form.TextField({fieldLabel: '重放日期(yyyy/MM/dd HH:mm:ss)', anchor: '-20'});
+		
+		var paramStore = new Ext.data.JsonStore({
+			fields: ['name', 'value', 'default_value']
+		});
+		var varStore = new Ext.data.JsonStore({
+			fields: ['name', 'value']
+		});
+		var argStore = new Ext.data.JsonStore({
+			fields: ['name', 'value']
+		});
+		
+		this.setValue = function(data) {
+			wExecLocal.setValue(data.exec_local == 'Y');
 			
-			Ext.each(arrays, function(radio) {
-				radio.on('check', function(rb, checked) {
-					if(checked == true) rbChecked(rb);
-				});
+			wExecRemote.setValue(data.exec_remote == 'Y');
+			if(data.remote_server) wRemoteHost.setValue(data.remote_server.name);
+			wPassExport.setValue(data.pass_export == 'Y');
+			
+			wExecCluster.setValue(data.exec_cluster == 'Y');
+			wPrepareExecution.setValue(data.cluster_prepare == 'Y');
+			wPostTransformation.setValue(data.cluster_post == 'Y');
+			wStartExecution.setValue(data.cluster_start == 'Y');
+			wShowTransformations.setValue(data.cluster_show_trans == 'Y');
+			
+			wSafeMode.setValue(data.safe_mode == 'Y');
+			wGatherMetrics.setValue(data.gather_metrics == 'Y');
+			wLogLevel.setValue(data.log_level);
+			wReplayDate.setValue(data.replay_date);
+			
+			paramStore.loadData(data.parameters);
+			varStore.loadData(data.variables);
+			argStore.loadData(data.arguments);
+			
+			this.data = data;
+		};
+		
+		var startExec = function() {
+			var data = this.data;
+			data.exec_local = wExecLocal.getValue() ? "Y" : "N";
+			
+			data.exec_remote = wExecRemote.getValue() ? "Y" : "N";
+			data.remote_server = {name: wRemoteHost.getValue()};
+			data.pass_export = wPassExport.getValue() ? "Y" : "N";
+			
+			data.exec_cluster = wExecCluster.getValue() ? "Y" : "N";
+			data.cluster_prepare = wPrepareExecution.getValue() ? "Y" : "N";
+			data.cluster_post = wPostTransformation.getValue() ? "Y" : "N";
+			data.cluster_start = wStartExecution.getValue() ? "Y" : "N";
+			data.cluster_show_trans = wShowTransformations.getValue() ? "Y" : "N";
+			
+			data.safe_mode = wSafeMode.getValue() ? "Y" : "N";
+			data.gather_metrics = wGatherMetrics.getValue() ? "Y" : "N";
+			data.log_level = wLogLevel.getValue();
+			data.replay_date = wReplayDate.getValue();
+			data.parameters = paramStore.toJson();
+			data.variables = varStore.toJson();
+			data.arguments = argStore.toJson();
+			
+			me.setDisabled(true);
+			Ext.Ajax.request({
+				url: GetUrl('trans/run.do'),
+				params: {graphXml: getActiveGraph().toXml(), executionConfiguration: Ext.encode(data)},
+				method: 'POST',
+				success: function(response) {
+					me.setDisabled(false);
+					decodeResponse(response, function(resObj) {
+						me.close();
+						setTimeout(function() {
+							getActiveGraph().fireEvent('doRun', resObj.message);
+						}, 500);
+					});
+				},
+				failure: failureResponse
 			});
-			arrays[0].setValue(true);
+			
+		};
+		
+		wExecLocal.on('check', function(rb, checked) {
+			if(checked) {
+				wRemoteHost.disable();
+				wPassExport.disable();
+				wClusterChcGroup.disable();
+			}
+		});
+		wExecRemote.on('check', function(rb, checked) {
+			if(checked) {
+				wRemoteHost.enable();
+				wPassExport.enable();
+				wClusterChcGroup.disable();
+			} else {
+				wRemoteHost.disable();
+				wPassExport.disable();
+			}
+		});
+		wExecCluster.on('check', function(rb, checked) {
+			if(checked) {
+				wClusterChcGroup.enable();
+				wRemoteHost.disable();
+				wPassExport.disable();
+			} else {
+				wClusterChcGroup.disable();
+			}
 		});
 		
-		
-		var details = new Ext.form.FormPanel({
-			title: '细节',
-            labelWidth: 190,
-            labelAlign: 'right',
-            bodyStyle: 'padding: 10px 15px;',
-            items: [{
-            	name: 'safeModeEnabled',
-                xtype: 'checkbox',
-                boxLabel: '启用安全模式'
-            },{
-            	name: 'gatheringMetrics',
-                xtype: 'checkbox',
-                boxLabel: 'Gather performance metrics',
-                checked: true
-            },{
-            	name: 'clearingLog',
-                xtype: 'checkbox',
-                boxLabel: 'Clear the log before execution',
-                checked: true
-            },new Ext.form.ComboBox({
-				fieldLabel: '日志级别',
-				displayField: 'text',
-				valueField: 'value',
-				anchor: '-20',
-				typeAhead: true,
-		        mode: 'local',
-		        forceSelection: true,
-		        triggerAction: 'all',
-		        selectOnFocus:true,
-				store: new Ext.data.JsonStore({
-		        	fields: ['value', 'text'],
-		        	data: [{value: '0', text: '没有日志'},
-		        	       {value: '1', text: '错误日志'},
-		        	       {value: '2', text: '最小日志'},
-		        	       {value: '3', text: '基本日志'},
-		        	       {value: '4', text: '详细日志'},
-		        	       {value: '5', text: '调试'},
-		        	       {value: '6', text: '行级日志（非常详细）'}]
-			    }),
-			    hiddenName: 'logLevel',
-			    value: 3
-			}),{
-            	name: 'replayDate',
-            	anchor: '-20',
-                xtype: 'textfield',
-                fieldLabel: '重放日期(yyyy/MM/dd HH:mm:ss)'
-            }]
-		});
-		
-		var parameterGrid = new Ext.grid.EditorGridPanel({
+		var wParams = new Ext.grid.EditorGridPanel({
 			title: '命名参数',
 			tbar: [{
-				iconCls: 'add', handler: function() {
-					var RecordType = parameterGrid.getStore().recordType;
-	                var p = new RecordType({
-	                    name: '',
-	                    value: '',
-	                    default_value: ''
-	                });
-	                parameterGrid.stopEditing();
-	                parameterGrid.getStore().insert(0, p);
-	                parameterGrid.startEditing(0, 0);
+				text: '新增参数', handler: function() {
+	                var rec = new  paramStore.recordType({ name: '',  value: '',  default_value: '' });
+	                wParams.stopEditing();
+	                wParams.getStore().insert(0, rec);
+	                wParams.startEditing(0, 0);
 				}
 			},{
-				iconCls: 'delete'
+				text: '删除参数'
 			}],
 			columns: [new Ext.grid.RowNumberer(), {
-				header: '命名参数', dataIndex: 'name', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
+				header: '命名参数', dataIndex: 'name', width: 100, editor: new Ext.form.TextField()
 			},{
 				header: '值', dataIndex: 'value', width: 100, editor: new Ext.form.TextField()
 			},{
 				header: '默认值', dataIndex: 'default_value', width: 100, editor: new Ext.form.TextField()
 			}],
-			store: new Ext.data.JsonStore({
-				fields: ['name', 'value', 'default_value'],
-				data: Ext.decode(root.getAttribute('parameters'))
-			})
+			store: paramStore
 		});
 		
-		var variableGrid = new Ext.grid.EditorGridPanel({
+		var wVariables = new Ext.grid.EditorGridPanel({
 			title: '变量',
 			tbar: [{
-				iconCls: 'add', handler: function() {
-					var RecordType = variableGrid.getStore().recordType;
-	                var p = new RecordType({
-	                    name: '',
-	                    value: ''
-	                });
-	                variableGrid.stopEditing();
-	                variableGrid.getStore().insert(0, p);
-	                variableGrid.startEditing(0, 0);
+				text: '新增变量', handler: function() {
+	                var rec = new varStore.recordType({ name: '', value: '' });
+	                wVariables.stopEditing();
+	                wVariables.getStore().insert(0, rec);
+	                wVariables.startEditing(0, 0);
 				}
 			},{
-				iconCls: 'delete'
+				text: '删除变量'
 			}],
 			columns: [new Ext.grid.RowNumberer(), {
-				header: '变量', dataIndex: 'var_name', width: 200, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
+				header: '变量', dataIndex: 'name', width: 200, editor: new Ext.form.TextField()
 			},{
-				header: '值', dataIndex: 'var_value', width: 250, editor: new Ext.form.TextField()
+				header: '值', dataIndex: 'value', width: 250, editor: new Ext.form.TextField()
 			}],
-			store: new Ext.data.JsonStore({
-				fields: ['var_name', 'var_value'],
-				data: Ext.decode(root.getAttribute('variables') || '[]')
-			})
+			store: varStore
 		});
 		
-		var table = new Ext.TabPanel({
+		var wArguments = new Ext.grid.EditorGridPanel({
+			title: '位置参数',
+			tbar: [{
+				text: '新增参数', handler: function() {
+	                var rec = new argStore.recordType({ value: '' });
+	                wArguments.stopEditing();
+	                wArguments.getStore().insert(0, rec);
+	                wArguments.startEditing(0, 0);
+				}
+			},{
+				text: '删除参数'
+			}],
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '位置参数', dataIndex: 'name', width: 250
+			},{
+				header: '值', dataIndex: 'value', width: 250, editor: new Ext.form.TextField()
+			}],
+			store: argStore
+		});
+		
+		this.items = new Ext.TabPanel({
 			activeTab: 0,
 			plain: true,
 			deferredRender: false,
-		    items: [executeMethod, details, parameterGrid, variableGrid]
+		    items: [{
+	    		xtype: 'form',
+	    		title: '基本配置',
+	    		labelWidth: 200,
+	    		labelAlign: 'right',
+	    		bodyStyle: 'padding: 10px',
+	    		items: [{
+	    			xtype: 'fieldset',
+	    			title: '执行方式',
+	    			items: [wExecLocal, wExecRemote, wRemoteHost, wPassExport, wExecCluster, wClusterChcGroup]
+	    		},{
+	    			xtype: 'fieldset',
+	    			title: '细节',
+	    			items: [wSafeMode, wGatherMetrics, wLogLevel, wReplayDate]
+	    		}]
+	    	}, wParams, wVariables, wArguments]
 		});
 		
-		this.items = table;
-		
-		var bCancel = new Ext.Button({
+		this.bbar = ['->', {
 			text: '取消', scope: this, handler: function() {this.close();}
-		});
-		
-		var me = this;
-		var bGo = new Ext.Button({
-			text: '启动', scope: this, handler: function() {
-				parameterGrid.getStore().commitChanges();
-				variableGrid.getStore().commitChanges();
-				
-				var parameters = [], variables = [];
-				parameterGrid.getStore().each(function(rec) {
-					parameters.push(rec.data);
-				});
-				variableGrid.getStore().each(function(rec) {
-					variables.push(rec.data);
-				});
-				
-				var executionConfig = {
-					executeMethod: executeMethod.getForm().getValues(),
-					details: details.getForm().getValues(),
-					parameters: parameters,
-					variables: variables
-				};
-				
-				me.setDisabled(true);
-				Ext.Ajax.request({
-					url: GetUrl('trans/run.do'),
-					params: {graphXml: getActiveGraph().toXml(), executionConfig: Ext.encode(executionConfig)},
-					method: 'POST',
-					success: function(response) {
-						me.setDisabled(false);
-						decodeResponse(response, function(resObj) {
-							me.close();
-							setTimeout(function() {
-								getActiveGraph().fireEvent('doRun', resObj.message);
-							}, 500);
-						});
-					},
-					failure: failureResponse
-				});
-			}
-		});
-		
-		this.bbar = ['->', bCancel, bGo];
+		}, {
+			text: '启动', scope: this, handler: startExec
+		}];
 		
 		TransExecutionConfigurationDialog.superclass.initComponent.call(this);
+	},
+	
+	initData: function() {
+		var me = this;
+		Ext.Ajax.request({
+			url: GetUrl('trans/initRun.do'),
+			method: 'POST',
+			params: {graphXml: getActiveGraph().toXml()},
+			success: function(response) {
+				me.setValue(Ext.decode(response.responseText));
+			},
+			failure: failureResponse
+		});
 	}
 });

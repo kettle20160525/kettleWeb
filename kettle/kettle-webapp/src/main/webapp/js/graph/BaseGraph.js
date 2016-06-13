@@ -2,6 +2,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	layout: 'border',
 	defaults: {border: false},
 	title: '正在加载...',
+	closable: true,
 
 	initComponent: function() {
 		var me = this;
@@ -74,17 +75,32 @@ BaseGraph = Ext.extend(Ext.Panel, {
 
 			return false;
 		};
+		var cellExist2 = function(label, nr) {
+			var cells = graph.getChildVertices(graph.getDefaultParent());
+			for(var i=0; i<cells.length; i++) {
+				if(cells[i].getAttribute('label') == label
+						&& parseInt(cells[i].getAttribute('nr')) == nr) {
+					return true;
+				}
+			}
+
+			return false;
+		};
 		var doInsert = mxCell.prototype.insert, me = this;
 		mxCell.prototype.insert = function(child, index) {
 			if(child.isVertex() && child.value) {
-				if(child.value.nodeName == 'Step'
-					|| child.value.nodeName == 'JobEntry') {
+				if(child.value.nodeName == 'Step') {
 					var i = 2, name = child.getAttribute('label');
 					while(cellExist(name)) {
 						name = child.getAttribute('label') + i;
 						i++;
 					}
 					child.setAttribute('label', name);
+				} else if(child.value.nodeName == 'JobEntry') {
+					var i = 0, name = child.getAttribute('label');
+					while(cellExist2(name, i))
+						i++;
+					child.setAttribute('nr', i);
 				}
 			}
 			
@@ -345,7 +361,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	  
 	    keyHandler.bindControlKey(65, function()
 	    {
-	    	graph.selectAll();
+	    	graph.selectVertices();
 	    });
 
 	    keyHandler.bindControlKey(89, function()

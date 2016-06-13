@@ -21,8 +21,13 @@ Ext.onReady(function() {
 	});
 	
 	tabPanel.on('tabchange', function(me, item) {
-		activeGraph = item;
-		guidePanel.activeCom(item.iconCls);
+		if(item) {
+			activeGraph = item;
+			guidePanel.activeCom(item);
+		} else {
+			activeGraph = null;
+			guidePanel.activeCom(null);
+		}
 	});
 	
 
@@ -32,8 +37,10 @@ Ext.onReady(function() {
 	});
     
     setTimeout(function(){
-        Ext.get('loading').remove();
-        Ext.get('loading-mask').fadeOut({remove:true});
+//        Ext.get('loading').remove();
+//        Ext.get('loading-mask').fadeOut({remove:true});
+    	Ext.get('loading').hide();
+        Ext.get('loading-mask').fadeOut();
     }, 250);
     
 //   var FtpPut = new JobEntryFTP_PUT();
@@ -95,12 +102,6 @@ function findItems(c, name, v) {
 		});
 	}
 	return arrays;
-}
-
-function GetUrl(url) {
-	var contextPath = Ext.fly('context-path').getValue();
-	var newurl = contextPath + '/' + url;
-	return newurl;
 }
 
 function getActiveGraph() {

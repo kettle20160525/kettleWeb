@@ -3,8 +3,6 @@ package org.flhy.webapp.controller;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +16,7 @@ import org.flhy.ext.App;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.TransExecutor;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.trans.TransExecutionConfigurationCodec;
 import org.flhy.ext.trans.step.StepEncoder;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
@@ -29,9 +28,10 @@ import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.CheckResultInterface;
 import org.pentaho.di.core.CheckResultSourceInterface;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.RowMetaAndData;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
-import org.pentaho.di.core.logging.LogLevel;
+import org.pentaho.di.core.logging.DefaultLogLevel;
 import org.pentaho.di.core.logging.LoggingObjectInterface;
 import org.pentaho.di.core.logging.LoggingObjectType;
 import org.pentaho.di.core.logging.SimpleLoggingObject;
@@ -146,6 +146,56 @@ public class TransGraphController {
 		JsonUtils.response(jsonArray);
 	}
 	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/initRun")
+	protected void initRun(@RequestParam String graphXml) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		transMeta.setRepository(App.getInstance().getRepository());
+		transMeta.setMetaStore(App.getInstance().getMetaStore());
+		
+		TransExecutionConfiguration executionConfiguration = App.getInstance().getTransExecutionConfiguration();
+		
+		if (transMeta.findFirstUsedClusterSchema() != null) {
+			executionConfiguration.setExecutingLocally(false);
+			executionConfiguration.setExecutingRemotely(false);
+			executionConfiguration.setExecutingClustered(true);
+		} else {
+			executionConfiguration.setExecutingLocally(true);
+			executionConfiguration.setExecutingRemotely(false);
+			executionConfiguration.setExecutingClustered(false);
+		}
+		
+		 // Remember the variables set previously
+	    //
+		RowMetaAndData variables = App.getInstance().getVariables();
+	    Object[] data = variables.getData();
+	    String[] fields = variables.getRowMeta().getFieldNames();
+	    Map<String, String> variableMap = new HashMap<String, String>();
+	    for ( int idx = 0; idx < fields.length; idx++ ) {
+	    	variableMap.put( fields[idx], data[idx].toString() );
+	    }
+
+	    executionConfiguration.setVariables( variableMap );
+	    executionConfiguration.getUsedVariables( transMeta );
+	    executionConfiguration.getUsedArguments(transMeta, App.getInstance().getArguments());
+	    executionConfiguration.setReplayDate( null );
+	    executionConfiguration.setRepository( App.getInstance().getRepository() );
+	    executionConfiguration.setSafeModeEnabled( false );
+
+	    executionConfiguration.setLogLevel( DefaultLogLevel.getLogLevel() );
+		
+	    // Fill the parameters, maybe do this in another place?
+		Map<String, String> params = executionConfiguration.getParams();
+		params.clear();
+		String[] paramNames = transMeta.listParameters();
+		for (String name : paramNames) {
+			params.put(name, "");
+		}
+		
+		JsonUtils.response(TransExecutionConfigurationCodec.encode(executionConfiguration));
+	}
+	
 	/**
 	 * 执行转换
 	 * 
@@ -155,86 +205,14 @@ public class TransGraphController {
 	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/run")
-	protected void run(@RequestParam String graphXml, @RequestParam String executionConfig) throws Exception {
+	protected void run(@RequestParam String graphXml, @RequestParam String executionConfiguration) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
-		JSONObject jsonObject = JSONObject.fromObject(executionConfig);
-		TransExecutionConfiguration executionConfiguration = new TransExecutionConfiguration();
-		
-		JSONObject executeMethod = jsonObject.optJSONObject("executeMethod");
-		if(executeMethod.optInt("execMethod") == 1) {
-			executionConfiguration.setExecutingLocally( true );
-			executionConfiguration.setExecutingRemotely( false );
-			executionConfiguration.setExecutingClustered( false );
-		} else if(executeMethod.optInt("execMethod") == 2) {
-			executionConfiguration.setExecutingLocally( false );
-			executionConfiguration.setExecutingRemotely( true );
-			executionConfiguration.setExecutingClustered( false );
-			
-			
-			executionConfiguration.setRemoteServer( transMeta.findSlaveServer( executeMethod.optString("remoteServer")) );
-			executionConfiguration.setPassingExport( executeMethod.containsKey("passingExport") );
-		} else if(executeMethod.optInt("execMethod") == 3) {
-			executionConfiguration.setExecutingLocally( true );
-			executionConfiguration.setExecutingRemotely( false );
-			executionConfiguration.setExecutingClustered( false );
-		}
-		
-		JSONObject details = jsonObject.optJSONObject("details");
-		executionConfiguration.setSafeModeEnabled( details.containsKey("safeModeEnabled") );
-		executionConfiguration.setGatheringMetrics( details.containsKey("gatheringMetrics") );
-		executionConfiguration.setClearingLog( details.containsKey("clearingLog") );
-		executionConfiguration.setLogLevel( LogLevel.values()[details.optInt("logLevel")] );
-		if (!Const.isEmpty(details.optString("replayDate"))) {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-			try {
-				executionConfiguration.setReplayDate(simpleDateFormat.parse(details.optString("replayDate")));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-		} else {
-			executionConfiguration.setReplayDate(null);
-		}
-		
-		executionConfiguration.getUsedVariables( transMeta );
-		executionConfiguration.getUsedArguments( transMeta, App.getInstance().getArguments() );
-		
-		Map<String, String> map = new HashMap<String, String>();
-		JSONArray parameters = jsonObject.optJSONArray("parameters");
-		if(parameters != null) {
-			for(int i=0; i<parameters.size(); i++) {
-				JSONObject param = parameters.getJSONObject(i);
-				String paramName = param.optString("name");
-				String paramValue = param.optString("value");
-				String defaultValue = param.optString("default_value");
-				if (Const.isEmpty(paramValue)) {
-					paramValue = Const.NVL(defaultValue, "");
-				}
-				map.put( paramName, paramValue );
-			}
-			executionConfiguration.setParams(map);
-		}
-		
-		map = new HashMap<String, String>();
-		JSONArray variables = jsonObject.optJSONArray("variables");
-		if(variables != null) {
-			for ( int i = 0; i < variables.size(); i++ ) {
-		    	JSONObject var = variables.getJSONObject(i);
-		    	String varname = var.optString("var_name");
-		    	String value = var.optString("var_value");
-		      
-
-		    	if ( !Const.isEmpty( varname ) ) {
-		    		map.put( varname, value );
-		    	}
-		    }
-		}
+		JSONObject jsonObject = JSONObject.fromObject(executionConfiguration);
+		TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject);
 	    
-	    executionConfiguration.setVariables( map );
-	    
-	    
-	    TransExecutor transExecutor = TransExecutor.initExecutor(executionConfiguration, transMeta);
+	    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
 	    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
 	    tr.start();
         executions.put(transExecutor.getExecutionId(), transExecutor);

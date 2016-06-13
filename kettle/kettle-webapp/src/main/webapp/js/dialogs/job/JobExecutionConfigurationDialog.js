@@ -1,10 +1,11 @@
 JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	width: 600,
-	height: 430,
+	height: 450,
 	layout: 'fit',
 	title: '执行作业',
 	modal: true,
 	bodyStyle: 'padding: 5px',
+	iconCls: 'jobGraphIcon',
 	
 	initComponent: function() {
 		var  root = getActiveGraph().getGraph().getDefaultParent(), me = this;
@@ -85,8 +86,11 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		var startExec = function() {
 			var data = this.data;
 			data.exec_local = wExecLocal.getValue() ? "Y" : "N";
+			
 			data.exec_remote = wExecRemote.getValue() ? "Y" : "N";
+			data.remote_server = {name: wRemoteHost.getValue()};
 			data.pass_export = wPassExport.getValue() ? "Y" : "N";
+			
 			data.safe_mode = wSafeMode.getValue() ? "Y" : "N";
 			data.gather_metrics = wGatherMetrics.getValue() ? "Y" : "N";
 			data.log_level = wLogLevel.getValue();
@@ -163,9 +167,9 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 				text: '删除变量'
 			}],
 			columns: [new Ext.grid.RowNumberer(), {
-				header: '变量', dataIndex: 'var_name', width: 200, editor: new Ext.form.TextField()
+				header: '变量', dataIndex: 'name', width: 200, editor: new Ext.form.TextField()
 			},{
-				header: '值', dataIndex: 'var_value', width: 250, editor: new Ext.form.TextField()
+				header: '值', dataIndex: 'value', width: 250, editor: new Ext.form.TextField()
 			}],
 			store: varStore
 		});

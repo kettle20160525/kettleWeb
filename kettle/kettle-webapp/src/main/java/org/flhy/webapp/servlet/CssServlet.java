@@ -1,7 +1,6 @@
 package org.flhy.webapp.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +23,9 @@ public class CssServlet extends HttpServlet {
 		images.put("imageShowPerf", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ShowPerf_image" )));
 		images.put("imageGantt", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Gantt_image" )));
 		images.put("imagePreview", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Preview_image" )));
+		
+		images.put("transGraphIcon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "SpoonIcon_image" )));
+		images.put("jobGraphIcon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ChefIcon_image" )));
 	}
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

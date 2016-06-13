@@ -32,12 +32,15 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			rootVisible: false
 		});
 		
-		this.activeCom = function(type) {
-			if(type == 'job') {
+		this.activeCom = function(item) {
+			if(item == null) {
+				me.remove(transTree.getId(), false);
+				me.remove(jobTree.getId(), false);
+			} else if(item.getXType() == 'JobGraph') {
 				me.add(jobTree);
 				me.setActiveTab(jobTree.getId());
 				me.remove(transTree.getId(), false);
-			} else if(type == 'trans') {
+			} else if(item.getXType() == 'TransGraph') {
 				me.add(transTree);
 				me.setActiveTab(transTree.getId());
 				me.remove(jobTree.getId(), false);

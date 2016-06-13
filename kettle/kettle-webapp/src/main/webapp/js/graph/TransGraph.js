@@ -1,5 +1,5 @@
 TransGraph = Ext.extend(BaseGraph, {
-	iconCls: 'trans',
+	iconCls: 'transGraphIcon',
 	
 	initComponent: function() {
 		this.tbar = [{
@@ -16,7 +16,9 @@ TransGraph = Ext.extend(BaseGraph, {
 		},'-',{
 			iconCls: 'run', handler: function() {
 				var dialog = new TransExecutionConfigurationDialog();
-				dialog.show();
+				dialog.show(null, function() {
+					dialog.initData();
+				});
 			}
 		},{
 			iconCls: 'pause', handler: function() { }
@@ -53,8 +55,8 @@ TransGraph = Ext.extend(BaseGraph, {
 			menu.addItem('新建注释', null, function(){alert(1);}, null, null, true);
 			menu.addItem('从剪贴板粘贴步骤', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);
-			menu.addItem('全选', null, function(){alert(1);}, null, null, true);
-			menu.addItem('清除选择', null, function(){alert(1);}, null, null, true);
+			menu.addItem('全选', null, function(){me.getGraph().selectVertices();}, null, null, true);
+			menu.addItem('清除选择', null, function(){me.getGraph().clearSelection();}, null, null, true);
 			menu.addSeparator(null);
 			menu.addItem('查看图形文件', null, function(){
 				var enc = new mxCodec(mxUtils.createXmlDocument());

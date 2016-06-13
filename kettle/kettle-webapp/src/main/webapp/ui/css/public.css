@@ -4,6 +4,10 @@ html td.mxPopupMenuItem {
 	padding: 3px 20px; font-size: 12px; font-family: '宋体'; 
 }
 
+html td.mxDisabled {
+ 	color: gray;
+}
+
 div.mxPopupMenu tr {
 	background-color: #ffffff;
 }
@@ -37,10 +41,6 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 
 .delete {
 	background-image:url(../images/delete.png) !important;
-}
-
-.folder {
-	background-image:url(../images/arrow.png) !important;
 }
 
 .save {
@@ -81,13 +81,6 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 	background-image:url(../images/show-results.png) !important;
 }
 
-.job {
-	background-image:url(../images/job.png) !important;
-}
-.trans {
-	background-image:url(../images/transformation.png) !important;
-}
-
 .job_tree {
 	background-image:url(../images/job_tree.png) !important;
 }
@@ -95,6 +88,9 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 	background-image:url(../images/transformation_tree.png) !important;
 }
 
+/**
+ * 第一次加载
+ */
 #loading-mask{
 	position:absolute;
 	left:0;
@@ -126,9 +122,8 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 }
 
 /**
-左侧菜单树
-*/
-
+ * 左侧菜单树
+ */
 .x-tree-node div.nav-node {
     border-bottom: 1px solid #ccc;
     background-color: #efefef;
@@ -146,7 +141,6 @@ div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
   vertical-align: top;
   width: 24px;
 }
-
 
 .nav .x-tree-ec-icon {
     display: none;
