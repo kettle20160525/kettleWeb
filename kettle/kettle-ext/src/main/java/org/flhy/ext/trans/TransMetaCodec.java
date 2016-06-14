@@ -272,7 +272,7 @@ public class TransMetaCodec extends BaseGraphCodec {
 				StepEncoder stepEncoder = (StepEncoder) PluginFactory.getBean(step.getStepID());
 				
 				PluginInterface plugin = PluginRegistry.getInstance().getPlugin(StepPluginType.class, step.getStepID());
-				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(step), p.x, p.y, 40, 40, "icon;image=" + SvgImageUrl.getMiddleUrl(plugin));
+				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(step), p.x, p.y, 40, 40, "icon;image=" + SvgImageUrl.getUrl(plugin));
 				cells.put(step, cell);
 			}
 			

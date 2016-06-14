@@ -12,10 +12,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.flhy.ext.cluster.SlaveServerCodec;
 import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
+import org.pentaho.di.base.AbstractMeta;
+import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.trans.TransExecutionConfiguration;
+import org.springframework.util.StringUtils;
 import org.xml.sax.SAXException;
 
 public class TransExecutionConfigurationCodec {
@@ -27,7 +30,7 @@ public class TransExecutionConfigurationCodec {
 		
 		jsonObject.put("exec_remote", executionConfiguration.isExecutingRemotely() ? "Y" : "N");
 		if(executionConfiguration.getRemoteServer() != null) {
-			jsonObject.put("remote_server", SlaveServerCodec.encode(executionConfiguration.getRemoteServer()));
+			jsonObject.put("remote_server", executionConfiguration.getRemoteServer());
 		}
 		jsonObject.put("pass_export", executionConfiguration.isPassingExport() ? "Y" : "N");
 		
@@ -93,14 +96,15 @@ public class TransExecutionConfigurationCodec {
 		return jsonObject;
 	}
 	
-	public static TransExecutionConfiguration decode(JSONObject jsonObject) throws ParserConfigurationException, SAXException, IOException {
+	public static TransExecutionConfiguration decode(JSONObject jsonObject, AbstractMeta meta) throws ParserConfigurationException, SAXException, IOException {
 		TransExecutionConfiguration executionConfiguration = new TransExecutionConfiguration();
 		executionConfiguration.setExecutingLocally("Y".equalsIgnoreCase(jsonObject.optString("exec_local")));
 		
 		executionConfiguration.setExecutingRemotely("Y".equalsIgnoreCase(jsonObject.optString("exec_remote")));
-		JSONObject remoteJson = jsonObject.optJSONObject("remote_server");
-		if(remoteJson != null) {
-			executionConfiguration.setRemoteServer(SlaveServerCodec.decode(remoteJson));
+		String remoteServer = jsonObject.optString("remote_server");
+		if(StringUtils.hasText(remoteServer)) {
+			SlaveServer slaveServer = meta.findSlaveServer(remoteServer);
+			executionConfiguration.setRemoteServer(slaveServer);
 		}
 		executionConfiguration.setPassingExport("Y".equalsIgnoreCase(jsonObject.optString("pass_export")));
 		

@@ -68,11 +68,11 @@ public class JobMetaCodec extends BaseGraphCodec {
 				JobEntryEncoder stepEncoder = (JobEntryEncoder) PluginFactory.getBean(jge.getEntry().getPluginId());
 				
 				PluginInterface plugin = PluginRegistry.getInstance().getPlugin(JobEntryPluginType.class, pluginId);
-				String image = SvgImageUrl.getMiddleUrl(plugin);
+				String image = SvgImageUrl.getUrl(plugin);
 				if(jge.isDummy())
-					image = SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" ));
+					image = SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "DUM_image" ));
 				if(jge.isStart())
-					image = SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" ));
+					image = SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "STR_image" ));
 				
 				Object cell = graph.insertVertex(parent, null, stepEncoder.encodeStep(jge), p.x, p.y, 40, 40, "icon;image=" + image);
 				cells.put(jge, cell);

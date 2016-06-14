@@ -9,7 +9,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.flhy.ext.utils.JSONObject;
 import org.pentaho.di.cluster.SlaveServer;
-import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.www.SslConfiguration;
 import org.springframework.util.StringUtils;
@@ -27,12 +26,12 @@ public class SlaveServerCodec {
 		jsonObject.put("port", slaveServer.getPort());
 		jsonObject.put("webAppName", slaveServer.getWebAppName());
 		jsonObject.put("username", slaveServer.getUsername());
-		jsonObject.put("password", Encr.decryptPasswordOptionallyEncrypted( slaveServer.getPassword() ));
+		jsonObject.put("password", slaveServer.getPassword());
 		jsonObject.put("proxy_hostname", slaveServer.getProxyHostname());
 		jsonObject.put("proxy_port", slaveServer.getProxyPort());
 		jsonObject.put("non_proxy_hosts", slaveServer.getNonProxyHosts());
-		jsonObject.put("master", slaveServer.isMaster());
-		jsonObject.put("sslMode", slaveServer.isSslMode());
+		jsonObject.put("master", slaveServer.isMaster() ? "Y" : "N");
+		jsonObject.put("sslMode", slaveServer.isSslMode() ? "Y" : "N");
 		if(slaveServer.getSslConfig() != null) {
 			
 		}
@@ -54,8 +53,8 @@ public class SlaveServerCodec {
 	    xml.append( XMLHandler.addTagValue( "proxy_hostname", jsonObject.optString("proxy_hostname"), false ) );
 	    xml.append( XMLHandler.addTagValue( "proxy_port", jsonObject.optString("proxy_port"), false ) );
 	    xml.append( XMLHandler.addTagValue( "non_proxy_hosts", jsonObject.optString("non_proxy_hosts"), false ) );
-	    xml.append( XMLHandler.addTagValue( "master", jsonObject.optBoolean("master") ? "Y" : "N", false ) );
-	    xml.append( XMLHandler.addTagValue( SlaveServer.SSL_MODE_TAG, jsonObject.optBoolean("sslMode") ? "Y" : "N", false ) );
+	    xml.append( XMLHandler.addTagValue( "master", jsonObject.optString("master"), false ) );
+	    xml.append( XMLHandler.addTagValue( SlaveServer.SSL_MODE_TAG, jsonObject.optString("sslMode"), false ) );
 	    
 	    JSONObject sslConfig = jsonObject.optJSONObject("sslConfig");
 	    if ( sslConfig != null ) {

@@ -1,7 +1,7 @@
-SystemInfoDialog = Ext.extend(KettleDialog, {
-	title: '获取系统信息',
-	width: 600,
-	height: 400,
+RandomValueDialog = Ext.extend(KettleDialog, {
+	title: '生成随机数',
+	width: 500,
+	height: 300,
 	initComponent: function() {
 		var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
 		
@@ -10,15 +10,15 @@ SystemInfoDialog = Ext.extend(KettleDialog, {
 			data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
 		});
 		
-		var grid = this.fitItems = new Ext.grid.EditorGridPanel({
+		var wFields = this.fitItems = new Ext.grid.EditorGridPanel({
 			title: '字段',
 			region :'center',
 			tbar: [{
 				iconCls: 'add', text: '添加字段', handler: function() {
 	                var record = new store.recordType({ name: '',  type: '' });
-	                grid.stopEditing();
-	                grid.getStore().insert(0, record);
-	                grid.startEditing(0, 0);
+	                wFields.stopEditing();
+	                wFields.getStore().insert(0, record);
+	                wFields.startEditing(0, 0);
 				}
 			},{
 				iconCls: 'delete', text: '删除字段'
@@ -30,8 +30,8 @@ SystemInfoDialog = Ext.extend(KettleDialog, {
 			},{
 				header: '类型', dataIndex: 'type', width: 200, renderer: function(v)
 				{
-					var store = Ext.StoreMgr.get('systemDataTypesStore');
-					var n = store.find('code', v);
+					var store = Ext.StoreMgr.get('randomValueFuncStore');
+					var n = store.find('type', v);
 					if(n == -1) return v;
 					return store.getAt(n).get('descrp');
 				}
@@ -39,20 +39,19 @@ SystemInfoDialog = Ext.extend(KettleDialog, {
 			store: store
 		});
 		
-		grid.on('cellclick', function(g, row, col) {
+		wFields.on('cellclick', function(g, row, col) {
 			if(col == 2) {
 				var listBox = new ListBox({
-					height: 80,
 					displayField: 'descrp',
-					valueField: 'code',
-					store: Ext.StoreMgr.get('systemDataTypesStore')
+					valueField: 'type',
+					store: Ext.StoreMgr.get('randomValueFuncStore')
 				});
 				
 				var win = new Ext.Window({
-					width: 250,
-					height: 500,
+					width: 350,
+					height: 300,
 					modal: true,
-					title: '选择信息类型',
+					title: '选择数据类型',
 					closeAction: 'close',
 					layout: 'fit',
 					items: listBox,
@@ -77,8 +76,8 @@ SystemInfoDialog = Ext.extend(KettleDialog, {
 			};
 		};
 		
-		SystemInfoDialog.superclass.initComponent.call(this);
+		RandomValueDialog.superclass.initComponent.call(this);
 	}
 });
 
-Ext.reg('SystemInfo', SystemInfoDialog);
+Ext.reg('RandomValue', RandomValueDialog);
