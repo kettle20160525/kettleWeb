@@ -129,7 +129,14 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '本地目录',
 					anchor: '-10',
 					items: [wLocalDir,{
-						xtype: 'button', text: '浏览...'
+						xtype: 'button', text: '浏览...',handler: function() {
+							var dialog = new FileExplorerWindow();
+							dialog.on('ok', function(path) {
+								wLocalDir.setValue(path);
+								dialog.close();
+							});
+							dialog.show();
+						}
 					}]
 				}, wTongpeifu, wDellocalfileAfterupload, wNotcoverremotefiles ]
 			}, 
