@@ -3,6 +3,7 @@ package org.flhy.webapp.controller;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Toolkit;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -292,6 +293,24 @@ public class TransGraphController {
 			
 			JsonUtils.responseXml(XMLHandler.getXMLHeader() + mxUtils.getXml(e));
 		}
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/nextSteps")
+	protected void nextSteps(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.TRANS_CODEC);
+		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
+		
+		JSONArray jsonArray = new JSONArray();
+		StepMeta stepinfo = transMeta.findStep( URLDecoder.decode(stepName, "utf-8") );
+		List<StepMeta> steps = transMeta.findNextSteps(stepinfo);
+		for(StepMeta stepMeta : steps) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", stepMeta.getName());
+			jsonArray.add(jsonObject);
+		}
+		
+		JsonUtils.response(jsonArray);
 	}
 	
 	/**

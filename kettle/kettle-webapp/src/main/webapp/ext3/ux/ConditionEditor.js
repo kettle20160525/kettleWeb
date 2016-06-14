@@ -5,21 +5,6 @@ ControlField = Ext.extend(Ext.form.TextField, {
 });
 Ext.reg('controlfield', ControlField);
 
-ValueMetaAndData = Ext.extend(Object, {
-	constructor: function(cfg) {
-		this.name = 'constant';
-		Ext.apply(this, cfg);
-	},
-	toString: function() {
-		
-		return syncCall({
-            url: "system/valueString.do",    
-            params: {valueMeta: Ext.encode(this)}
-        });
-		
-	}
-});
-
 Condition = Ext.extend(Ext.util.Observable, {
 	constructor: function(config){
 		this.operator = 0;
@@ -31,28 +16,22 @@ Condition = Ext.extend(Ext.util.Observable, {
 		this.right_valuename = null;
 		this.right_exact = null;
 		
-		Ext.apply(this, config);
-		if(config.conditions) {
-			delete this.conditions;
-			
-			for(var i=0; i<config.conditions.length; i++) {
-				var c = new Condition(config.conditions[i]);
-				this.list.push(c);
+		if(config) {
+			Ext.apply(this, config);
+			if(config.conditions) {
+				delete this.conditions;
+				
+				for(var i=0; i<config.conditions.length; i++) {
+					var c = new Condition(config.conditions[i]);
+					this.list.push(c);
+				}
 			}
-		}
-		if(config.right_exact) {
-			delete this.right_exact;
-			this.right_exact = new ValueMetaAndData(config.right_exact);
 		}
 		
 		this.operators =  [ "-", "OR", "AND", "NOT", "OR NOT", "AND NOT", "XOR" ];
 		this.functions = ["=", "<>", "<", "<=", ">", ">=", "REGEXP", "IS NULL", "IS NOT NULL", 
 			"IN LIST", "CONTAINS", "STARTS WITH", "ENDS WITH", "LIKE", "TRUE"];
 		
-		this.addEvents({
-			"fired" : true,
-			"quit" : true
-		});
 
 		// Call our superclass constructor to complete construction process.
 		Condition.superclass.constructor.call(this, config);
@@ -70,7 +49,7 @@ Condition = Ext.extend(Ext.util.Observable, {
 		value.func = this.func;
 		value.right_valuename = this.right_valuename;
 		if(this.right_exact != null) {
-			value.right_exact = Ext.encode(this.right_exact);
+			value.right_exact = this.right_exact;
 		}
 		
 		return value;
@@ -192,7 +171,10 @@ Condition = Ext.extend(Ext.util.Observable, {
 		if(this.right_exact == null)
 			return null;
 		
-		return this.right_exact.toString();
+		return syncCall({
+			url: "system/valueString.do",    
+			params: {valueMeta: Ext.encode(this.right_exact)}
+		});
 	},
 	
 	getOperator: function() {
@@ -384,7 +366,6 @@ ConditionEditor = Ext.extend(Ext.Container, {
 		var parents = this.parents;
 		if ( parents.length > 0 ) {
 			this.active_condition = parents.pop();
-
 			this.doLayout();
 		}
 	 },
@@ -534,8 +515,8 @@ ConditionEditor = Ext.extend(Ext.Container, {
 			if(active_condition.getFunc() == 7 || active_condition.getFunc() == 8) valueControl.setValue('-');
 			
 			valueControl.getEl().on('click', function() {
-				var dialog = new EnterValueDialog();
-				dialog.on('sure', function(v) {
+				var dialog = new EnterValueDialog({value: active_condition.right_exact});
+				dialog.on('ok', function(v) {
 					active_condition.setRightValuename( null );
 	                active_condition.setRightExact( v );
 	                

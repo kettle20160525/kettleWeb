@@ -61,8 +61,6 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/KettleFileRepositoryDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/dialogs/repository/RepositoriesDialog.js"></script>
 	    
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/DebugWin.js"></script>
-	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextFieldDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/TextAreaDialog.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/FileExplorerWindow.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/other/AnswerDialog.js"></script>
