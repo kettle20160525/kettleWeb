@@ -60,6 +60,7 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 				useraliveftpconnection: wUsealiveftpconnection.getValue()   ? "Y" : "N" ,
 				controlencode: wControlEncode.getValue(),
 				
+				localdir:wLocalDir.getValue(),
 				tongpeifu: wTongpeifu.getValue(),
 				dellocalfileafterupload: wDellocalfileAfterupload.getValue()  ? "Y" : "N" ,
 				notcoverremotefiles: wNotcoverremotefiles.getValue() ? "Y" : "N" ,
