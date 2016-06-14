@@ -127,8 +127,10 @@ BaseGraph = Ext.extend(Ext.Panel, {
 			Ext.each(evt.getProperty('edit').changes, function(change) {
 				if (change.constructor == mxCellAttributeChange && change.cell != null)    {
 					var cell = change.cell, root = graph.getDefaultParent();
-					if(cell.getId() == root.getId())
+					if(cell.getId() == root.getId()) {
 						me.getDatabaseStore();
+						me.getSlaveServerStore();
+					}
 					
 					if(cell.isEdge() && cell.value.nodeName == 'JobHop') {
 						if(change.attribute == 'label') return;
@@ -426,6 +428,105 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		return this.databaseStore;
 	},
 	
+	onDatabaseMerge: function(json) {
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent();
+		var databases = root.getAttribute('databases');
+		var jsonArray = Ext.decode(databases);
+		
+		if(jsonArray.length == 0) {
+			jsonArray.push(json);
+		} else {
+			Ext.each(jsonArray, function(item, index) {
+				if(item.name == json.name) {
+					jsonArray.splice(index, 1, json);
+				} else {
+					if(index == jsonArray.length - 1)
+						jsonArray.push(json);
+				}
+			});
+		}
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+			var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
+        	graph.getModel().execute(edit);
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
+	getSlaveServerStore: function() {
+		if(!this.slaveServerStore) {
+			this.slaveServerStore = new Ext.data.JsonStore({
+				idProperty: 'name',
+				fields: ['name', '', 'hostname', 'port', 'webAppName', 'username', 'password', 'master']
+			});
+		}
+		var graph = this.getGraph();
+		var cell = graph.getDefaultParent(), data = [];
+		if(cell.getAttribute('slaveServers') != null)
+			data = Ext.decode(cell.getAttribute('slaveServers'));
+		this.slaveServerStore.loadData(data);
+		
+		return this.slaveServerStore;
+	},
+	
+	onSlaveServerMerge: function(json) {
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent();
+		var slaveServers = root.getAttribute('slaveServers');
+		var jsonArray = Ext.decode(slaveServers);
+		
+		if(jsonArray.length == 0) {
+			jsonArray.push(json);
+		} else {
+			Ext.each(jsonArray, function(item, index) {
+				if(item.name == json.name) {
+					jsonArray.splice(index, 1, json);
+				} else {
+					if(index == jsonArray.length - 1)
+						jsonArray.push(json);
+				}
+			});
+		}
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+			var edit = new mxCellAttributeChange(root, 'slaveServers', Ext.encode(jsonArray));
+        	graph.getModel().execute(edit);
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
+	onSlaveServerDel: function(name) {
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent();
+		var slaveServers = root.getAttribute('slaveServers');
+		var jsonArray = Ext.decode(slaveServers);
+		
+		Ext.each(jsonArray, function(item, index) {
+			if(item.name == name) {
+				jsonArray.splice(index, 1);
+			}
+		});
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+			var edit = new mxCellAttributeChange(root, 'slaveServers', Ext.encode(jsonArray));
+        	graph.getModel().execute(edit);
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
 	tableFields: function(connection, schema, table, cb) {
 		var store = new Ext.data.JsonStore({
 			idProperty: 'name',
@@ -450,17 +551,9 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		return store;
 	},
 	
-	getSlaveServerStore: function() {
-		var slaveServerStore = new Ext.data.JsonStore({
-			idProperty: 'name',
-			fields: ['name']
-		}), graph = this.getGraph();
-		var cell = graph.getDefaultParent(), data = [];
-		if(cell.getAttribute('slaveServers') != null)
-			data = Ext.decode(cell.getAttribute('slaveServers'));
-		slaveServerStore.loadData(data);
-		
-		return slaveServerStore;
+	showSlaves: function() {
+		var dialog = new SlaveServersDialog();
+		dialog.show();
 	},
 	
 	listParameters: function() {

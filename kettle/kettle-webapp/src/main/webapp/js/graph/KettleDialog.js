@@ -1,7 +1,8 @@
 KettleForm = Ext.extend(Ext.form.FormPanel, {
 	labeWidth: 100,
 	labelAlign: 'right',
-	defaultType: 'textfield'
+	defaultType: 'textfield',
+	bodyStyle: 'padding: 10px 0px'
 });
 Ext.reg('KettleForm', KettleForm);
 
@@ -127,4 +128,3 @@ KettleTabDialog = Ext.extend(KettleDialog, {
 		KettleTabDialog.superclass.initComponent.call(this);
 	}
 });
-

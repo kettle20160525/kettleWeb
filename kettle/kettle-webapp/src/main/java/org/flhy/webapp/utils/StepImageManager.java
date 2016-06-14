@@ -48,40 +48,40 @@ public class StepImageManager {
 		}
 	}
 	
-	public static BufferedImage getUniversalImage(ClassLoader classLoader, String filename, String size) throws IOException {
+	public static BufferedImage getUniversalImage(ClassLoader classLoader, String filename, int scale) throws IOException {
 
 		if (StringUtils.isBlank(filename)) {
 			log.logError("Unable to load image [" + filename + "]");
-			return getImageAsResource(NO_IMAGE, size);
+			return getImageAsResource(NO_IMAGE, scale);
 		}
 
 		BufferedImage result = null;
 		if (SvgSupport.isSvgEnabled()) {
-			result = getUniversalImageInternal(classLoader, SvgSupport.toSvgName(filename), size);
+			result = getUniversalImageInternal(classLoader, SvgSupport.toSvgName(filename), scale);
 		}
 
 		if (result == null) {
-			result = getUniversalImageInternal(classLoader, SvgSupport.toPngName(filename), size);
+			result = getUniversalImageInternal(classLoader, SvgSupport.toPngName(filename), scale);
 		}
 
 		if (result == null) {
 			log.logError("Unable to load image [" + filename + "]");
-			result = getImageAsResource(NO_IMAGE, size);
+			result = getImageAsResource(NO_IMAGE, scale);
 		}
 		return result;
 	}
 
-	public static BufferedImage getImageAsResource(String location, String size) throws IOException {
+	public static BufferedImage getImageAsResource(String location, int scale) throws IOException {
 		BufferedImage result = null;
 		if (result == null && SvgSupport.isSvgEnabled()) {
-			result = getImageAsResourceInternal(SvgSupport.toSvgName(location), size);
+			result = getImageAsResourceInternal(SvgSupport.toSvgName(location), scale);
 		}
 		if (result == null) {
-			result = getImageAsResourceInternal(SvgSupport.toPngName(location), size);
+			result = getImageAsResourceInternal(SvgSupport.toPngName(location), scale);
 		}
 		if (result == null && !location.equals(NO_IMAGE)) {
 			log.logError("Unable to load image [" + location + "]");
-			result = getImageAsResource(NO_IMAGE, size);
+			result = getImageAsResource(NO_IMAGE, scale);
 		}
 		if (result == null) {
 			log.logError("Unable to load image [" + location + "]");
@@ -90,14 +90,14 @@ public class StepImageManager {
 		return result;
 	}
 	
-	private static BufferedImage getUniversalImageInternal(ClassLoader classLoader, String filename, String size) throws IOException {
-		BufferedImage result = loadFromClassLoader(classLoader, filename, size);
+	private static BufferedImage getUniversalImageInternal(ClassLoader classLoader, String filename, int scale) throws IOException {
+		BufferedImage result = loadFromClassLoader(classLoader, filename, scale);
 		if (result == null) {
-			result = loadFromClassLoader(classLoader, "/" + filename, size);
+			result = loadFromClassLoader(classLoader, "/" + filename, scale);
 			if (result == null) {
-				result = loadFromClassLoader(classLoader, "ui/images/" + filename, size);
+				result = loadFromClassLoader(classLoader, "ui/images/" + filename, scale);
 				if (result == null) {
-					result = getImageAsResourceInternal(filename, size);
+					result = getImageAsResourceInternal(filename, scale);
 				}
 			}
 		}
@@ -107,7 +107,7 @@ public class StepImageManager {
 	/**
 	 * Internal image loading by ClassLoader.getResourceAsStream.
 	 */
-	private static BufferedImage loadFromClassLoader(ClassLoader classLoader, String location, String size) throws IOException {
+	private static BufferedImage loadFromClassLoader(ClassLoader classLoader, String location, int scale) throws IOException {
 		InputStream s = null;
 		try {
 			s = classLoader.getResourceAsStream(location);
@@ -118,7 +118,7 @@ public class StepImageManager {
 			return null;
 		}
 		try {
-			return loadImage(s, location, size);
+			return loadImage(s, location, scale);
 		} finally {
 			IOUtils.closeQuietly(s);
 		}
@@ -127,16 +127,16 @@ public class StepImageManager {
 	/**
 	 * Load image from several sources.
 	 */
-	private static BufferedImage getImageAsResourceInternal(String location, String size) throws IOException {
+	private static BufferedImage getImageAsResourceInternal(String location, int scale) throws IOException {
 		BufferedImage result = null;
 		if (result == null) {
-			result = loadFromCurrentClasspath(location, size);
+			result = loadFromCurrentClasspath(location, scale);
 		}
 		if (result == null) {
-			result = loadFromBasedVFS(location, size);
+			result = loadFromBasedVFS(location, scale);
 		}
 		if (result == null) {
-			result = loadFromSimpleVFS(location, size);
+			result = loadFromSimpleVFS(location, scale);
 		}
 		return result;
 	}
@@ -145,7 +145,7 @@ public class StepImageManager {
 	 * Internal image loading by
 	 * Thread.currentThread.getContextClassLoader.getResource.
 	 */
-	private static BufferedImage loadFromCurrentClasspath(String location, String size) throws IOException {
+	private static BufferedImage loadFromCurrentClasspath(String location, int scale) throws IOException {
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		if (cl == null) {
 			// Can't count on Thread.currentThread().getContextClassLoader()
@@ -172,7 +172,7 @@ public class StepImageManager {
 			return null;
 		}
 		try {
-			return loadImage(s, location, size);
+			return loadImage(s, location, scale);
 		} finally {
 			IOUtils.closeQuietly(s);
 		}
@@ -181,7 +181,7 @@ public class StepImageManager {
 	/**
 	 * Internal image loading from Kettle's user.dir VFS.
 	 */
-	private static BufferedImage loadFromBasedVFS(String location, String size) throws IOException {
+	private static BufferedImage loadFromBasedVFS(String location, int scale) throws IOException {
 		try {
 			FileObject imageFileObject = KettleVFS.getInstance().getFileSystemManager().resolveFile(base, location);
 			InputStream s = KettleVFS.getInputStream(imageFileObject);
@@ -189,7 +189,7 @@ public class StepImageManager {
 				return null;
 			}
 			try {
-				return loadImage(s, location, size);
+				return loadImage(s, location, scale);
 			} finally {
 				IOUtils.closeQuietly(s);
 			}
@@ -198,14 +198,14 @@ public class StepImageManager {
 		}
 	}
 
-	private static BufferedImage loadFromSimpleVFS(String location, String size) throws IOException {
+	private static BufferedImage loadFromSimpleVFS(String location, int scale) throws IOException {
 		try {
 			InputStream s = KettleVFS.getInputStream(location);
 			if (s == null) {
 				return null;
 			}
 			try {
-				return loadImage(s, location, size);
+				return loadImage(s, location, scale);
 			} finally {
 				IOUtils.closeQuietly(s);
 			}
@@ -215,7 +215,7 @@ public class StepImageManager {
 		return null;
 	}
 	
-	private static BufferedImage loadImage(InputStream in, String filename, String size) throws IOException {
+	private static BufferedImage loadImage(InputStream in, String filename, int scale) throws IOException {
 		if (SvgSupport.isSvgName(filename)) {
 			SAXSVGDocumentFactory factory = new SAXSVGDocumentFactory( XMLResourceDescriptor.getXMLParserClassName() );
 			Document doc = factory.createDocument( null, in );
@@ -226,13 +226,13 @@ public class StepImageManager {
 		    GraphicsNode svgGraphicsNode = builder.build( ctx, doc );
 		    Dimension2D svgGraphicsSize = ctx.getDocumentSize();
 		    
-		    BufferedImage image = SvgImageUrl.createImage(size);//new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+		    BufferedImage image = SvgImageUrl.createImage(scale);//new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
 		    renderSvg( image, svgGraphicsNode, svgGraphicsSize, 0 );
 		    
 		    return image;
 		} else {
 			BufferedImage image = ImageIO.read(in);
-			BufferedImage result = (BufferedImage) image.getScaledInstance(SvgImageUrl.getWidth(size), SvgImageUrl.getHeight(size), Image.SCALE_DEFAULT);
+			BufferedImage result = (BufferedImage) image.getScaledInstance(scale, scale, Image.SCALE_DEFAULT);
 			return result;
 		}
 	}

@@ -68,7 +68,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			wExecLocal.setValue(data.exec_local == 'Y');
 			
 			wExecRemote.setValue(data.exec_remote == 'Y');
-			if(data.remote_server) wRemoteHost.setValue(data.remote_server.name);
+			wRemoteHost.setValue(data.remote_server);
 			wPassExport.setValue(data.pass_export == 'Y');
 			
 			wExecCluster.setValue(data.exec_cluster == 'Y');
@@ -94,7 +94,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			data.exec_local = wExecLocal.getValue() ? "Y" : "N";
 			
 			data.exec_remote = wExecRemote.getValue() ? "Y" : "N";
-			data.remote_server = {name: wRemoteHost.getValue()};
+			data.remote_server = wRemoteHost.getValue();
 			data.pass_export = wPassExport.getValue() ? "Y" : "N";
 			
 			data.exec_cluster = wExecCluster.getValue() ? "Y" : "N";

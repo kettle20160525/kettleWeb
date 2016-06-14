@@ -1,11 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>txtFileOutput</name>
+    <name>server</name>
     <description/>
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
-    <trans_status>0</trans_status>
     <directory>&#x2f;</directory>
     <parameters>
     </parameters>
@@ -62,48 +62,81 @@
     <partitionschemas>
     </partitionschemas>
     <slaveservers>
+         <slaveserver><name>localhost</name><hostname>127.0.0.1</hostname><port>8080</port><webAppName/><username>master</username><password>Encrypted 2be98afc86aa7f2e4cb79a371cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master><sslMode>N</sslMode></slaveserver>
     </slaveservers>
     <clusterschemas>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2016&#x2f;05&#x2f;30 22&#x3a;04&#x3a;46.784</created_date>
+  <created_date>2016&#x2f;06&#x2f;07 09&#x3a;26&#x3a;27.704</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;13 23&#x3a;08&#x3a;46.790</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;07 09&#x3a;26&#x3a;27.704</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
-  <connection>
-    <name>SampleData</name>
-    <server/>
-    <type>H2</type>
-    <access>JNDI</access>
-    <database>SampleData</database>
-    <port>1521</port>
-    <username/>
-    <password>Encrypted </password>
-    <servername/>
-    <data_tablespace/>
-    <index_tablespace/>
-    <attributes>
-      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>INITIAL_POOL_SIZE</code><attribute>5</attribute></attribute>
-      <attribute><code>MAXIMUM_POOL_SIZE</code><attribute>10</attribute></attribute>
-      <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
-      <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
-      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
-      <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
-      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
-      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
-      <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>
-    </attributes>
-  </connection>
   <order>
-  <hop> <from>&#x8868;&#x8f93;&#x5165;</from><to>&#x8fc7;&#x6ee4;&#x8bb0;&#x5f55;</to><enabled>Y</enabled> </hop>
-  <hop> <from>&#x8fc7;&#x6ee4;&#x8bb0;&#x5f55;</from><to>&#x6587;&#x672c;&#x6587;&#x4ef6;&#x8f93;&#x51fa;</to><enabled>Y</enabled> </hop>
+  <hop> <from>&#x751f;&#x6210;&#x968f;&#x673a;&#x6570;</from><to>&#x589e;&#x52a0;&#x5e38;&#x91cf;</to><enabled>Y</enabled> </hop>
+  <hop> <from>&#x589e;&#x52a0;&#x5e38;&#x91cf;</from><to>&#x6587;&#x672c;&#x6587;&#x4ef6;&#x8f93;&#x51fa;</to><enabled>Y</enabled> </hop>
   </order>
+  <step>
+    <name>&#x751f;&#x6210;&#x968f;&#x673a;&#x6570;</name>
+    <type>RandomValue</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>age</name>
+        <type>random integer</type>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>96</xloc>
+      <yloc>112</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>&#x589e;&#x52a0;&#x5e38;&#x91cf;</name>
+    <type>Constant</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>name</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif>zhangsan</nullif>
+        <length>-1</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>160</xloc>
+      <yloc>224</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
   <step>
     <name>&#x6587;&#x672c;&#x6587;&#x4ef6;&#x8f93;&#x51fa;</name>
     <type>TextFileOutput</type>
@@ -129,7 +162,7 @@
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>D&#x3a;&#x5c;123&#x5c;222</name>
+      <name>D&#x3a;&#x5c;123&#x5c;file</name>
       <is_command>N</is_command>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
@@ -148,7 +181,7 @@
     </file>
     <fields>
       <field>
-        <name>CUSTOMERNUMBER</name>
+        <name>age</name>
         <type>Integer</type>
         <format>&#x23;&#x3b;-&#x23;</format>
         <currency/>
@@ -156,11 +189,11 @@
         <group>,</group>
         <nullif/>
         <trim_type>none</trim_type>
-        <length>9</length>
+        <length>10</length>
         <precision>0</precision>
       </field>
       <field>
-        <name>CUSTOMERNAME</name>
+        <name>name</name>
         <type>String</type>
         <format/>
         <currency/>
@@ -168,201 +201,14 @@
         <group/>
         <nullif/>
         <trim_type>none</trim_type>
-        <length>50</length>
+        <length>-1</length>
         <precision>-1</precision>
-      </field>
-      <field>
-        <name>CONTACTLASTNAME</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>CONTACTFIRSTNAME</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>PHONE</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>ADDRESSLINE1</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>ADDRESSLINE2</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>CITY</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>STATE</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>POSTALCODE</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>15</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>COUNTRY</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>50</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>SALESREPEMPLOYEENUMBER</name>
-        <type>Integer</type>
-        <format>&#x23;&#x3b;-&#x23;</format>
-        <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>9</length>
-        <precision>0</precision>
-      </field>
-      <field>
-        <name>CREDITLIMIT</name>
-        <type>Integer</type>
-        <format>&#x23;&#x3b;-&#x23;</format>
-        <currency/>
-        <decimal>.</decimal>
-        <group>,</group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>17</length>
-        <precision>0</precision>
       </field>
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>370</xloc>
-      <yloc>290</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>&#x8868;&#x8f93;&#x5165;</name>
-    <type>TableInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <connection>SampleData</connection>
-    <sql>SELECT&#xd;&#xa;  CUSTOMERNUMBER&#xd;&#xa;, CUSTOMERNAME&#xd;&#xa;, CONTACTLASTNAME&#xd;&#xa;, CONTACTFIRSTNAME&#xd;&#xa;, PHONE&#xd;&#xa;, ADDRESSLINE1&#xd;&#xa;, ADDRESSLINE2&#xd;&#xa;, CITY&#xd;&#xa;, STATE&#xd;&#xa;, POSTALCODE&#xd;&#xa;, COUNTRY&#xd;&#xa;, SALESREPEMPLOYEENUMBER&#xd;&#xa;, CREDITLIMIT&#xd;&#xa;FROM CUSTOMERS&#xd;&#xa;</sql>
-    <limit>10</limit>
-    <lookup/>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>96</xloc>
-      <yloc>144</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>&#x8fc7;&#x6ee4;&#x8bb0;&#x5f55;</name>
-    <type>FilterRows</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-<send_true_to/>
-<send_false_to/>
-    <compare>
-<condition>
- <negated>N</negated>
- <leftvalue>CUSTOMERNAME</leftvalue>
- <function>LIKE</function>
- <rightvalue/>
- <value><name>constant</name><type>String</type><text>&#x25;Mini&#x25;</text><length>-1</length><precision>-1</precision><isnull>N</isnull><mask/></value> </condition>
-    </compare>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>191</xloc>
-      <yloc>258</yloc>
+      <xloc>224</xloc>
+      <yloc>336</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

@@ -213,7 +213,7 @@ public class TransGraphController {
 		TransMeta transMeta = (TransMeta) codec.decode(graphXml);
 		
 		JSONObject jsonObject = JSONObject.fromObject(executionConfiguration);
-		TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject);
+		TransExecutionConfiguration transExecutionConfiguration = TransExecutionConfigurationCodec.decode(jsonObject, transMeta);
 	    
 	    TransExecutor transExecutor = TransExecutor.initExecutor(transExecutionConfiguration, transMeta);
 	    Thread tr = new Thread(transExecutor, "TransExecutor_" + transExecutor.getExecutionId());
@@ -245,12 +245,12 @@ public class TransGraphController {
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
 			jsonObject.put("log", transExecutor.getExecutionLog());
 			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-			jsonObject.put("previewData", transExecutor.getPreviewData());
+//			jsonObject.put("previewData", transExecutor.getPreviewData());
 		} else {
 			jsonObject.put("stepMeasure", transExecutor.getStepMeasure());
 			jsonObject.put("log", transExecutor.getExecutionLog());
 			jsonObject.put("stepStatus", transExecutor.getStepStatus());
-			jsonObject.put("previewData", transExecutor.getPreviewData());
+//			jsonObject.put("previewData", transExecutor.getPreviewData());
 		}
 		
 		JsonUtils.response(jsonObject);

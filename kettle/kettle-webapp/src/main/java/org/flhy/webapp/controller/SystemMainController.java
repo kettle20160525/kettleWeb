@@ -42,6 +42,8 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.sftp.SFTPClient;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.laf.BasePropertyHandler;
+import org.pentaho.di.trans.steps.randomvalue.RandomValueMeta;
+import org.pentaho.di.trans.steps.randomvalue.RandomValueMetaFunction;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.springframework.stereotype.Controller;
@@ -69,7 +71,7 @@ public class SystemMainController {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
-			jsonObject.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "Folder_image" )));
+			jsonObject.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "Folder_image" )));
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 
@@ -92,8 +94,8 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
 				child.put("pluginId", p.getIds()[0]);
-				child.put("icon", SvgImageUrl.getMiddleUrl(p));
-				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
+				child.put("icon", SvgImageUrl.getUrl(p));
+				child.put("dragIcon", SvgImageUrl.getUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);
 				child.put("leaf", true);
@@ -125,7 +127,7 @@ public class SystemMainController {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("id", "category" + i++);
 			jsonObject.put("text", baseCategory);
-			jsonObject.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "Folder_image" )));
+			jsonObject.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "Folder_image" )));
 			jsonObject.put("cls", "nav-node");
 			JSONArray children = new JSONArray();
 
@@ -136,8 +138,8 @@ public class SystemMainController {
 				child.put("id", startEntry.getEntry().getPluginId());
 				child.put("text", startEntry.getName());
 				child.put("pluginId", startEntry.getEntry().getPluginId());
-				child.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" )));
-				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "STR_image" )));
+				child.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "STR_image" )));
+				child.put("dragIcon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "STR_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", startEntry.getDescription());
 				child.put("leaf", true);
@@ -148,8 +150,8 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", dummyEntry.getName());
 				child.put("pluginId", dummyEntry.getEntry().getPluginId());
-				child.put("icon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" )));
-				child.put("dragIcon", SvgImageUrl.getMiddleUrl(BasePropertyHandler.getProperty( "DUM_image" )));
+				child.put("icon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "DUM_image" )));
+				child.put("dragIcon", SvgImageUrl.getUrl(BasePropertyHandler.getProperty( "DUM_image" )));
 				child.put("cls", "nav");
 				child.put("qtip", dummyEntry.getDescription());
 				child.put("leaf", true);
@@ -176,8 +178,8 @@ public class SystemMainController {
 				child.put("id", "step" + i++);
 				child.put("text", PluginFactory.containBean(p.getIds()[0]) ? pluginName : "<font color='red'>" + pluginName + "</font>");
 				child.put("pluginId", p.getIds()[0]);
-				child.put("icon", SvgImageUrl.getMiddleUrl(p));
-				child.put("dragIcon", SvgImageUrl.getMiddleUrl(p));
+				child.put("icon", SvgImageUrl.getUrl(p));
+				child.put("dragIcon", SvgImageUrl.getUrl(p));
 				child.put("cls", "nav");
 				child.put("qtip", pluginDescription);
 				child.put("leaf", true);
@@ -202,6 +204,24 @@ public class SystemMainController {
 		SystemDataTypes[] values = SystemDataTypes.values();
 		for (SystemDataTypes value : values) {
 			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("code", value.getCode());
+			jsonObject.put("descrp", value.getDescription());
+			jsonArray.add(jsonObject);
+		}
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/randomValueFunc")
+	protected void randomValueFunc() throws IOException {
+		JSONArray jsonArray = new JSONArray();
+		
+		RandomValueMetaFunction[] values = RandomValueMeta.functions;
+		for (RandomValueMetaFunction value : values) {
+			if(value == null) continue;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("type", value.getType());
 			jsonObject.put("code", value.getCode());
 			jsonObject.put("descrp", value.getDescription());
 			jsonArray.add(jsonObject);

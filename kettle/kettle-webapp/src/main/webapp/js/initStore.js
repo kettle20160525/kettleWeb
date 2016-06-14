@@ -30,6 +30,15 @@ Ext.onReady(function() {
 	}).load();
 	
 	new Ext.data.JsonStore({
+		storeId: 'randomValueFuncStore',
+		fields: ['type', 'code', 'descrp'],
+		proxy: new Ext.data.HttpProxy({
+			url: 'system/randomValueFunc.do',
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
 		storeId: 'databaseAccessData',
 		fields: ['value','text'],
 		proxy: new Ext.data.HttpProxy({
