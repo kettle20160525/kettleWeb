@@ -445,7 +445,7 @@ public class JobGraphController {
 		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		
 		JSONObject jsonObject = JSONObject.fromObject(executionConfiguration);
-		JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject);
+		JobExecutionConfiguration jobExecutionConfiguration = JobExecutionConfigurationCodec.decode(jsonObject, jobMeta);
 		
 	    JobExecutor jobExecutor = JobExecutor.initExecutor(jobExecutionConfiguration, jobMeta);
 	    Thread tr = new Thread(jobExecutor, "JobExecutor_" + jobExecutor.getExecutionId());

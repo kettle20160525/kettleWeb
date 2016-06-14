@@ -2,7 +2,7 @@ JobResult = Ext.extend(Ext.TabPanel, {
 	region: 'south',
 	hidden: true,
 	height: 250,
-	activeTab: 2,
+	activeTab: 1,
 	initComponent: function() {
 		var me = this;
 		var jobMeasure = new TreeGrid({

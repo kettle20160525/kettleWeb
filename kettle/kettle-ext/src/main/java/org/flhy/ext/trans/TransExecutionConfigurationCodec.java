@@ -30,7 +30,7 @@ public class TransExecutionConfigurationCodec {
 		
 		jsonObject.put("exec_remote", executionConfiguration.isExecutingRemotely() ? "Y" : "N");
 		if(executionConfiguration.getRemoteServer() != null) {
-			jsonObject.put("remote_server", executionConfiguration.getRemoteServer());
+			jsonObject.put("remote_server", executionConfiguration.getRemoteServer().getName());
 		}
 		jsonObject.put("pass_export", executionConfiguration.isPassingExport() ? "Y" : "N");
 		

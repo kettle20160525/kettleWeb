@@ -68,7 +68,7 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 		this.setValue = function(data) {
 			wExecLocal.setValue(data.exec_local == 'Y');
 			wExecRemote.setValue(data.exec_remote == 'Y');
-			if(data.remote_server) wRemoteHost.setValue(data.remote_server.name);
+			wRemoteHost.setValue(data.remote_server);
 			wPassExport.setValue(data.pass_export == 'Y');
 			wSafeMode.setValue(data.safe_mode == 'Y');
 			wGatherMetrics.setValue(data.gather_metrics == 'Y');
@@ -88,7 +88,7 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 			data.exec_local = wExecLocal.getValue() ? "Y" : "N";
 			
 			data.exec_remote = wExecRemote.getValue() ? "Y" : "N";
-			data.remote_server = {name: wRemoteHost.getValue()};
+			data.remote_server = wRemoteHost.getValue();
 			data.pass_export = wPassExport.getValue() ? "Y" : "N";
 			
 			data.safe_mode = wSafeMode.getValue() ? "Y" : "N";

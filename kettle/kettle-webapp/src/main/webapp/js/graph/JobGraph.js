@@ -36,6 +36,8 @@ JobGraph = Ext.extend(BaseGraph, {
 		},'-',{
 			iconCls: 'exploredb'
 		},'-',{
+			iconCls: 'imageSlave', scope: this, handler: this.showSlaves
+		},'-',{
 			iconCls: 'show-results', scope: this, handler: function() {
 				this.showResultPanel();
 			}
