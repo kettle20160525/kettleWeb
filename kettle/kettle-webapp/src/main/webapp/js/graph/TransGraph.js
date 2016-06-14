@@ -62,22 +62,21 @@ TransGraph = Ext.extend(BaseGraph, {
 			menu.addItem('清除选择', null, function(){me.getGraph().clearSelection();}, null, null, true);
 			menu.addSeparator(null);
 			menu.addItem('查看图形文件', null, function(){
-				var enc = new mxCodec(mxUtils.createXmlDocument());
-				var node = enc.encode(graph.getModel());
-				var debugWin = new DebugWin({fcontent: mxUtils.getPrettyXml(node)});
-				debugWin.show();
+				var dialog = new TextAreaDialog();
+				dialog.show(null, function() {
+					dialog.initData(me.toXml());
+				});
 			}, null, null, true);
 			menu.addItem('查看引擎文件', null, function(){
-				var enc = new mxCodec(mxUtils.createXmlDocument());
-				var node = enc.encode(graph.getModel());
-				
 				Ext.Ajax.request({
 					url: GetUrl('trans/engineXml.do'),
-					params: {graphXml: mxUtils.getPrettyXml(node)},
+					params: {graphXml: me.toXml()},
 					method: 'POST',
 					success: function(response) {
-						var debugWin = new DebugWin({fcontent: response.responseText});
-						debugWin.show();
+						var dialog = new TextAreaDialog();
+						dialog.show(null, function() {
+							dialog.initData(response.responseText);
+						});
 					}
 				});
 			}, null, null, true);
@@ -92,12 +91,10 @@ TransGraph = Ext.extend(BaseGraph, {
 			menu.addSeparator(null);
 			menu.addItem('数据发送......', null, function(){alert(1);}, null, null, true);
 			menu.addItem('改变开始复制的数量...', null, function(){
-				var dialog = new TextFieldDialog({
-					title: '步骤复制的数量...',
-					fieldLabel: '复制的数量（1或更多）：',
-					value: cell.getAttribute('copies'),
-					listeners: {
-						sure: function(num) {
+				Ext.MessageBox.prompt('步骤复制的数量...', '复制的数量（1或更多）：', function(btn, text) {
+					if(btn == 'ok' && text != '') {
+						var num = parseInt(text);
+						if(num > 0) {
 							graph.getModel().beginUpdate();
 							try {
 								var edit = new mxCellAttributeChange(cell, 'copies', num);
@@ -105,11 +102,10 @@ TransGraph = Ext.extend(BaseGraph, {
 								me.showCopies(graph, cell);
 							} finally {
 								graph.getModel().endUpdate();
-							}
+							}							
 						}
 					}
 				});
-				dialog.show();
 			}, null, null, true);
 			menu.addSeparator(null);
 			menu.addItem('复制到剪贴板', null, function(){mxClipboard.cut(graph);}, null, null, true);
@@ -243,6 +239,32 @@ TransGraph = Ext.extend(BaseGraph, {
 		store.baseParams.stepName = encodeURIComponent(stepName);
 		store.baseParams.graphXml = this.toXml();
 		store.baseParams.before = before;
+		store.load();
+		
+		return store;
+	},
+	
+	nextSteps: function(stepName, cb) {
+		var graph = this.getGraph();
+		var store = new Ext.data.JsonStore({
+			fields: ['name'],
+			proxy: new Ext.data.HttpProxy({
+				url: GetUrl('trans/nextSteps.do'),
+				method: 'POST'
+			})
+		});
+		
+		store.on('loadexception', function(misc, s, response) {
+			failureResponse(response);
+		});
+		
+		store.on('load', function() {
+			if(Ext.isFunction(cb))
+				cb(store);
+		});
+		
+		store.baseParams.stepName = encodeURIComponent(stepName);
+		store.baseParams.graphXml = this.toXml();
 		store.load();
 		
 		return store;

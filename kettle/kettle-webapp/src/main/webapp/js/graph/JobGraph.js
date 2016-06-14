@@ -57,22 +57,21 @@ JobGraph = Ext.extend(BaseGraph, {
 			menu.addItem('清除选择', null, function(){me.getGraph().clearSelection();}, null, null, !graph.isSelectionEmpty());
 			menu.addSeparator(null);
 			menu.addItem('查看图形文件', null, function(){
-				var enc = new mxCodec(mxUtils.createXmlDocument());
-				var node = enc.encode(graph.getModel());
-				var debugWin = new DebugWin({fcontent: mxUtils.getPrettyXml(node)});
-				debugWin.show();
+				var dialog = new TextAreaDialog();
+				dialog.show(null, function() {
+					dialog.initData(me.toXml());
+				});
 			}, null, null, true);
 			menu.addItem('查看引擎文件', null, function(){
-				var enc = new mxCodec(mxUtils.createXmlDocument());
-				var node = enc.encode(graph.getModel());
-				
 				Ext.Ajax.request({
 					url: GetUrl('job/engineXml.do'),
-					params: {graphXml: mxUtils.getPrettyXml(node)},
+					params: {graphXml: me.toXml()},
 					method: 'POST',
 					success: function(response) {
-						var debugWin = new DebugWin({fcontent: response.responseText});
-						debugWin.show();
+						var dialog = new TextAreaDialog();
+						dialog.show(null, function() {
+							dialog.initData(response.responseText);
+						});
 					}
 				});
 			}, null, null, true);
