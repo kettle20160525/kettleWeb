@@ -1,6 +1,6 @@
 JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 	width: 700,
-	height: 550,
+	height: 600,
 	title: 'FTP上传',
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
@@ -12,12 +12,13 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 		var wProxyserver = new Ext.form.TextField({fieldLabel: '代理主机',anchor: '-10', value: cell.getAttribute('proxyserver') });
 		var wProxyserverport = new Ext.form.TextField({fieldLabel: '代理端口',anchor: '-10', value: cell.getAttribute('proxyserverport')});
 		var wProxyserverusername = new Ext.form.TextField({fieldLabel: '代理用户名',anchor: '-10', value: cell.getAttribute('proxyserverusername')});
-		var wProxyserverpwd = new Ext.form.TextField({fieldLabel: '代理密码',anchor: '-10', value: cell.getAttribute('proxyserverpwd')});
+		var wProxyserverpwd = new Ext.form.TextField({fieldLabel: '代理密码',flex:1 , value: cell.getAttribute('proxyserverpwd')});
 		
 		// 测试连接  一个按钮
 		var wBinaryMode = new Ext.form.Checkbox({fieldLabel: '二进制模式', checked: cell.getAttribute('binarymode') == 'Y'});
 		var wTimeout = new Ext.form.TextField({fieldLabel: '超时',anchor: '-10', value: cell.getAttribute('timeout')});
 		var wUsealiveftpconnection = new Ext.form.Checkbox({fieldLabel: '使用活动的FTP连接', checked: cell.getAttribute('usealiveftpconnection') == 'Y'});
+
 		var wControlEncode = new Ext.form.ComboBox({
 			fieldLabel: '控制编码',
 			anchor: '-10',
@@ -27,14 +28,16 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: Ext.StoreMgr.get('contrlEncodeStore'),
+			store: Ext.StoreMgr.get('availableCharsetsStore'),
 			value: cell.getAttribute('contrlEncode')
 		});
 		
 		
+		var wLocalDir = new Ext.form.TextField({fieldLabel: '本地目录',flex:1 , value: cell.getAttribute('localdir')});
 		var wTongpeifu = new Ext.form.TextField({fieldLabel: '通配符', anchor: '-10', value: cell.getAttribute('tongpeifu')});
 		var wDellocalfileAfterupload = new Ext.form.Checkbox({fieldLabel: '上传文件后删除本地文件', checked: cell.getAttribute('dellocalfilesafterupload')=='Y'  });
 		var wNotcoverremotefiles= new Ext.form.Checkbox({fieldLabel: '不覆盖文件', checked: cell.getAttribute('notcoverremotefiles')=='Y'  });
+		var wRemoteDir = new Ext.form.TextField({fieldLabel: '远程目录',flex:1 , value: cell.getAttribute('remotedir')});
 		
 		var wProxy2server = new Ext.form.TextField({fieldLabel: '主机', anchor: '-10', value: cell.getAttribute('proxy2server')});
 		var wProxy2serverport = new Ext.form.TextField({fieldLabel: '端口', anchor: '-10', value: cell.getAttribute('proxy2serverport')});
@@ -43,24 +46,24 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 		
 		this.getValues = function(){
 			return {
-				servername: wServerName.getValue(),
-				serverport: wServerPort.getValue(),
-				username: wUserName.getValue(),
-				password: wPassword.getValue(),
-				proxyserver: wProxyserver.getValue() ,
-				proxyserverport: wProxyserverport.getValue(),
-				proxyserverusername: wProxyserverusername.getValue(),
-				proxyserverpwd: wProxyserverpwd.getValue(),
+				servername : wServerName.getValue(),
+				serverport : wServerPort.getValue(),
+				username : wUserName.getValue(),
+				password : wPassword.getValue(),
+				proxyserver : wProxyserver.getValue() ,
+				proxyserverport : wProxyserverport.getValue(),
+				proxyserverusername : wProxyserverusername.getValue(),
+				proxyserverpwd : wProxyserverpwd.getValue(),
 				
-				binarymode:wBinaryMode.getValue()?"Y":"N",
-				timeout: wTimeout.getValue(),
-				useraliveftpconnection: wUsealiveftpconnection.getValue()?"Y":"N",
+				binarymode : wBinaryMode.getValue()   ? "Y" : "N"   ,
+				timeout : wTimeout.getValue(),
+				useraliveftpconnection: wUsealiveftpconnection.getValue()   ? "Y" : "N" ,
 				controlencode: wControlEncode.getValue(),
 				
 				tongpeifu: wTongpeifu.getValue(),
-				dellocalfileafterupload: wDellocalfileAfterupload.getValue()?"Y":"N",
-				notcoverremotefiles: wNotcoverremotefiles.getValue()?"Y":"N",
-				proxypassword: wProxyPassword.getValue(),
+				dellocalfileafterupload: wDellocalfileAfterupload.getValue()  ? "Y" : "N" ,
+				notcoverremotefiles: wNotcoverremotefiles.getValue() ? "Y" : "N" ,
+				remotedir: wRemoteDir.getValue(),
 				
 				proxy2server: wProxy2server.getValue(),
 				proxy2serverport: wProxy2serverport.getValue(),
@@ -80,19 +83,33 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 				xtype: 'fieldset',
 				title: '服务器设置',
 				items: [wServerName, wServerPort, wUserName, wPassword,wProxyserver, 
-				        wProxyserverport,  wProxyserverusername, wProxyserverpwd,{
+				        wProxyserverport,  wProxyserverusername,{
 								xtype: 'compositefield',
-								fieldLabel: '测试',
+								fieldLabel: '代理密码',
 								anchor: '-10',
-								items: [ {
-									xtype: 'button', text: '测试连接'
+								items: [ wProxyserverpwd,{
+									xtype: 'button', text: '测试连接', handler: function() {
+											me.onSure(false);
+											
+											Ext.Ajax.request({
+												url: GetUrl('job/ftpputtest.do'),
+												method: 'POST',
+												params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+												success: function(response) {
+													decodeResponse(response, function(resObj) {
+														Ext.Msg.alert(resObj.title, resObj.message);
+													});
+												},
+												failure: failureResponse
+											});
+										}
 								}]
 							}
 				]
 			},{
 				xtype: 'fieldset',
 				title: '高级设置',
-				items: [ wBinaryMode, wTimeout, wUsealiveftpconnection,wProxyType ]
+				items: [ wBinaryMode, wTimeout, wUsealiveftpconnection,wControlEncode ]
 			}]
 		},
 		
@@ -111,7 +128,7 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					xtype: 'compositefield',
 					fieldLabel: '本地目录',
 					anchor: '-10',
-					items: [{
+					items: [wLocalDir,{
 						xtype: 'button', text: '浏览...'
 					}]
 				}, wTongpeifu, wDellocalfileAfterupload, wNotcoverremotefiles ]
@@ -123,7 +140,7 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					xtype: 'compositefield',
 					fieldLabel: '远程目录',
 					anchor: '-10',
-					items: [ {
+					items: [wRemoteDir, {
 						xtype: 'button', text: '测试目录'
 					}]
 				}]
