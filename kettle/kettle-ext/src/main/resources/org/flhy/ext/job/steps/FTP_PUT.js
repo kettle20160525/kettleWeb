@@ -1,6 +1,6 @@
 JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 	width: 700,
-	height: 600,
+	height: 700,
 	title: 'FTP上传',
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
