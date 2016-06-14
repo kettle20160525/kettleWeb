@@ -72,16 +72,36 @@ public class JobEntryFTP_PUT extends AbstractJobEntry{
 
 		Document doc = mxUtils.createDocument();
 		Element e = doc.createElement(PropsUI.JOB_JOBENTRY_NAME);
-		//一般
-		e.setAttribute("timeout", jobEntryFTPPUT.getTimeout()+"");
+		//一般---服务器设置
+		e.setAttribute("servername", jobEntryFTPPUT.getServerName());
 		e.setAttribute("serverport", jobEntryFTPPUT.getServerPort());
-		//控制编码的处理
+		e.setAttribute("username", jobEntryFTPPUT.getUserName());
+		e.setAttribute("password", jobEntryFTPPUT.getPassword());
+		e.setAttribute("proxyserver", jobEntryFTPPUT.getProxyHost());
+		e.setAttribute("proxyserverport", jobEntryFTPPUT.getProxyPort());
+		e.setAttribute("proxyserverusername", jobEntryFTPPUT.getProxyUsername());
+		e.setAttribute("proxyserverpwd", jobEntryFTPPUT.getProxyPassword());
+
+		//一般----高级设置
+		e.setAttribute("binarymode", jobEntryFTPPUT.isBinaryMode() ?"Y":"N");
+		e.setAttribute("timeout", jobEntryFTPPUT.getTimeout()+"");
+		e.setAttribute("usealiveftpconnection",  jobEntryFTPPUT.isActiveConnection() ?"Y":"N");
 		e.setAttribute("contrlEncode",jobEntryFTPPUT.getControlEncoding() );
-		System.out.println("控制编码my"+jobEntryFTPPUT.getControlEncoding());
+
+		//文件---源（本地）文件
+		e.setAttribute("localdir", jobEntryFTPPUT.getLocalDirectory());
+		e.setAttribute("tongpeifu", jobEntryFTPPUT.getWildcard());
+		e.setAttribute("dellocalfilesafterupload", jobEntryFTPPUT.getRemove()?"Y":"N");
+		e.setAttribute("notcoverremotefiles", jobEntryFTPPUT.isOnlyPuttingNewFiles()?"Y":"N");
 		
-		//文件
-		//Sockets处理
+		//文件---目标（远程）文件
+		e.setAttribute("remotedir", jobEntryFTPPUT.getRemoteDirectory());
+		
+		//Sockets代理---代理
+		e.setAttribute("proxy2server", jobEntryFTPPUT.getProxyHost());
 		e.setAttribute("proxy2serverport", jobEntryFTPPUT.getProxyPort());
+		e.setAttribute("proxy2serverusername", jobEntryFTPPUT.getProxyUsername());
+		e.setAttribute("proxy2serverpwd", jobEntryFTPPUT.getProxyPassword());
 		
 		return e;
 	}
