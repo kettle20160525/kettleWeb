@@ -148,8 +148,22 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 					fieldLabel: '远程目录',
 					anchor: '-10',
 					items: [wRemoteDir, {
-						xtype: 'button', text: '测试目录'
-					}]
+						xtype: 'button', text: '测试目录',handler: function() {
+							me.onSure(false);
+							Ext.Ajax.request({
+								url: GetUrl('job/ftpputtestremotedir.do'),
+								method: 'POST',
+								params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+								success: function(response) {
+									decodeResponse(response, function(resObj) {
+										Ext.Msg.alert(resObj.title, resObj.message);
+									});
+								},
+								failure: failureResponse
+							});
+						}
+					}
+					]
 				}]
 			}
 			]
