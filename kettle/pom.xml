@@ -12,24 +12,14 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>kettle-core</artifactId>
 			<version>6.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.pentaho.di</groupId>
-			<artifactId>commons-pool</artifactId>
-			<version>1.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.pentaho.di</groupId>
-			<artifactId>commons-dbcp</artifactId>
-			<version>1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.pentaho.di</groupId>
-			<artifactId>edtftpj</artifactId>
-			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.pentaho.di</groupId>
@@ -98,6 +88,10 @@
 			<version>2.0.1</version>
 			<exclusions>
 				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+				<exclusion>
 					<artifactId>xmlParserAPIs</artifactId>
 					<groupId>xerces</groupId>
 				</exclusion>
@@ -127,11 +121,23 @@
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-svg-dom</artifactId>
 			<version>1.7</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>batik-bridge</artifactId>
 			<version>1.7</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jsonpath</groupId>
@@ -167,6 +173,11 @@
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
 			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.enterprisedt</groupId>
+			<artifactId>edtftpj</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 	</dependencies>
 
