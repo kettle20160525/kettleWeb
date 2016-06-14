@@ -35,6 +35,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositorySecurityProvider;
+import org.pentaho.di.ui.job.entries.ftpput.JobEntryFTPPUTDialog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -286,6 +287,62 @@ public class JobGraphController {
 		JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.ErrorConnect.Title.Bad" ), 
 				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.ErrorConnect.NOK", ftpput.getServerName(), info) + Const.CR);
 	}
+	
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/ftpputtestremotedir")
+	protected void ftpputtestremotedir(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
+		
+		JobEntryCopy jobEntryCopy = jobMeta.findJobEntry(stepName);
+		JobEntryFTPPUT ftpput = (JobEntryFTPPUT) jobEntryCopy.getEntry();
+		 
+		String info = "";
+		FTPClient ftpputClient = null;
+		try {
+			String servername = jobMeta.environmentSubstitute(ftpput.getServerName());
+			String serverport = jobMeta.environmentSubstitute(ftpput.getServerPort());
+			String username = jobMeta.environmentSubstitute(ftpput.getUserName());
+			String password = jobMeta.environmentSubstitute(ftpput.getPassword());
+//			String keyFilename = jobMeta.environmentSubstitute(ftpput.getKeyFilename());
+//			String keyFilePass = jobMeta.environmentSubstitute(ftpput.getKeyPassPhrase());
+			
+			ftpputClient = new FTPClient(servername, Integer.parseInt(serverport) );
+//			ftpputClient=new FTPClient(remoteAddr, controlPort);
+//			ftpputClient = new FTPClient(InetAddress.getByName(servername), Const.toInt(serverport, 21), 30, ftpput.getControlEncoding());
+//			ftpputClient = new FTPClient  (InetAddress.getByName(servername), Const.toInt(serverport, 22), username);
+			String proxyHost = jobMeta.environmentSubstitute(ftpput.getProxyHost());
+			String proxyPort = jobMeta.environmentSubstitute(ftpput.getProxyPort());
+			String proxyUsername = jobMeta.environmentSubstitute(ftpput.getProxyUsername());
+			String proxyPass = jobMeta.environmentSubstitute(ftpput.getProxyPassword());
+			ftpputClient.login(username, password);
+			
+			
+
+			if(ftpputClient.exists(ftpput.getRemoteDirectory())) {
+				JsonUtils.success(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.Title.Ok" ), 
+						BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.OK", ftpput.getRemoteDirectory() ) + Const.CR);
+				return;
+			}
+//			JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.Title.Ok" ), 
+//					BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.OK", ftpput.getServerName() ) + Const.CR);
+			return;
+		} catch (Exception e) {
+			if (ftpputClient != null) {
+				try {
+					ftpputClient.quit();
+				} catch (Exception ignored) {
+				}
+				ftpputClient = null;
+			}
+			info = e.getMessage();
+		}
+		
+		JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.Title.Bad" ), 
+				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.NOK", ftpput.getRemoteDirectory(), info) + Const.CR);
+	}
+	
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/sftpdirtest")
