@@ -317,17 +317,15 @@ public class JobGraphController {
 			String proxyUsername = jobMeta.environmentSubstitute(ftpput.getProxyUsername());
 			String proxyPass = jobMeta.environmentSubstitute(ftpput.getProxyPassword());
 			ftpputClient.login(username, password);
-			
-			
 
 			if(ftpputClient.exists(ftpput.getRemoteDirectory())) {
-				JsonUtils.success(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.Title.Ok" ), 
-						BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.OK", ftpput.getRemoteDirectory() ) + Const.CR);
+				JsonUtils.success(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.OK" ), 
+						BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.OK", ftpput.getRemoteDirectory() ) + Const.CR);
 				return;
 			}
 //			JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.Title.Ok" ), 
 //					BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.OK", ftpput.getServerName() ) + Const.CR);
-			return;
+//			return;
 		} catch (Exception e) {
 			if (ftpputClient != null) {
 				try {
@@ -339,8 +337,8 @@ public class JobGraphController {
 			info = e.getMessage();
 		}
 		
-		JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.Title.Bad" ), 
-				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.exists.NOK", ftpput.getRemoteDirectory(), info) + Const.CR);
+		JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.Title.Bad" ), 
+				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.NOK", ftpput.getRemoteDirectory(), info) + Const.CR);
 	}
 	
 	
