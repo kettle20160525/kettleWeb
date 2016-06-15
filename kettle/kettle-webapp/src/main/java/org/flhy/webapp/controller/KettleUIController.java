@@ -74,6 +74,7 @@ public class KettleUIController {
 	static HashMap<String, String> images = new HashMap<String, String>();
 	
 	static {
+		// 执行结果面板上的图标
 		images.put("imageShowHistory", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ShowHistory_image" )));
 		images.put("imageShowLog", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ShowLog_image" )));
 		images.put("imageShowGrid", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ShowGrid_image" )));
@@ -81,10 +82,27 @@ public class KettleUIController {
 		images.put("imageGantt", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Gantt_image" )));
 		images.put("imagePreview", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Preview_image" )));
 		
-		images.put("transGraphIcon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "SpoonIcon_image" )));
-		images.put("jobGraphIcon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ChefIcon_image" )));
+		// 转换和作业的小图标
+		images.put("trans", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "SpoonIcon_image" )));
+		images.put("job", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ChefIcon_image" )));
 		
-		images.put("imageSlave", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Slave_image" )));
-		images.put("imageCluster", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Cluster_image" )));
+		// 工具栏上的图标
+		images.put("save", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/save.svg")));
+		images.put("run", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/run.svg")));
+		images.put("pause", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/pause.svg")));
+		images.put("stop", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/stop.svg")));
+		images.put("preview", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/preview.svg")));
+		images.put("debug", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/debug.svg")));
+		
+		images.put("replay", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/replay.svg")));
+		images.put("check", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/check.svg")));
+		images.put("impact", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/impact.svg")));
+		images.put("SQLbutton", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/SQLbutton.svg")));
+		images.put("exploredb", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/exploredb.svg")));
+		
+		images.put("SlaveServer", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Slave_image" )));
+		images.put("ClusterSchema", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Cluster_image" )));
+		
+		images.put("show-results", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/show-results.svg")));
 	}
 }

@@ -1,5 +1,5 @@
 TransGraph = Ext.extend(BaseGraph, {
-	iconCls: 'transGraphIcon',
+	iconCls: 'trans',
 	
 	initComponent: function() {
 		this.tbar = [{
@@ -45,9 +45,9 @@ TransGraph = Ext.extend(BaseGraph, {
 		},{
 			iconCls: 'exploredb'
 		},'-',{
-			iconCls: 'imageSlave', scope: this, handler: this.showSlaves
+			iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
 		},{
-			iconCls: 'imageCluster', scope: this, handler: function() {
+			iconCls: 'ClusterSchema', scope: this, handler: function() {
 				var dialog = new ClusterSchemaDialog();
 				dialog.show();
 			}

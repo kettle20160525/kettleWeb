@@ -292,7 +292,7 @@ public class RepositoryController {
 				leaf.put("id", "transaction_" + e.getObjectId().getId());
 				leaf.put("objectId", e.getObjectId().getId());
 				leaf.put("text", e.getName());
-				leaf.put("iconCls", "trans_tree");
+				leaf.put("iconCls", "trans");
 				leaf.put("leaf", true);
 				children.add(leaf);
 			}
@@ -305,7 +305,7 @@ public class RepositoryController {
 				leaf.put("id", "job_" + e.getObjectId().getId());
 				leaf.put("objectId", e.getObjectId().getId());
 				leaf.put("text", e.getName());
-				leaf.put("iconCls", "job_tree");
+				leaf.put("iconCls", "job");
 				leaf.put("leaf", true);
 				children.add(leaf);
 			}

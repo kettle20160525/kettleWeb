@@ -1,5 +1,5 @@
 JobGraph = Ext.extend(BaseGraph, {
-	iconCls: 'jobGraphIcon',
+	iconCls: 'job',
 	
 	initComponent: function() {
 		var me = this;
@@ -36,7 +36,7 @@ JobGraph = Ext.extend(BaseGraph, {
 		},'-',{
 			iconCls: 'exploredb'
 		},'-',{
-			iconCls: 'imageSlave', scope: this, handler: this.showSlaves
+			iconCls: 'SlaveServer', scope: this, handler: this.showSlaves
 		},'-',{
 			iconCls: 'show-results', scope: this, handler: function() {
 				this.showResultPanel();

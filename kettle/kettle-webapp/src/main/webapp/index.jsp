@@ -78,6 +78,7 @@
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/TransResult.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/JobResult.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/SlaveServerDialog.js"></script>
+	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/graph/ClusterSchemaDialog.js"></script>
 	    
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/GuidePanel.js"></script>
 	    <script type="text/javascript" src="${pageContext.request.contextPath}/js/initMain.js"></script>

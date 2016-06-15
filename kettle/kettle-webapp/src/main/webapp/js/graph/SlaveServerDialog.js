@@ -4,7 +4,7 @@ SlaveServerDialog = Ext.extend(Ext.Window, {
 	height: 350,
 	modal: true,
 	layout: 'fit',
-	iconCls: 'imageSlave',
+	iconCls: 'SlaveServer',
 	initComponent: function() {
 		
 		var wName = new Ext.form.TextField({fieldLabel: '服务器名称', anchor: '-20'});
@@ -89,7 +89,7 @@ SlaveServersDialog = Ext.extend(Ext.Window, {
 	height: 350,
 	modal: true,
 	layout: 'fit',
-	iconCls: 'imageSlave',
+	iconCls: 'SlaveServer',
 	initComponent: function() {
 		
 		var grid = this.items = new Ext.grid.GridPanel({

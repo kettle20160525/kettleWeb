@@ -89,7 +89,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					var sm = repository.getSelectionModel();
 					var node = sm.getSelectedNode();
 					if(node && node.isLeaf()) {
-			    		var type = node.attributes.iconCls == 'job_tree' ? 1 : 0;
+			    		var type = node.attributes.iconCls == 'job' ? 1 : 0;
 			    		me.openFile(node.attributes.objectId, type);
 					}
 				}
@@ -123,7 +123,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					}
                 }
             }, {
-                iconCls: 'trans_tree',
+                iconCls: 'trans',
                 text: '新建转换', handler: function() {
                 	var sm = repository.getSelectionModel();
 					var node = sm.getSelectedNode();
@@ -140,7 +140,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 												id: "transaction_" + resObj.message,
 												objectId: resObj.message,
 												text: text,
-												iconCls: 'trans_tree',
+												iconCls: 'trans',
 												leaf: true
 											});
 											node.appendChild(child);
@@ -156,7 +156,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 					}
                 }
             }, {
-                iconCls: 'job_tree', text: '新建任务', handler: function() {
+                iconCls: 'job', text: '新建任务', handler: function() {
                 	var sm = repository.getSelectionModel();
 					var node = sm.getSelectedNode();
 					if(node && !node.isLeaf()) {
@@ -172,7 +172,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 												id: "job_" + resObj.message,
 												objectId: resObj.message,
 												text: text,
-												iconCls: 'job_tree',
+												iconCls: 'job',
 												leaf: true
 											});
 											node.appendChild(child);
@@ -202,9 +202,9 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 							   fn: function(bId) {
 								   if(bId == 'yes') {
 									   var type = -1;
-									   if(node.attributes.iconCls == 'job_tree')
+									   if(node.attributes.iconCls == 'job')
 										   type = 1;
-									   else if(node.attributes.iconCls == 'trans_tree')
+									   else if(node.attributes.iconCls == 'trans')
 										   type = 0;
 									   
 									   Ext.Ajax.request({
@@ -235,7 +235,7 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    
 	    repository.on('dblclick', function(node) {
 	    	if(node.isLeaf() == true) {
-	    		var type = node.attributes.iconCls == 'job_tree' ? 1 : 0;
+	    		var type = node.attributes.iconCls == 'job' ? 1 : 0;
 	    		me.openFile(node.attributes.objectId, type);
 	    	}
 	    });

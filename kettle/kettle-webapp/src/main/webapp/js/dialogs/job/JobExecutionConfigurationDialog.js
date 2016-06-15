@@ -5,7 +5,7 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	title: '执行作业',
 	modal: true,
 	bodyStyle: 'padding: 5px',
-	iconCls: 'jobGraphIcon',
+	iconCls: 'job',
 	
 	initComponent: function() {
 		var  root = getActiveGraph().getGraph().getDefaultParent(), me = this;

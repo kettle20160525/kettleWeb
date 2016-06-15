@@ -5,7 +5,7 @@ TransExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	title: '执行转换',
 	modal: true,
 	bodyStyle: 'padding: 5px',
-	iconCls: 'transGraphIcon',
+	iconCls: 'trans',
 	
 	initComponent: function() {
 		var  root = getActiveGraph().getGraph().getDefaultParent(), me = this;
