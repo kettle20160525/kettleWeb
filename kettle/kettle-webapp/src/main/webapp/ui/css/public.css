@@ -43,51 +43,6 @@ div.mxPopupMenu tr.mxPopupMenuItemHover {
 	background-image:url(../images/delete.png) !important;
 }
 
-.save {
-	background-image:url(../images/save.png) !important;
-}
-.run {
-	background-image:url(../images/run.png) !important;
-}
-.pause {
-	background-image:url(../images/pause.png) !important;
-}
-.stop {
-	background-image:url(../images/stop.png) !important;
-}
-.preview {
-	background-image:url(../images/preview.png) !important;
-}
-.debug {
-	background-image:url(../images/debug.png) !important;
-}
-.replay {
-	background-image:url(../images/replay.png) !important;
-}
-
-.check {
-	background-image:url(../images/check.png) !important;
-}
-.impact {
-	background-image:url(../images/impact.png) !important;
-}
-.SQLbutton {
-	background-image:url(../images/SQLbutton.png) !important;
-}
-.exploredb {
-	background-image:url(../images/exploredb.png) !important;
-}
-.show-results {
-	background-image:url(../images/show-results.png) !important;
-}
-
-.job_tree {
-	background-image:url(../images/job_tree.png) !important;
-}
-.trans_tree {
-	background-image:url(../images/transformation_tree.png) !important;
-}
-
 /**
  * 第一次加载
  */
