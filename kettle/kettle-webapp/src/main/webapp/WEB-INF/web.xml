@@ -8,52 +8,32 @@
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>dispatcher</servlet-name>
 		<url-pattern>*.do</url-pattern>
 	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>SvgDispatcher</servlet-name>
-		<servlet-class>org.flhy.webapp.servlet.SvgDispatcher</servlet-class>
-	</servlet>
-
 	<servlet-mapping>
-		<servlet-name>SvgDispatcher</servlet-name>
+		<servlet-name>dispatcher</servlet-name>
 		<url-pattern>*.svg</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>*.css2</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>*.js2</url-pattern>
 	</servlet-mapping>
 	
 	<filter>
 		<filter-name>GlobalFilter</filter-name>
 		<filter-class>org.flhy.webapp.filter.GlobalFilter</filter-class>
 	</filter>
-
 	<filter-mapping>
 		<filter-name>GlobalFilter</filter-name>
 		<url-pattern>*</url-pattern>
 	</filter-mapping>
 	
-	<servlet>
-		<servlet-name>JavaScriptServlet</servlet-name>
-		<servlet-class>org.flhy.webapp.servlet.JavaScriptServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>JavaScriptServlet</servlet-name>
-		<url-pattern>*.js2</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>CssServlet</servlet-name>
-		<servlet-class>org.flhy.webapp.servlet.CssServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>CssServlet</servlet-name>
-		<url-pattern>*.css2</url-pattern>
-	</servlet-mapping>
-
 	<listener>
 		<listener-class>org.flhy.webapp.listener.SystemLoadListener</listener-class>
 	</listener>

@@ -83,7 +83,7 @@ function loadPluginScript(pluginId) {
 		var oHead = document.getElementsByTagName('HEAD').item(0);
 	    var oScript= document.createElement("script");
 	    oScript.type = "text/javascript";
-	    oScript.src = GetUrl(pluginId + '.js2');
+	    oScript.src = GetUrl('ui/stepjs/' + pluginId + '.js2');
 	    oHead.appendChild( oScript ); 
 		
 		loadCache.add(pluginId, 1);
