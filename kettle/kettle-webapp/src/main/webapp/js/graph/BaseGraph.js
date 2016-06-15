@@ -130,6 +130,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 					if(cell.getId() == root.getId()) {
 						me.getDatabaseStore();
 						me.getSlaveServerStore();
+						me.getClusterSchemaStore();
 					}
 					
 					if(cell.isEdge() && cell.value.nodeName == 'JobHop') {
@@ -405,6 +406,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	initContextMenu: Ext.emptyFn,
 	cellAdded: Ext.emptyFn,
 	newHop: Ext.emptyFn,
+	getClusterSchemaStore: Ext.emptyFn,
 	
 	toXml: function() {
 		var enc = new mxCodec(mxUtils.createXmlDocument());
@@ -474,6 +476,15 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		return this.slaveServerStore;
 	},
 	
+	getSlaveServerData: function() {
+		var graph = this.getGraph();
+		var cell = graph.getDefaultParent(), data = [];
+		if(cell.getAttribute('slaveServers') != null)
+			data = Ext.decode(cell.getAttribute('slaveServers'));
+		
+		return data;
+	},
+	
 	onSlaveServerMerge: function(json) {
 		var graph = this.getGraph();
 		var root = graph.getDefaultParent();
@@ -513,6 +524,7 @@ BaseGraph = Ext.extend(Ext.Panel, {
 		Ext.each(jsonArray, function(item, index) {
 			if(item.name == name) {
 				jsonArray.splice(index, 1);
+				return false;
 			}
 		});
 		

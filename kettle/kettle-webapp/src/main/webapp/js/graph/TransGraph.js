@@ -46,6 +46,11 @@ TransGraph = Ext.extend(BaseGraph, {
 			iconCls: 'exploredb'
 		},'-',{
 			iconCls: 'imageSlave', scope: this, handler: this.showSlaves
+		},{
+			iconCls: 'imageCluster', scope: this, handler: function() {
+				var dialog = new ClusterSchemaDialog();
+				dialog.show();
+			}
 		},'-',{
 			iconCls: 'show-results', scope: this, handler: function() {this.showResultPanel();}
 		}];
@@ -125,6 +130,76 @@ TransGraph = Ext.extend(BaseGraph, {
 				stepFieldsDialog.show();
 			}, null, null, true);
 		}
+	},
+	
+	onClusterSchemaMerge: function(json) {
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent();
+		var clusterSchemas = root.getAttribute('clusterSchemas');
+		var jsonArray = Ext.decode(clusterSchemas);
+		
+		if(jsonArray.length == 0) {
+			jsonArray.push(json);
+		} else {
+			Ext.each(jsonArray, function(item, index) {
+				if(item.name == json.name) {
+					jsonArray.splice(index, 1, json);
+				} else {
+					if(index == jsonArray.length - 1)
+						jsonArray.push(json);
+				}
+			});
+		}
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+			var edit = new mxCellAttributeChange(root, 'clusterSchemas', Ext.encode(jsonArray));
+        	graph.getModel().execute(edit);
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
+	onClusterSchemaDel: function(name) {
+		var graph = this.getGraph();
+		var root = graph.getDefaultParent();
+		var clusterSchemas = root.getAttribute('clusterSchemas');
+		var jsonArray = Ext.decode(clusterSchemas);
+		
+		Ext.each(jsonArray, function(item, index) {
+			if(item.name == name) {
+				jsonArray.splice(index, 1);
+				return false;
+			}
+		});
+		
+		graph.getModel().beginUpdate();
+        try
+        {
+			var edit = new mxCellAttributeChange(root, 'clusterSchemas', Ext.encode(jsonArray));
+        	graph.getModel().execute(edit);
+        } finally
+        {
+            graph.getModel().endUpdate();
+        }
+	},
+	
+	getClusterSchemaStore: function() {
+		if(!this.clusterSchemaStore) {
+			this.clusterSchemaStore = new Ext.data.JsonStore({
+				idProperty: 'name',
+				fields: ['name', '', 'base_port', 'sockets_buffer_size', 'sockets_flush_interval', 'sockets_compressed', 'dynamic', 'slaveservers']
+			});
+		}
+		var graph = this.getGraph();
+		var cell = graph.getDefaultParent(), data = [];
+		if(cell.getAttribute('clusterSchemas') != null)
+			data = Ext.decode(cell.getAttribute('clusterSchemas'));
+		this.clusterSchemaStore.loadData(data);
+		
+		return this.clusterSchemaStore;
 	},
 	
 	cellAdded: function(graph, child) {

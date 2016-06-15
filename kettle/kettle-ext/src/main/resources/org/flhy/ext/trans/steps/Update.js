@@ -3,7 +3,7 @@ UpdateDialog = Ext.extend(KettleTabDialog, {
 	width: 600,
 	height: 450,
 	initComponent: function() {
-		var me = this, graph = getActiveGraph().getGraph(), cell = graph.getSelectionCell();
+		var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
 		
 		var wConnection = new Ext.form.ComboBox({
 			flex: 1,
@@ -20,20 +20,7 @@ UpdateDialog = Ext.extend(KettleTabDialog, {
 		});
 		
 		var onDatabaseCreate = function(dialog) {
-			var root = graph.getDefaultParent();
-			var databases = root.getAttribute('databases');
-			var jsonArray = Ext.decode(databases);
-			jsonArray.push(dialog.getValue());
-			graph.getModel().beginUpdate();
-            try
-            {
-				var edit = new mxCellAttributeChange(root, 'databases', Ext.encode(jsonArray));
-            	graph.getModel().execute(edit);
-            } finally
-            {
-                graph.getModel().endUpdate();
-            }
-			
+			getActiveGraph().onDatabaseMerge(dialog.getValue());
             wConnection.setValue(dialog.getValue().name);
             dialog.close();
 		};

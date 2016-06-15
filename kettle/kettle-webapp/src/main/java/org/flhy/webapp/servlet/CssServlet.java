@@ -28,6 +28,7 @@ public class CssServlet extends HttpServlet {
 		images.put("jobGraphIcon", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ChefIcon_image" )));
 		
 		images.put("imageSlave", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Slave_image" )));
+		images.put("imageCluster", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Cluster_image" )));
 	}
 
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

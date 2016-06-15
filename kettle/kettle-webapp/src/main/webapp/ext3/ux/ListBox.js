@@ -71,6 +71,10 @@ ListBox = Ext.extend(Ext.BoxComponent, {
 		return this.value;
 	},
 	
+	getStore: function() {
+		return this.store;
+	},
+	
 	setValue: function(v, flag) {
 		this.value = v;
 		var count = this.el.select('option').getCount();

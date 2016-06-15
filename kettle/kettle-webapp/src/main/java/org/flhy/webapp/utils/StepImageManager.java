@@ -1,8 +1,13 @@
 package org.flhy.webapp.utils;
 
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
 import java.awt.image.BufferedImage;
@@ -231,9 +236,16 @@ public class StepImageManager {
 		    
 		    return image;
 		} else {
-			BufferedImage image = ImageIO.read(in);
-			BufferedImage result = (BufferedImage) image.getScaledInstance(scale, scale, Image.SCALE_DEFAULT);
-			return result;
+			BufferedImage png = ImageIO.read(in);
+			
+			BufferedImage result = new BufferedImage(scale, scale, BufferedImage.TYPE_INT_ARGB);  
+			Graphics2D gc = (Graphics2D) result.getGraphics();
+			
+			AffineTransform affineTransform = new AffineTransform( gc.getTransform() );
+			affineTransform.scale(scale * 1.0f / png.getWidth(), scale * 1.0f / png.getHeight());
+			gc.drawImage(png, 0, 0, null);
+			gc.dispose();
+			return png;
 		}
 	}
 	

@@ -3,27 +3,22 @@ SampleRowsDialog = Ext.extend(KettleDialog, {
 	width: 300,
 	height: 190,
 	initComponent: function() {
-		var me = this, 
-			transGraph = getActiveGraph(),
-			graph = transGraph.getGraph(), 
-			cell = graph.getSelectionCell(), 
-			store = transGraph.getDatabaseStore();
+		var me = this, cell = getActiveGraph().getGraph().getSelectionCell();
 
+		var wLinesRange = new Ext.form.TextField({fieldLabel: '行范围', anchor: '-10', value: cell.getAttribute('linesrange')});
+		var wLineNumberField = new Ext.form.TextField({fieldLabel: '行号字段名', anchor: '-10', value: cell.getAttribute('linenumfield')});
+		
 		this.fitItem = new KettleForm({
 			labelWidth: 80,
-			bodyStyle: 'padding: 15px 0px',
-			items: [{
-				fieldLabel: '行范围',
-				xtype: 'textfield',
-				value: cell.getAttribute('linesrange'),
-				anchor: '-10'
-			}, {
-				fieldLabel: '行号字段名',
-				xtype: 'textfield',
-				value: cell.getAttribute('linenumfield'),
-				anchor: '-10'
-			}]
+			items: [wLinesRange, wLineNumberField]
 		});
+		
+		this.getValues = function(){
+			return {
+				linesrange: wLinesRange.getValue(),
+				linenumfield: wLineNumberField.getValue()
+			};
+		};
 		
 		SampleRowsDialog.superclass.initComponent.call(this);
 	}

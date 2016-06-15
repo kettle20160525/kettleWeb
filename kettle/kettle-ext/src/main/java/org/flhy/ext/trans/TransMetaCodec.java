@@ -8,6 +8,7 @@ import java.util.Properties;
 import org.flhy.ext.PluginFactory;
 import org.flhy.ext.base.BaseGraphCodec;
 import org.flhy.ext.base.GraphCodec;
+import org.flhy.ext.cluster.SlaveServerCodec;
 import org.flhy.ext.core.PropsUI;
 import org.flhy.ext.trans.step.StepDecoder;
 import org.flhy.ext.trans.step.StepEncoder;
@@ -198,53 +199,9 @@ public class TransMetaCodec extends BaseGraphCodec {
 		    e.setAttribute("step_performance_capturing_delay", String.valueOf(transMeta.getStepPerformanceCapturingDelay()));
 		    e.setAttribute("step_performance_capturing_size_limit", transMeta.getStepPerformanceCapturingSizeLimit());
 		    
-		    jsonArray = new JSONArray();
-		    List<PartitionSchema> partitionSchemas = transMeta.getPartitionSchemas();
-			for (int i = 0; i < partitionSchemas.size(); i++) {
-				PartitionSchema partitionSchema = partitionSchemas.get(i);
-				
-				jsonObject = new JSONObject();
-				jsonObject.put("name", partitionSchema.getName());
-				jsonObject.put("dynamic", partitionSchema.isDynamicallyDefined());
-				jsonObject.put("partitions_per_slave", partitionSchema.getNumberOfPartitionsPerSlave());
-				
-				JSONArray partition = new JSONArray();
-				List<String> partitionIDs = partitionSchema.getPartitionIDs();
-				for (int j = 0; j < partitionIDs.size(); j++) {
-					jsonArray.add(partitionIDs.get(j));
-				}
-				jsonObject.put("partition", partition);
-				
-				jsonArray.add(jsonObject);
-			}
-			e.setAttribute("partitionschemas", jsonArray.toString());
-		    
 		    super.encodeSlaveServers(e, transMeta);
-		    
-		    jsonArray = new JSONArray();
-			for (int i = 0; i < transMeta.getClusterSchemas().size(); i++) {
-				ClusterSchema clusterSchema = transMeta.getClusterSchemas().get(i);
-				
-				jsonObject = new JSONObject();
-				jsonObject.put("name", clusterSchema.getName());
-				jsonObject.put("base_port", clusterSchema.getBasePort());
-				jsonObject.put("sockets_buffer_size", clusterSchema.getSocketsBufferSize());
-				
-				jsonObject.put("sockets_flush_interval", clusterSchema.getSocketsFlushInterval());
-				jsonObject.put("sockets_compressed", clusterSchema.isSocketsCompressed() ? "Y" : "N");
-				jsonObject.put("dynamic", clusterSchema.isDynamic() ? "Y" : "N");
-				
-				JSONArray slaveservers = new JSONArray();
-				for (int j = 0; j < clusterSchema.getSlaveServers().size(); j++) {
-					SlaveServer slaveServer = clusterSchema.getSlaveServers().get(j);
-					slaveservers.add(slaveServer.getName());
-				}
-				jsonObject.put("slaveservers", slaveservers);
-				
-				
-				jsonArray.add(jsonObject);
-			}
-			e.setAttribute("clusterSchemas", jsonArray.toString());
+		    encodeClusterSchema(e, transMeta);
+		    encodePartitionSchema(e, transMeta);
 		    
 		    try {
 		    	if(transMeta.getKey() != null) {
@@ -533,8 +490,8 @@ public class TransMetaCodec extends BaseGraphCodec {
 		JSONArray slavesNode = jsonObject.optJSONArray("slaveservers");
 		if(slavesNode != null) {
 			for (int i = 0; i < slavesNode.size(); i++) {
-				String serverName = slavesNode.getString(i);
-				SlaveServer slaveServer = SlaveServer.findSlaveServer(referenceSlaveServers, serverName);
+				JSONObject slaveServerJson = slavesNode.getJSONObject(i);
+				SlaveServer slaveServer = SlaveServer.findSlaveServer(referenceSlaveServers, slaveServerJson.optString("name"));
 				if (slaveServer != null) {
 					slaveServers.add(slaveServer);
 				}
@@ -543,6 +500,32 @@ public class TransMetaCodec extends BaseGraphCodec {
 		}
 		
 		return clusterSchema;
+	}
+	
+	public void encodeClusterSchema(Element e, TransMeta transMeta) {
+		JSONArray jsonArray = new JSONArray();
+		for (int i = 0; i < transMeta.getClusterSchemas().size(); i++) {
+			ClusterSchema clusterSchema = transMeta.getClusterSchemas().get(i);
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", clusterSchema.getName());
+			jsonObject.put("base_port", clusterSchema.getBasePort());
+			jsonObject.put("sockets_buffer_size", clusterSchema.getSocketsBufferSize());
+
+			jsonObject.put("sockets_flush_interval", clusterSchema.getSocketsFlushInterval());
+			jsonObject.put("sockets_compressed", clusterSchema.isSocketsCompressed() ? "Y" : "N");
+			jsonObject.put("dynamic", clusterSchema.isDynamic() ? "Y" : "N");
+
+			JSONArray slaveservers = new JSONArray();
+			for (int j = 0; j < clusterSchema.getSlaveServers().size(); j++) {
+				SlaveServer slaveServer = clusterSchema.getSlaveServers().get(j);
+				slaveservers.add(SlaveServerCodec.encode(slaveServer));
+			}
+			jsonObject.put("slaveservers", slaveservers);
+
+			jsonArray.add(jsonObject);
+		}
+		e.setAttribute("clusterSchemas", jsonArray.toString());
 	}
 	
 	public PartitionSchema decodePartitionSchema(JSONObject jsonObject) {
@@ -559,6 +542,29 @@ public class TransMetaCodec extends BaseGraphCodec {
 	    }
 	    
 	    return partitionSchema;
+	}
+	
+	public void encodePartitionSchema(Element e, TransMeta transMeta) {
+		JSONArray jsonArray = new JSONArray();
+	    List<PartitionSchema> partitionSchemas = transMeta.getPartitionSchemas();
+		for (int i = 0; i < partitionSchemas.size(); i++) {
+			PartitionSchema partitionSchema = partitionSchemas.get(i);
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("name", partitionSchema.getName());
+			jsonObject.put("dynamic", partitionSchema.isDynamicallyDefined());
+			jsonObject.put("partitions_per_slave", partitionSchema.getNumberOfPartitionsPerSlave());
+			
+			JSONArray partition = new JSONArray();
+			List<String> partitionIDs = partitionSchema.getPartitionIDs();
+			for (int j = 0; j < partitionIDs.size(); j++) {
+				jsonArray.add(partitionIDs.get(j));
+			}
+			jsonObject.put("partition", partition);
+			
+			jsonArray.add(jsonObject);
+		}
+		e.setAttribute("partitionschemas", jsonArray.toString());
 	}
 
 	@Override
