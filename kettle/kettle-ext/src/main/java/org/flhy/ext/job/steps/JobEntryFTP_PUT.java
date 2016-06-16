@@ -26,7 +26,7 @@ public class JobEntryFTP_PUT extends AbstractJobEntry{
 	  JobEntryFTPPUT jobEntryFTPPUT = (JobEntryFTPPUT) jobEntry;
 	  jobEntryFTPPUT.setServerName(cell.getAttribute("serverName"));
 		jobEntryFTPPUT.setServerPort(cell.getAttribute("serverPort"));
-		jobEntryFTPPUT.setUserName(cell.getAttribute("userName"));
+		jobEntryFTPPUT.setUserName(cell.getAttribute("username"));
 		jobEntryFTPPUT.setPassword(cell.getAttribute("password"));
 		jobEntryFTPPUT.setBinaryMode("Y".equalsIgnoreCase(cell.getAttribute("binaryMode")));
 		jobEntryFTPPUT.setTimeout(Const.toInt(cell.getAttribute("timeout"),0));
@@ -35,7 +35,7 @@ public class JobEntryFTP_PUT extends AbstractJobEntry{
 		jobEntryFTPPUT.setProxyHost(cell.getAttribute("proxy_host"));
 		jobEntryFTPPUT.setProxyPort(cell.getAttribute("proxy_port"));
 		jobEntryFTPPUT.setProxyUsername(cell.getAttribute("proxy_username"));
-		jobEntryFTPPUT.setProxyPassword(Encr.decryptPasswordOptionallyEncrypted(cell.getAttribute("proxy_password")));
+		jobEntryFTPPUT.setProxyPassword(cell.getAttribute("proxy_password"));
 		jobEntryFTPPUT.setLocalDirectory(cell.getAttribute("localDirectory"));
 		jobEntryFTPPUT.setWildcard(cell.getAttribute("wildcard"));
 		jobEntryFTPPUT.setRemove("Y".equalsIgnoreCase(cell.getAttribute("remove")));
@@ -55,7 +55,7 @@ public class JobEntryFTP_PUT extends AbstractJobEntry{
 		
 		e.setAttribute("serverName", jobEntryFTPPUT.getServerName());
 		e.setAttribute("serverPort", jobEntryFTPPUT.getServerPort());
-		e.setAttribute("userName", jobEntryFTPPUT.getUserName());
+		e.setAttribute("username", jobEntryFTPPUT.getUserName());
 		e.setAttribute("password", jobEntryFTPPUT.getPassword() );
 		e.setAttribute("binaryMode", jobEntryFTPPUT.isBinaryMode()? "Y" : "N" );
 		e.setAttribute("timeout", jobEntryFTPPUT.getTimeout()+ "");
