@@ -1,194 +1,152 @@
-JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
-	width: 700,
-	height: 700,
+FTPputDialog = Ext.extend(KettleTabDialog, {
+	width: 400,
+	height: 600,
 	title: 'FTP上传',
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
-		
-		var wServerName = new Ext.form.TextField({fieldLabel: 'FTP服务器名称/IP地址', anchor: '-10', value: cell.getAttribute('servername')});
-		var wServerPort = new Ext.form.TextField({fieldLabel: '端口', anchor: '-10', value: cell.getAttribute('serverport')});
-		var wUserName = new Ext.form.TextField({fieldLabel: '用户名', anchor: '-10', value: cell.getAttribute('username')});
-		var wPassword = new Ext.form.TextField({fieldLabel: '密码', anchor: '-10', value: cell.getAttribute('password')});
-		var wProxyserver = new Ext.form.TextField({fieldLabel: '代理主机',anchor: '-10', value: cell.getAttribute('proxyserver') });
-		var wProxyserverport = new Ext.form.TextField({fieldLabel: '代理端口',anchor: '-10', value: cell.getAttribute('proxyserverport')});
-		var wProxyserverusername = new Ext.form.TextField({fieldLabel: '代理用户名',anchor: '-10', value: cell.getAttribute('proxyserverusername')});
-		var wProxyserverpwd = new Ext.form.TextField({fieldLabel: '代理密码',flex:1 , value: cell.getAttribute('proxyserverpwd')});
-		
-		// 测试连接  一个按钮
-		var wBinaryMode = new Ext.form.Checkbox({fieldLabel: '二进制模式', checked: cell.getAttribute('binarymode') == 'Y'});
-		var wTimeout = new Ext.form.TextField({fieldLabel: '超时',anchor: '-10', value: cell.getAttribute('timeout')});
-		var wUsealiveftpconnection = new Ext.form.Checkbox({fieldLabel: '使用活动的FTP连接', checked: cell.getAttribute('usealiveftpconnection') == 'Y'});
-
-		var wControlEncode = new Ext.form.ComboBox({
-			fieldLabel: '控制编码',
-			anchor: '-10',
-			displayField: 'name',
-			valueField: 'name',
-			typeAhead: true,
-	        forceSelection: true,
-	        triggerAction: 'all',
-	        selectOnFocus:true,
-			store: Ext.StoreMgr.get('availableCharsetsStore'),
-			value: cell.getAttribute('contrlEncode')
-		});
-		
-		
-		var wLocalDir = new Ext.form.TextField({fieldLabel: '本地目录',flex:1 , value: cell.getAttribute('localdir')});
-		var wTongpeifu = new Ext.form.TextField({fieldLabel: '通配符', anchor: '-10', value: cell.getAttribute('tongpeifu')});
-		var wDellocalfileAfterupload = new Ext.form.Checkbox({fieldLabel: '上传文件后删除本地文件', checked: cell.getAttribute('dellocalfilesafterupload')=='Y'  });
-		var wNotcoverremotefiles= new Ext.form.Checkbox({fieldLabel: '不覆盖文件', checked: cell.getAttribute('notcoverremotefiles')=='Y'  });
-		var wRemoteDir = new Ext.form.TextField({fieldLabel: '远程目录',flex:1 , value: cell.getAttribute('remotedir')});
-		
-		var wProxy2server = new Ext.form.TextField({fieldLabel: '主机', anchor: '-10', value: cell.getAttribute('proxy2server')});
-		var wProxy2serverport = new Ext.form.TextField({fieldLabel: '端口', anchor: '-10', value: cell.getAttribute('proxy2serverport')});
-		var wProxy2serverusername = new Ext.form.TextField({fieldLabel: '用户名', anchor: '-10', value: cell.getAttribute('proxy2serverusername')});
-		var wProxy2serverpwd = new Ext.form.TextField({fieldLabel: '密码', anchor: '-10', value: cell.getAttribute('proxy2serverpwd')});
-		
+		var wServerName = new Ext.form.TextField({fieldLabel: 'FTP服务器名称/IP地址',anchor: '-10',flex: 1,value: cell.getAttribute('serverName')});
+		var wServerport = new Ext.form.TextField({fieldLabel: '端口', flex: 1,anchor: '-10',value: cell.getAttribute('serverPort')});
+		var wUsername = new Ext.form.TextField({fieldLabel: '用户名',flex: 1,anchor: '-10', value: cell.getAttribute('username')});
+		var wPassword = new Ext.form.TextField({fieldLabel: '密码', flex: 1,anchor: '-10',value: cell.getAttribute('password')});
+		var wBinaryMode = new Ext.form.Checkbox({fieldLabel: '二进制模式',anchor: '-10', flex: 1,checked: cell.getAttribute('binaryMode') == 'Y'});
+		var wTimeout =new Ext.form.TextField({fieldLabel: '超时', flex: 1,anchor: '-10',value: cell.getAttribute('timeout')});
+		var wActiveConnection = new Ext.form.Checkbox({fieldLabel: '使用活动的FTP链接', anchor: '-10',flex: 1,checked: cell.getAttribute('activeConnection') == 'Y'});
+		var wControlEncoding = new Ext.form.TextField({fieldLabel: '控制编码', anchor: '-10',flex: 1,value: cell.getAttribute('control_encoding')});
+		var wProxyHost = new Ext.form.TextField({fieldLabel: '代理主机',flex: 1,anchor: '-10', value: cell.getAttribute('proxy_host')});
+		var wProxyPort = new Ext.form.TextField({fieldLabel: '代理端口', flex: 1,anchor: '-10',value: cell.getAttribute('proxy_port')});
+		var wProxyUsername = new Ext.form.TextField({fieldLabel: '代理用户名',flex: 1, anchor: '-10',value: cell.getAttribute('proxy_username')});
+		var wProxyPassword = new Ext.form.TextField({fieldLabel: '代理密码', flex: 1, anchor: '-10',value: cell.getAttribute('proxy_password')});
+		var wLocalDirectory = new Ext.form.TextField({fieldLabel: '本地目录', flex: 1,anchor: '-10',value: cell.getAttribute('localDirectory')});
+		var wWildcard= new Ext.form.TextField({fieldLabel: '通配符（正则表达式）', flex: 1,anchor: '-10',value: cell.getAttribute('wildcard')});
+		var wRemove = new Ext.form.Checkbox({fieldLabel: '上传文件后删除本地文',flex: 1,anchor: '-10', checked: cell.getAttribute('remove') == 'Y'});
+		var wOnlyPuttingNewFiles = new Ext.form.Checkbox({fieldLabel: '不覆盖文件',flex: 1,anchor: '-10', checked: cell.getAttribute('only_new') == 'Y'});	
+		var wRemoteDirectory = new Ext.form.TextField({fieldLabel: '远程目录',flex: 1, anchor: '-10',value: cell.getAttribute('remoteDirectory')});
+		var wSocksProxyHost = new Ext.form.TextField({fieldLabel: '主机',flex: 1, anchor: '-10', value: cell.getAttribute('socksproxy_host')});
+		var wSocksProxyPort = new Ext.form.TextField({fieldLabel: '端口',flex: 1, anchor: '-10',value: cell.getAttribute('socksproxy_port')});
+		var wSocksProxyUsername = new Ext.form.TextField({fieldLabel: '用户名', flex: 1,anchor: '-10',value: cell.getAttribute('socksproxy_username')});
+		var wSocksProxyPassword = new Ext.form.TextField({fieldLabel: '密码', flex: 1,anchor: '-10',value: cell.getAttribute('socksproxy_password')});
 		this.getValues = function(){
 			return {
-				servername : wServerName.getValue(),
-				serverport : wServerPort.getValue(),
-				username : wUserName.getValue(),
-				password : wPassword.getValue(),
-				proxyserver : wProxyserver.getValue() ,
-				proxyserverport : wProxyserverport.getValue(),
-				proxyserverusername : wProxyserverusername.getValue(),
-				proxyserverpwd : wProxyserverpwd.getValue(),
-				
-				binarymode : wBinaryMode.getValue()   ? "Y" : "N"   ,
-				timeout : wTimeout.getValue(),
-				useraliveftpconnection: wUsealiveftpconnection.getValue()   ? "Y" : "N" ,
-				controlencode: wControlEncode.getValue(),
-				
-				localdir:wLocalDir.getValue(),
-				tongpeifu: wTongpeifu.getValue(),
-				dellocalfileafterupload: wDellocalfileAfterupload.getValue()  ? "Y" : "N" ,
-				notcoverremotefiles: wNotcoverremotefiles.getValue() ? "Y" : "N" ,
-				remotedir: wRemoteDir.getValue(),
-				
-				proxy2server: wProxy2server.getValue(),
-				proxy2serverport: wProxy2serverport.getValue(),
-				proxy2serverusername: wProxy2serverusername.getValue(),
-				proxy2serverpwd : wProxy2serverpwd.getValue()
+				serverName: wServerName.getValue(),
+				serverPort: wServerport.getValue(),
+				username: wUsername.getValue(),
+				password: wPassword.getValue(),
+				binaryMode: wBinaryMode.getValue() ? "Y" : "N",
+				timeout: wTimeout.getValue(),
+				activeConnection: wActiveConnection.getValue() ? "Y" : "N",
+				control_encoding: wControlEncoding.getValue(),
+				proxy_host: wProxyHost.getValue(),
+				proxy_port: wProxyPort.getValue(),
+				proxy_username: wProxyUsername.getValue(),
+				proxy_password: wProxyPassword.getValue(),
+				localDirectory: wLocalDirectory.getValue(),
+				wildcard: wWildcard.getValue(),
+				remove: wRemove.getValue() ? "Y" : "N",
+				only_new: wOnlyPuttingNewFiles.getValue() ? "Y" : "N",
+				remoteDirectory: wRemoteDirectory.getValue(),
+				socksproxy_host: wSocksProxyHost.getValue(),
+				socksproxy_port: wSocksProxyPort.getValue(),
+				socksproxy_username: wSocksProxyUsername.getValue(),
+				socksproxy_password: wSocksProxyPassword.getValue(),
 			};
 		};
 		
-		this.tabItems = [
-		                 
-		{
+		this.tabItems = [{ 
 			xtype: 'KettleForm',
 			title: '一般',
 			bodyStyle: 'padding: 10px 10px',
-			labelWidth: 130,
+			labelWidth: 110,
 			items: [{
 				xtype: 'fieldset',
+				bodyStyle: 'padding: 10px 10px',
 				title: '服务器设置',
-				items: [wServerName, wServerPort, wUserName, wPassword,wProxyserver, 
-				        wProxyserverport,  wProxyserverusername,{
-								xtype: 'compositefield',
-								fieldLabel: '代理密码',
-								anchor: '-10',
-								items: [ wProxyserverpwd,{
-									xtype: 'button', text: '测试连接', handler: function() {
-											me.onSure(false);
-											
-											Ext.Ajax.request({
-												url: GetUrl('job/ftpputtest.do'),
-												method: 'POST',
-												params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
-												success: function(response) {
-													decodeResponse(response, function(resObj) {
-														Ext.Msg.alert(resObj.title, resObj.message);
-													});
-												},
-												failure: failureResponse
-											});
-										}
-								}]
-							}
-				]
+				anchor: '-10',
+				items: [wServerName,wServerport,wUsername,wPassword,wProxyHost,wProxyPort,wProxyUsername,wProxyPassword,{
+					xtype: 'button', text: '测试连接', handler: function() {
+						me.onSure(false);
+						Ext.Ajax.request({
+							url: GetUrl('job/ftpputtest.do'),
+							method: 'POST',
+							params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+							success: function(response) {
+								decodeResponse(response, function(resObj) {
+									Ext.Msg.alert(resObj.title, resObj.message);
+								});
+							},
+							failure: failureResponse
+						});
+					}
+				}]
 			},{
 				xtype: 'fieldset',
+				bodyStyle: 'padding: 10px 10px',
 				title: '高级设置',
-				items: [ wBinaryMode, wTimeout, wUsealiveftpconnection,wControlEncode ]
+				anchor: '-10',
+				items: [wBinaryMode,wTimeout,wActiveConnection,wControlEncoding]
 			}]
-		},
-		
-		
-		
-		
-		{
+		},{
 			xtype: 'KettleForm',
 			title: '文件',
 			bodyStyle: 'padding: 10px 10px',
-			labelWidth: 200,
-			items: [{
+			labelWidth: 150,
+			items: [ {
 				xtype: 'fieldset',
-				title: '源(本地)文件',
-				items: [{
-					xtype: 'compositefield',
-					fieldLabel: '本地目录',
-					anchor: '-10',
-					items: [wLocalDir,{
-						xtype: 'button', text: '浏览...',handler: function() {
-							var dialog = new FileExplorerWindow();
-							dialog.on('ok', function(path) {
-								wLocalDir.setValue(path);
-								dialog.close();
-							});
-							dialog.show();
-						}
-					}]
-				}, wTongpeifu, wDellocalfileAfterupload, wNotcoverremotefiles ]
-			}, 
-			{
-				xtype: 'fieldset',
-				title: '目标(远程)文件',
-				items: [{
-					xtype: 'compositefield',
-					fieldLabel: '远程目录',
-					anchor: '-10',
-					items: [wRemoteDir, {
-						xtype: 'button', text: '测试目录',handler: function() {
-							me.onSure(false);
-							Ext.Ajax.request({
-								url: GetUrl('job/ftpputtestremotedir.do'),
-								method: 'POST',
-								params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
-								success: function(response) {
-									decodeResponse(response, function(resObj) {
-										Ext.Msg.alert(resObj.title, resObj.message);
-									});
-								},
-								failure: failureResponse
-							});
-						}
-					}
-					]
-				}]
-			}
-			]
-		},
-		
-		
-		
-		{
-			xtype: 'KettleForm',
-			title: 'Sockets代理',
+				bodyStyle: 'padding: 10px 10px',
+				title: '源（本地）文件',
+				anchor: '-10',
+				items: [
+						{xtype: 'compositefield',
+						fieldLabel: '本地目录',
+						anchor: '-10',
+						items: [wLocalDirectory, {
+							xtype: 'button', text: '浏览...', handler: function() {
+								var dialog = new FileExplorerWindow();
+								dialog.on('ok', function(path) {
+									wLocalDirectory.setValue(path);
+									dialog.close();
+								});
+								dialog.show();
+							}
+						}]}, wWildcard,wRemove,wOnlyPuttingNewFiles]
+			},{
+			xtype: 'fieldset',
+			title: '目标（远程）文件',
 			bodyStyle: 'padding: 10px 10px',
-			labelWidth: 200,
-			items: [{
+			anchor: '-10',
+			items: [wRemoteDirectory,
+					{xtype: 'button', text: '测试目录', handler: function() {
+						me.onSure(false);
+						
+						Ext.Ajax.request({
+							url: GetUrl('job/ftpputdirtest.do'),
+							method: 'POST',
+							params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+							success: function(response) {
+								decodeResponse(response, function(resObj) {
+									Ext.Msg.alert(resObj.title, resObj.message);
+								});
+							},
+							failure: failureResponse
+						});
+					}
+					}]}
+		]
+		}, {
+			xtype: 'KettleForm',
+			title: 'Socks代理',
+			bodyStyle: 'padding: 10px 10px',
+			labelWidth: 90,
+			items: [ {
 				xtype: 'fieldset',
 				title: '代理',
-				items: [wProxy2server, wProxy2serverport, wProxy2serverusername,wProxy2serverpwd]
+				bodyStyle: 'padding: 10px 10px',
+				anchor: '-10',
+				items: [wSocksProxyHost, wSocksProxyPort,wSocksProxyUsername,wSocksProxyPassword]
 			}
-			]
-		}
-		
-		
-		];
-		JobEntryFTPPUTDialog.superclass.initComponent.call(this);
+		]
+		}];
+		FTPputDialog.superclass.initComponent.call(this);
 	}
 });
 
-Ext.reg('FTP_PUT', JobEntryFTPPUTDialog);
+Ext.reg('FTP_PUT', FTPputDialog);
