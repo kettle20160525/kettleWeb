@@ -122,6 +122,8 @@ public class TransExecutor implements Runnable {
 					
 					Thread.sleep(500);
 				}
+			} else if(executionConfiguration.isExecutingClustered()) {
+				
 			}
 			
 		} catch(Exception e) {
