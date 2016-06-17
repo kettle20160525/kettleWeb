@@ -9,16 +9,17 @@ Ext.onReady(function() {
 			url: 'system/valueMeta.do',
 			method: 'POST'
 		})
-	}).load();
+	}).load();	//字段类型，如Integer, String等
 	
 	new Ext.data.JsonStore({
 		storeId: 'valueFormatStore',
-		fields: ['name'],
+		fields: ['id', 'name'],
+		baseParams: {valueType: 'all'},
 		proxy: new Ext.data.HttpProxy({
 			url: 'system/valueFormat.do',
 			method: 'POST'
 		})
-	});
+	}).load();	//字段值格式，如yyyy-MM-dd
 	
 	new Ext.data.JsonStore({
 		storeId: 'systemDataTypesStore',
@@ -27,7 +28,7 @@ Ext.onReady(function() {
 			url: 'system/systemDataTypes.do',
 			method: 'POST'
 		})
-	}).load();
+	}).load();	//获取系统变量组件使用
 	
 	new Ext.data.JsonStore({
 		storeId: 'randomValueFuncStore',
@@ -36,7 +37,7 @@ Ext.onReady(function() {
 			url: 'system/randomValueFunc.do',
 			method: 'POST'
 		})
-	}).load();
+	}).load();	//获取随机数组件使用
 	
 	new Ext.data.JsonStore({
 		storeId: 'databaseAccessData',
@@ -93,10 +94,20 @@ Ext.onReady(function() {
 	}).load();
 	
 	new Ext.data.JsonStore({
-		storeId: 'logLabelStore',
+		storeId: 'logLevelStore',
 		fields: ['id', 'code', 'desc'],
 		proxy: new Ext.data.HttpProxy({
-			url: GetUrl('system/logLabel.do'),
+			url: GetUrl('system/logLevel.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId: 'variableTypeStore',
+		fields: ['id', 'code', 'desc'],
+		idProperty: 'code',
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/variableType.do'),
 			method: 'POST'
 		})
 	}).load();

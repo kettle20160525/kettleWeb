@@ -37,7 +37,7 @@ JobExecutionConfigurationDialog = Ext.extend(Ext.Window, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
-			store: Ext.StoreMgr.get('logLabelStore'),
+			store: Ext.StoreMgr.get('logLevelStore'),
 		    hiddenName: 'logLevel',
 		    value: 3
 		});

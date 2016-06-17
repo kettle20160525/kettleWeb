@@ -100,3 +100,6 @@ div.nav-node .x-tree-node-icon, div.nav .x-tree-node-icon {
 .nav .x-tree-ec-icon {
     display: none;
 }
+
+
+.cm-s-default .cm-keyword {font-weight: bold;}

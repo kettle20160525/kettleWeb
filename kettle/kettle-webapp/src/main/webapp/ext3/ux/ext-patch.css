@@ -1,5 +1,9 @@
 @CHARSET "utf-8";  
-  
+
+.x-window-mc {
+	font-size: 13px;
+}
+
 .x-tab-strip span.x-tab-strip-text {  
     font-size: 12px;  
 }  

@@ -408,6 +408,23 @@ BaseGraph = Ext.extend(Ext.Panel, {
 	newHop: Ext.emptyFn,
 	getClusterSchemaStore: Ext.emptyFn,
 	
+	editCell: function(cell) {
+		var pluginType = cell.getAttribute('ctype');
+		if(Ext.ComponentMgr.isRegistered(pluginType) === true) {
+			if(!(pluginType == 'SPECIAL' && cell.getAttribute('dummy') == 'Y')) {
+				var dialog = Ext.create({data: cell}, pluginType);
+				dialog.show();
+			}
+		} else {
+			Ext.Msg.show({
+			   title: '系统提示',
+			   msg: '该插件[' + pluginType + ']待实现，请联系lhy249056652@sina.com',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.WARNING
+			});
+		}
+	},
+	
 	toXml: function() {
 		var enc = new mxCodec(mxUtils.createXmlDocument());
 		var node = enc.encode(this.getGraph().getModel());

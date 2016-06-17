@@ -85,10 +85,7 @@ JobGraph = Ext.extend(BaseGraph, {
 		} else {
 			menu.addItem('新节点', null, function(){alert(1);}, null, null, true);
 			menu.addItem('编辑作业入口', null, function(){
-				if(cell.getAttribute('dummy') != 'Y') {
-					var dialog = Ext.create({}, cell.getAttribute('ctype'));
-					dialog.show();
-				}
+				me.editCell(cell);
 			}, null, null, true);
 			menu.addItem('编辑作业入口描述信息', null, function(){alert(1);}, null, null, true);
 			menu.addSeparator(null);
@@ -169,13 +166,6 @@ JobGraph = Ext.extend(BaseGraph, {
         {
             graph.getModel().endUpdate();
         }
-	},
-	
-	editCell: function(cell) {
-		if(cell.getAttribute('dummy') == 'Y')
-			return;
-		var dialog = Ext.create({}, cell.getAttribute('ctype'));
-		dialog.show();
 	},
 	
 	getResultPanel: function() {

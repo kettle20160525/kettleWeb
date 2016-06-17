@@ -233,10 +233,10 @@ TransGraph = Ext.extend(BaseGraph, {
 		});
 	},
 	
-	editCell: function(cell) {
-		var dialog = Ext.create({}, cell.getAttribute('ctype'));
-		dialog.show();
-	},
+//	editCell: function(cell) {
+//		var dialog = Ext.create({data: cell}, cell.getAttribute('ctype'));
+//		dialog.show();
+//	},
 	
 	showCopies: function(graph, cell) {
 		var overlays = graph.getCellOverlays(cell) || [];
