@@ -87,22 +87,34 @@ public class KettleUIController {
 		images.put("job", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "ChefIcon_image" )));
 		
 		// 工具栏上的图标
-		images.put("save", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/save.svg")));
-		images.put("run", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/run.svg")));
-		images.put("pause", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/pause.svg")));
-		images.put("stop", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/stop.svg")));
-		images.put("preview", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/preview.svg")));
-		images.put("debug", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/debug.svg")));
+		images.put("save", SvgImageUrl.getSmallUrl("ui/images/save.svg"));
+		images.put("run", SvgImageUrl.getSmallUrl("ui/images/run.svg"));
+		images.put("pause", SvgImageUrl.getSmallUrl("ui/images/pause.svg"));
+		images.put("stop", SvgImageUrl.getSmallUrl("ui/images/stop.svg"));
+		images.put("preview", SvgImageUrl.getSmallUrl("ui/images/preview.svg"));
+		images.put("debug", SvgImageUrl.getSmallUrl("ui/images/debug.svg"));
 		
-		images.put("replay", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/replay.svg")));
-		images.put("check", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/check.svg")));
-		images.put("impact", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/impact.svg")));
-		images.put("SQLbutton", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/SQLbutton.svg")));
-		images.put("exploredb", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/exploredb.svg")));
+		images.put("replay", SvgImageUrl.getSmallUrl("ui/images/replay.svg"));
+		images.put("check", SvgImageUrl.getSmallUrl("ui/images/check.svg"));
+		images.put("impact", SvgImageUrl.getSmallUrl("ui/images/impact.svg"));
+		images.put("SQLbutton", SvgImageUrl.getSmallUrl("ui/images/SQLbutton.svg"));
+		images.put("exploredb", SvgImageUrl.getSmallUrl("ui/images/exploredb.svg"));
 		
 		images.put("SlaveServer", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Slave_image" )));
 		images.put("ClusterSchema", SvgImageUrl.getSmallUrl(BasePropertyHandler.getProperty( "Cluster_image" )));
 		
-		images.put("show-results", SvgImageUrl.getSmallUrl(SvgImageUrl.getSmallUrl("ui/images/show-results.svg")));
+		images.put("show-results", SvgImageUrl.getSmallUrl("ui/images/show-results.svg"));
+		
+		// javscript组件图标
+		images.put("underGreen", SvgImageUrl.getSmallUrl( "ui/images/underGreen.svg"));
+		images.put("arrowGreen", SvgImageUrl.getSmallUrl( "ui/images/arrowGreen.svg"));
+		images.put("arrowOrange", SvgImageUrl.getSmallUrl( "ui/images/arrowOrange.svg"));
+		
+		images.put("addNew", SvgImageUrl.getSmallUrl( "ui/images/addSmall.svg"));
+		images.put("addCopy", SvgImageUrl.getSmallUrl( "ui/images/copySmall.svg"));
+		images.put("activeScript", SvgImageUrl.getSmallUrl( "ui/images/faScript.svg"));
+		images.put("activeStartScript", SvgImageUrl.getSmallUrl( "ui/images/SQLbutton.svg"));
+		images.put("activeEndScript", SvgImageUrl.getSmallUrl( "ui/images/edfScript.svg"));
+		images.put("scriptType", SvgImageUrl.getSmallUrl( "ui/images/hide-inactive.svg"));
 	}
 }

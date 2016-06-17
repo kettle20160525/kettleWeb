@@ -44,6 +44,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.trans.steps.randomvalue.RandomValueMeta;
 import org.pentaho.di.trans.steps.randomvalue.RandomValueMetaFunction;
+import org.pentaho.di.trans.steps.setvariable.SetVariableMeta;
 import org.pentaho.di.trans.steps.systemdata.SystemDataTypes;
 import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
 import org.springframework.stereotype.Controller;
@@ -254,40 +255,32 @@ public class SystemMainController {
 	@RequestMapping(method=RequestMethod.POST, value="/valueFormat")
 	protected void valueFormat(@RequestParam String valueType) throws IOException {
 		JSONArray jsonArray = new JSONArray();
-		int type = ValueMeta.getType(valueType);
-
-		switch (type) {
-		case ValueMetaInterface.TYPE_INTEGER:
-			String[] fmt = Const.getNumberFormats();
-			for (String f : fmt) {
+		if("all".equalsIgnoreCase(valueType)) {
+			for(String format : Const.getConversionFormats()) {
 				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("name", f);
+				jsonObject.put("name", format);
 				jsonArray.add(jsonObject);
 			}
-			break;
-		case ValueMetaInterface.TYPE_NUMBER:
-			fmt = Const.getNumberFormats();
-			for (String f : fmt) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("name", f);
-				jsonArray.add(jsonObject);
+		} else {
+			int type = ValueMeta.getType(valueType);
+			if(type == ValueMetaInterface.TYPE_INTEGER || type == ValueMetaInterface.TYPE_NUMBER) {
+				String[] fmt = Const.getNumberFormats();
+				for (String str : fmt) {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("id", ValueMeta.getType(str));
+					jsonObject.put("name", str);
+					jsonArray.add(jsonObject);
+				}
+			} else if(type == ValueMetaInterface.TYPE_DATE || type == ValueMetaInterface.TYPE_TIMESTAMP) {
+				String[] fmt = Const.getDateFormats();
+				for (String str : fmt) {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("id", ValueMeta.getType(str));
+					jsonObject.put("name", str);
+					jsonArray.add(jsonObject);
+				}
 			}
-			break;
-		case ValueMetaInterface.TYPE_DATE:
-
-			fmt = Const.getDateFormats();
-			for (String f : fmt) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("name", f);
-				jsonArray.add(jsonObject);
-			}
-			break;
-		case ValueMetaInterface.TYPE_BIGNUMBER:
-			break;
-		default:
-			break;
 		}
-		
 		JsonUtils.response(jsonArray);
 	}
 	
@@ -388,8 +381,8 @@ public class SystemMainController {
 	}
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/logLabel")
-	protected void logLabel() throws Exception {
+	@RequestMapping(method=RequestMethod.POST, value="/logLevel")
+	protected void logLevel() throws Exception {
 		JSONArray jsonArray = new JSONArray();
 	    for (LogLevel level : new LogLevel[]{LogLevel.NOTHING, LogLevel.ERROR, LogLevel.MINIMAL, 
 	    		LogLevel.BASIC, LogLevel.DETAILED, LogLevel.DEBUG, LogLevel.ROWLEVEL}) {
@@ -398,6 +391,22 @@ public class SystemMainController {
 			jsonObject.put("id", level.getLevel());
 			jsonObject.put("code", level.getCode());
 			jsonObject.put("desc", level.getDescription());
+			jsonArray.add(jsonObject);
+	    }
+		
+		JsonUtils.response(jsonArray);
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/variableType")
+	protected void variableType() throws Exception {
+		JSONArray jsonArray = new JSONArray();
+	    for (int i=0; i<SetVariableMeta.getVariableTypeDescriptions().length; i++) {
+	    	
+	    	JSONObject jsonObject = new JSONObject();
+			jsonObject.put("id", i);
+			jsonObject.put("code", SetVariableMeta.getVariableTypeCode(i));
+			jsonObject.put("desc", SetVariableMeta.getVariableTypeDescription(i));
 			jsonArray.add(jsonObject);
 	    }
 		
