@@ -21,8 +21,25 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 		        	       { text: 'FTPS'},
 		        	       { text: 'SFTP'},
 		        	       { text: 'SSH'}]
-			    }),  
-            value: cell.getAttribute('protocol')
+			    }), 
+			    
+            value: cell.getAttribute('protocol'),
+            listeners:{
+		    	'select' :function(){
+					if(wProtocol.getValue()=='FTPS')
+				   {
+						wftpscConnectionType.setDisabled(false);
+					}else{
+						wftpscConnectionType.setDisabled(true);
+			        }
+					if(wProtocol.getValue()=='SSH')
+					   {
+						wPublicpublickey.setDisabled(false);
+						}else{
+							wPublicpublickey.setDisabled(true);
+				        }
+			    }
+			 }
 		});
 		var wServerName = new Ext.form.TextField({fieldLabel: 'FTP服务器名称/IP地址',anchor: '-10',flex: 1,value: cell.getAttribute('serverName')});
 		var wServerport = new Ext.form.TextField({fieldLabel: '端口', flex: 1,anchor: '-10',value: cell.getAttribute('serverPort')});
@@ -39,6 +56,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 	        forceSelection: true,
 	        triggerAction: 'all',
 	        selectOnFocus:true,
+	        disabled:true,
 			value: cell.getAttribute('ftps_connection_type'),
 			store: new Ext.data.JsonStore({
 	        	fields: ['value', 'text'],
@@ -49,7 +67,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 	        	       {value: '4', text: 'AUTH_TLS_FTP_CONNECTION'},
 	        	       {value: '5', text: 'IMPLICIT_TLS_FTP_CONNECTION'},
 	        	       {value: '6', text: 'IMPLICIT_TLS_WITH_CRYPTED_DATA_FTP_CONNECTION'}]
-		    }),  
+		    })
 			});
 		var wUseproxy = new Ext.form.Checkbox({
 			fieldLabel: '使用代理',
@@ -74,38 +92,19 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 		 }
 		});
 
-		var wProxyHost = new Ext.form.TextField({fieldLabel: '代理主机',flex: 1,anchor: '-10', value: cell.getAttribute('proxy_host')});
-		var wProxyPort = new Ext.form.TextField({fieldLabel: '代理端口', flex: 1,anchor: '-10',value: cell.getAttribute('proxy_port')});
-		var wProxyUsername = new Ext.form.TextField({fieldLabel: '代理用户名',flex: 1, anchor: '-10',value: cell.getAttribute('proxy_username')});
-		var wProxyPassword = new Ext.form.TextField({fieldLabel: '代理密码', flex: 1, anchor: '-10',value: cell.getAttribute('proxy_password')});
+		var wProxyHost = new Ext.form.TextField({fieldLabel: '代理主机',disabled:true,flex: 1,anchor: '-10', value: cell.getAttribute('proxy_host')});
+		var wProxyPort = new Ext.form.TextField({fieldLabel: '代理端口', disabled:true,flex: 1,anchor: '-10',value: cell.getAttribute('proxy_port')});
+		var wProxyUsername = new Ext.form.TextField({fieldLabel: '代理用户名',disabled:true,flex: 1, anchor: '-10',value: cell.getAttribute('proxy_username')});
+		var wProxyPassword = new Ext.form.TextField({fieldLabel: '代理密码', disabled:true,flex: 1, anchor: '-10',value: cell.getAttribute('proxy_password')});
 		
 		var wTimeout =new Ext.form.TextField({fieldLabel: '超时', flex: 1,anchor: '-10',value: cell.getAttribute('timeout')});
 		var wActiveConnection = new Ext.form.Checkbox({fieldLabel: '使用活动的FTP链接', anchor: '-10',flex: 1,checked: cell.getAttribute('activeConnection') == 'Y'});
 		
-		var wPublicpublickey = new Ext.form.Checkbox({
-			fieldLabel: '使用公钥秘密钥',
-			anchor: '-10', flex: 1,
-			checked: cell.getAttribute('publicpublickey') == 'Y',
-			listeners:{
-				'check':function(checked){
-					if(checked.checked)
-				   {
-						wKeyfilename.setDisabled(false);
-						wKeyfilepass.setDisabled(false);
-					}else{
-						wKeyfilename.setDisabled(true);
-						wKeyfilepass.setDisabled(true);
-			        }
-			    }
-			 }});
-		var wKeyfilename = new Ext.form.TextField({fieldLabel: '公钥文件', flex: 1, anchor: '-10',value: cell.getAttribute('keyfilename')});
-		var wKeyfilepass = new Ext.form.TextField({fieldLabel: '加密密钥', flex: 1, anchor: '-10',value: cell.getAttribute('keyfilepass')});
-		
-		var wWildcard= new Ext.form.TextField({fieldLabel: '通配符（正则表达式）', flex: 1,anchor: '-10',value: cell.getAttribute('wildcard')});
-		var wRemoteDirectory = new Ext.form.TextField({fieldLabel: '远程目录',flex: 1, anchor: '-10',value: cell.getAttribute('remoteDirectory')});
-		
+		var wKeyfilename = new Ext.form.TextField({fieldLabel: '公钥文件', disabled:true,flex: 1, anchor: '-10',value: cell.getAttribute('keyfilename')});
+		var wKeyfilepass = new Ext.form.TextField({fieldLabel: '加密密钥', disabled:true,flex: 1, anchor: '-10',value: cell.getAttribute('keyfilepass')});
 		var wfindbutton = new Ext.Button({
 			text: '浏览...', 
+			disabled:true,
 			handler: function() {
 			var dialog = new FileExplorerWindow();
 			dialog.on('ok', function(path) {
@@ -114,6 +113,46 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 			});
 			dialog.show();
 		}});
+		var wPublicpublickey = new Ext.form.Checkbox({
+			fieldLabel: '使用公钥秘密钥',
+			anchor: '-10', flex: 1,
+			disabled:true,
+			checked: cell.getAttribute('publicpublickey') == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wKeyfilename.setDisabled(false);
+						wKeyfilepass.setDisabled(false);
+						wfindbutton.setDisabled(false);
+
+					}else{
+						wKeyfilename.setDisabled(true);
+						wKeyfilepass.setDisabled(true);
+						wfindbutton.setDisabled(true);
+
+			        }
+			    }
+			 }});
+		
+		var wWildcard= new Ext.form.TextField({fieldLabel: '通配符（正则表达式）', flex: 1,anchor: '-10',value: cell.getAttribute('wildcard')});
+		var wRemoteDirectory = new Ext.form.TextField({fieldLabel: '远程目录',flex: 1, anchor: '-10',value: cell.getAttribute('remoteDirectory')});
+		var wcheckbutton = new Ext.Button({xtype: 'button', text: '检查文件夹', handler: function() {
+			me.onSure(false);
+			Ext.Ajax.request({
+				url: GetUrl('job/ftpputdirtest.do'),
+				method: 'POST',
+				params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
+				success: function(response) {
+					decodeResponse(response, function(resObj) {
+						Ext.Msg.alert(resObj.title, resObj.message);
+					});
+				},
+				failure: failureResponse
+			});
+		}
+		});
+		
 		var wCopyprevious = new Ext.form.Checkbox({
 			fieldLabel: '从上一步结果复制参数', 
 			anchor: '-10',
@@ -125,11 +164,13 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 				   {
 						wRemoteDirectory.setDisabled(true);
 						wWildcard.setDisabled(true);
-						wfindbutton.disable();
+						wcheckbutton.setDisabled(true);
+
 					}else{
 						wRemoteDirectory.setDisabled(false);
 						wWildcard.setDisabled(false);
-						wfindbutton.enable();
+						wcheckbutton.setDisabled(false);
+
 			        }
 			    }
 			 }
@@ -146,14 +187,24 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 	        triggerAction: 'all',
 	        selectOnFocus:true,
 			value: cell.getAttribute('success_condition'),
-			tore: new Ext.data.JsonStore({
+			store: new Ext.data.JsonStore({
 	        	fields: ['value', 'text'],
 	        	data: [{value: 'success_when_at_least', text: 'success_when_at_least'},
-	        	       {value: 'success_if_errors_less1', text: 'success_if_errors_less'},
-	        	       {value: 'success_if_errors_less', text: 'success_is_all_files_downloaded'}]
+	        	       {value: 'success_if_errors_less', text: 'success_if_errors_less'},
+	        	       {value: 'success_is_all_files_downloaded', text: 'success_is_all_files_downloaded'}]
 		    }), 
+		    listeners:{
+		    	'select' :function(value){
+					if(wSuccess_condition.getValue()=='success_when_at_least')
+				   {
+						wNr_limit_success.setDisabled(false);
+					}else{
+						wNr_limit_success.setDisabled(true);
+			        }
+			    }
+			 }
 			});
-		var wNr_limit_success = new Ext.form.TextField({fieldLabel: '数量',flex: 1, anchor: '-10',value: cell.getAttribute('nr_limit_success')});
+		var wNr_limit_success = new Ext.form.TextField({fieldLabel: '数量',flex: 1,disabled:true, anchor: '-10',value: cell.getAttribute('nr_limit_success')});
 		
 		var wSocksProxyHost = new Ext.form.TextField({fieldLabel: '主机',flex: 1, anchor: '-10', value: cell.getAttribute('socksproxy_host')});
 		var wSocksProxyPort = new Ext.form.TextField({fieldLabel: '端口',flex: 1, anchor: '-10',value: cell.getAttribute('socksproxy_port')});
@@ -240,22 +291,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 				xtype: 'compositefield',
 				fieldLabel: '远程目录',
 				anchor: '-10',
-				items:[wRemoteDirectory,
-					{xtype: 'button', text: '检查文件夹', handler: function() {
-						me.onSure(false);
-						Ext.Ajax.request({
-							url: GetUrl('job/ftpputdirtest.do'),
-							method: 'POST',
-							params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
-							success: function(response) {
-								decodeResponse(response, function(resObj) {
-									Ext.Msg.alert(resObj.title, resObj.message);
-								});
-							},
-							failure: failureResponse
-						});
-					}
-					}]},wWildcard]},
+				items:[wRemoteDirectory, wcheckbutton]},wWildcard]},
 					{
 						xtype: 'fieldset',
 						bodyStyle: 'padding: 10px 10px',
