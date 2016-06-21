@@ -93,7 +93,7 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 											me.onSure(false);
 											
 											Ext.Ajax.request({
-												url: GetUrl('job/ftpputtest.do'),
+												url: GetUrl('job/ftptest.do'),
 												method: 'POST',
 												params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 												success: function(response) {
@@ -152,7 +152,7 @@ JobEntryFTPPUTDialog = Ext.extend(KettleTabDialog, {
 						xtype: 'button', text: '测试目录',handler: function() {
 							me.onSure(false);
 							Ext.Ajax.request({
-								url: GetUrl('job/ftpputtestremotedir.do'),
+								url: GetUrl('job/ftpdirtest.do'),
 								method: 'POST',
 								params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 								success: function(response) {

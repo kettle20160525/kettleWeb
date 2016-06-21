@@ -258,7 +258,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 					xtype: 'button', text: '测试连接', handler: function() {
 						me.onSure(false);
 						Ext.Ajax.request({
-							url: GetUrl('job/ftpdirtest.do'),
+							url: GetUrl('job/ftptest.do'),
 							method: 'POST',
 							params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 							success: function(response) {
