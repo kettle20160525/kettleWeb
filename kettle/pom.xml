@@ -189,12 +189,16 @@
 			<version>1.7R3</version>
 		</dependency>
 		<dependency>
-     <groupId>com.trilead</groupId>
-    <artifactId>trilead-ssh2</artifactId>
-    <version>build213</version>
-     </dependency>
+            <groupId>com.trilead</groupId>
+           <artifactId>trilead-ssh2</artifactId>
+            <version>build213</version>
+        </dependency>
+        <dependency>
+			<groupId>org.ftp4che</groupId>
+			<artifactId>ftp4che</artifactId>
+			<version>0.7.1</version>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
