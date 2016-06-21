@@ -29,7 +29,7 @@ RepositoryExplorerWindow = Ext.extend(Ext.Window, {
 			if(!Ext.isEmpty(textfield.getValue())) {
 				var path = textfield.getValue();
 				var directory = path.substring(0, path.lastIndexOf('/') + 1);
-				var name = path.substring(path.lastIndexOf('/') + 1);
+				var name = path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 				this.fireEvent('ok', directory, name);
 			}
 		};

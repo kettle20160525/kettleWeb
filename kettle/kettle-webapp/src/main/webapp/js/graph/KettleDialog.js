@@ -136,6 +136,10 @@ KettleDialog = Ext.extend(Ext.Window, {
 		return this.wLabel.getValue();
 	},
 	
+	setStepname: function(v) {
+		this.wLabel.setValue(v);
+	},
+	
 	onSure: function() {
 		var data = this.getData();
 		if(this.fireEvent('beforesave', this, data) !== false) {

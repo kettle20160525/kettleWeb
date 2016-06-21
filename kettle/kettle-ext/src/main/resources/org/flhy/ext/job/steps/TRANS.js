@@ -18,7 +18,12 @@ JobEntryTrans = Ext.extend(KettleTabDialog, {
 		var wTransname = new Ext.form.TextField({flex: 1, disabled: true});
 		var wbTransname = new Ext.Button({text: '选择..', disabled: true, handler: function() {
 			var dialog = new RepositoryExplorerWindow();
-			dialog.on('ok', function(dir, name) {wDirectory.setValue(dir);wTransname.setValue(name);dialog.close();});
+			dialog.on('ok', function(dir, name) {
+				wDirectory.setValue(dir);
+				wTransname.setValue(name);
+				me.setStepname(name);
+				dialog.close();
+			});
 			dialog.show();
 		}});
 		
