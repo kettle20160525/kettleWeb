@@ -26,6 +26,7 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.ftpdelete.JobEntryFTPDelete;
 import org.pentaho.di.job.entries.ftpput.JobEntryFTPPUT;
 import org.pentaho.di.job.entries.sftp.JobEntrySFTP;
 import org.pentaho.di.job.entries.sftp.SFTPClient;
@@ -290,21 +291,52 @@ public class JobGraphController {
 	
 	
 	@ResponseBody
-	@RequestMapping(method=RequestMethod.POST, value="/ftpputtestremotedir")
+	@RequestMapping(method=RequestMethod.POST, value="/ftpdirtest")
 	protected void ftpputtestremotedir(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
 		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
 		JobMeta jobMeta = (JobMeta) codec.decode(graphXml);
 		
 		JobEntryCopy jobEntryCopy = jobMeta.findJobEntry(stepName);
-		JobEntryFTPPUT ftpput = (JobEntryFTPPUT) jobEntryCopy.getEntry();
-		 
+		String servername = "";
+		String serverport = "";
+		String username = "";
+		String password = "";
+		String proxyHost = "";
+		String proxyPort = "";
+		String proxyUsername = "";
+		String proxyPass = "";
+		String remoteDirectory="";
+		
+
 		String info = "";
 		FTPClient ftpputClient = null;
 		try {
-			String servername = jobMeta.environmentSubstitute(ftpput.getServerName());
-			String serverport = jobMeta.environmentSubstitute(ftpput.getServerPort());
-			String username = jobMeta.environmentSubstitute(ftpput.getUserName());
-			String password = jobMeta.environmentSubstitute(ftpput.getPassword());
+			 if("FTP 上传".equals(stepName)){
+					JobEntryFTPPUT ftpput = (JobEntryFTPPUT) jobEntryCopy.getEntry();
+					servername = jobMeta.environmentSubstitute(ftpput.getServerName());
+					serverport = jobMeta.environmentSubstitute(ftpput.getServerPort());
+					username = jobMeta.environmentSubstitute(ftpput.getUserName());
+				    password = jobMeta.environmentSubstitute(ftpput.getPassword());
+					 proxyHost = jobMeta.environmentSubstitute(ftpput.getProxyHost());
+					 proxyPort = jobMeta.environmentSubstitute(ftpput.getProxyPort());
+					 proxyUsername = jobMeta.environmentSubstitute(ftpput.getProxyUsername());
+					 proxyPass = jobMeta.environmentSubstitute(ftpput.getProxyPassword());
+					 remoteDirectory=jobMeta.environmentSubstitute(ftpput.getRemoteDirectory());
+			 }
+			 if("FTP 删除".equals(stepName)){
+				 JobEntryFTPDelete ftpdelete = (JobEntryFTPDelete) jobEntryCopy.getEntry();
+					servername = jobMeta.environmentSubstitute(ftpdelete.getServerName());
+					serverport = jobMeta.environmentSubstitute(ftpdelete.getPort());
+					username = jobMeta.environmentSubstitute(ftpdelete.getUserName());
+				    password = jobMeta.environmentSubstitute(ftpdelete.getPassword());
+					 proxyHost = jobMeta.environmentSubstitute(ftpdelete.getProxyHost());
+					 proxyPort = jobMeta.environmentSubstitute(ftpdelete.getProxyPort());
+					 proxyUsername = jobMeta.environmentSubstitute(ftpdelete.getProxyUsername());
+					 proxyPass = jobMeta.environmentSubstitute(ftpdelete.getProxyPassword());
+					 remoteDirectory=jobMeta.environmentSubstitute(ftpdelete.getFtpDirectory());
+
+			 }
+
 //			String keyFilename = jobMeta.environmentSubstitute(ftpput.getKeyFilename());
 //			String keyFilePass = jobMeta.environmentSubstitute(ftpput.getKeyPassPhrase());
 			
@@ -312,20 +344,23 @@ public class JobGraphController {
 //			ftpputClient=new FTPClient(remoteAddr, controlPort);
 //			ftpputClient = new FTPClient(InetAddress.getByName(servername), Const.toInt(serverport, 21), 30, ftpput.getControlEncoding());
 //			ftpputClient = new FTPClient  (InetAddress.getByName(servername), Const.toInt(serverport, 22), username);
-			String proxyHost = jobMeta.environmentSubstitute(ftpput.getProxyHost());
-			String proxyPort = jobMeta.environmentSubstitute(ftpput.getProxyPort());
-			String proxyUsername = jobMeta.environmentSubstitute(ftpput.getProxyUsername());
-			String proxyPass = jobMeta.environmentSubstitute(ftpput.getProxyPassword());
+	
 			ftpputClient.login(username, password);
-
-			if(ftpputClient.exists(ftpput.getRemoteDirectory())) {
-				JsonUtils.success(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.OK" ), 
-						BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.OK", ftpput.getRemoteDirectory() ) + Const.CR);
+			if("FTP 上传".equals(stepName)){
+			   if(ftpputClient.exists(remoteDirectory)) {
+				JsonUtils.success(BaseMessages.getString( JobEntryFTPDelete.class, "JobFTPPUT.FolderExists.OK" ), 
+						BaseMessages.getString( JobEntryFTPDelete.class, "JobFTPPUT.FolderExists.OK", remoteDirectory) + Const.CR);
 				return;
+			  }
 			}
-//			JsonUtils.success(BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.Title.Ok" ), 
-//					BaseMessages.getString( JobEntrySFTP.class, "JobFTPPUT.Connected.OK", ftpput.getServerName() ) + Const.CR);
-//			return;
+			
+			if("FTP 删除".equals(stepName)){
+				   if(ftpputClient.exists(remoteDirectory)) {
+					JsonUtils.success(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPDelete.Connected.OK" ), 
+							BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPDelete.Connected.Title.Ok", remoteDirectory) + Const.CR);
+					return;
+				  }
+			}
 		} catch (Exception e) {
 			if (ftpputClient != null) {
 				try {
@@ -336,9 +371,14 @@ public class JobGraphController {
 			}
 			info = e.getMessage();
 		}
-		
-		JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.Title.Bad" ), 
-				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.NOK", ftpput.getRemoteDirectory(), info) + Const.CR);
+		if("FTP 上传".equals(stepName)){
+		     JsonUtils.fail(BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.Title.Bad" ), 
+				 BaseMessages.getString( JobEntryFTPPUT.class, "JobFTPPUT.FolderExists.NOK", remoteDirectory, info) + Const.CR);
+		}
+		if("FTP 删除".equals(stepName)){
+		     JsonUtils.fail(BaseMessages.getString( JobEntryFTPDelete.class, "JobFTPDelete.ErrorConnect.NOK" ), 
+				 BaseMessages.getString( JobEntryFTPDelete.class, "JobFTPDelete.ErrorConnect.NOK", remoteDirectory, info) + Const.CR);
+		}
 	}
 	
 	
