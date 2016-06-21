@@ -95,105 +95,6 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 			fields: ['name', 'type', 'format', 'length', 'precision', 'currency', 'decimal', 'group', 'trim_type', 'nullif'],
 			data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
 		});
-		var grid = new Ext.grid.EditorGridPanel({
-			region: 'center',
-			title: '字段',
-			tbar: [{
-				text: '新增字段', handler: function() {
-					var RecordType = grid.getStore().recordType;
-	                var p = new RecordType({
-	                    name: '',
-	                    type: '',
-	                    format: '',
-	                    length: 100
-	                });
-	                grid.stopEditing();
-	                grid.getStore().insert(0, p);
-	                grid.startEditing(0, 0);
-				}
-			},{
-				text: '删除字段'
-			},{
-				text: '获取字段'
-			},{
-				text: '最小宽度'
-			}],
-			columns: [new Ext.grid.RowNumberer(), {
-				header: '名称', dataIndex: 'name', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			},{
-				header: '类型', dataIndex: 'type', width: 100, editor: new Ext.form.ComboBox({
-			        store: Ext.StoreMgr.get('valueMetaStore'),
-			        displayField: 'name',
-			        valueField: 'name',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: '格式', dataIndex: 'format', width: 150, editor: new Ext.form.ComboBox({
-			        store: new Ext.data.JsonStore({
-			        	fields: ['value'],
-			        	data: [{value: 'yyyy-MM-dd HH:mm:ss'},
-			        	       {value: 'yyyy/MM/dd HH:mm:ss'},
-			        	       {value: 'yyyy-MM-dd'},
-			        	       {value: 'yyyy/MM/dd'},
-			        	       {value: 'yyyyMMdd'},
-			        	       {value: 'yyyyMMddHHmmss'}]
-			        }),
-			        displayField:'value',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: '长度', dataIndex: 'length', width: 50, editor: new Ext.form.NumberField()
-			},{
-				header: '精度', dataIndex: 'precision', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '货币', dataIndex: 'currency', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '小数', dataIndex: 'decimal', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '分组', dataIndex: 'group', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '去除空字符串方式', dataIndex: 'trim_type', width: 100, renderer: function(v)
-				{
-					if(v == 'none') 
-						return '不去掉空格'; 
-					else if(v == 'left') 
-						return '去掉左空格';
-					else if(v == 'right') 
-						return '去掉右空格';
-					else if(v == 'both') 
-						return '去掉左右两端空格';
-					return v;
-				}, editor: new Ext.form.ComboBox({
-			        store: new Ext.data.JsonStore({
-			        	fields: ['value', 'text'],
-			        	data: [{value: 'none', text: '不去掉空格'},
-			        	       {value: 'left', text: '去掉左空格'},
-			        	       {value: 'right', text: '去掉右空格'},
-			        	       {value: 'both', text: '去掉左右两端空格'}]
-			        }),
-			        displayField: 'text',
-			        valueField: 'value',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: 'Null', dataIndex: 'nullif', width: 80, editor: new Ext.form.TextField()
-			}],
-			store: store
-		});
 		
 		this.getValues = function(){
 			return {
@@ -268,7 +169,90 @@ TextFileOutputDialog = Ext.extend(KettleTabDialog, {
 				}]
 			},wEnclosure, wEnclForced, wDisableEnclosureFix, wHeader, wFooter, wFormat, wCompression, 
 			wEncoding, wPad, wFastDump, wSplitEvery, wEndedLine]
-		}, grid];
+		}, {
+			xtype:'KettleEditorGrid',
+			region: 'center',
+			title: '字段',
+			menuAdd: function(menu) {
+				menu.insert(0, {
+					text: '获取变量', scope: this, handler: function() {
+						me.onSure();
+						
+						getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(st) {
+							store.loadData(st.toJson());
+						});
+					}
+				});
+			},
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '名称', dataIndex: 'name', width: 100, editor: new Ext.form.TextField({
+	                allowBlank: false
+	            })
+			},{
+				header: '类型', dataIndex: 'type', width: 100, editor: new Ext.form.ComboBox({
+			        store: Ext.StoreMgr.get('valueMetaStore'),
+			        displayField: 'name',
+			        valueField: 'name',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '格式', dataIndex: 'format', width: 150, editor: new Ext.form.ComboBox({
+			        store: Ext.StoreMgr.get('valueFormatStore'),
+			        displayField:'name',
+			        valueField:'name',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '长度', dataIndex: 'length', width: 50, editor: new Ext.form.NumberField()
+			},{
+				header: '精度', dataIndex: 'precision', width: 100, editor: new Ext.form.TextField()
+			},{
+				header: '货币', dataIndex: 'currency', width: 100, editor: new Ext.form.TextField()
+			},{
+				header: '小数', dataIndex: 'decimal', width: 100, editor: new Ext.form.TextField()
+			},{
+				header: '分组', dataIndex: 'group', width: 100, editor: new Ext.form.TextField()
+			},{
+				header: '去除空字符串方式', dataIndex: 'trim_type', width: 100, renderer: function(v)
+				{
+					if(v == 'none') 
+						return '不去掉空格'; 
+					else if(v == 'left') 
+						return '去掉左空格';
+					else if(v == 'right') 
+						return '去掉右空格';
+					else if(v == 'both') 
+						return '去掉左右两端空格';
+					return v;
+				}, editor: new Ext.form.ComboBox({
+			        store: new Ext.data.JsonStore({
+			        	fields: ['value', 'text'],
+			        	data: [{value: 'none', text: '不去掉空格'},
+			        	       {value: 'left', text: '去掉左空格'},
+			        	       {value: 'right', text: '去掉右空格'},
+			        	       {value: 'both', text: '去掉左右两端空格'}]
+			        }),
+			        displayField: 'text',
+			        valueField: 'value',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: 'Null', dataIndex: 'nullif', width: 80, editor: new Ext.form.TextField()
+			}],
+			store: store
+		}];
 		TextFileOutputDialog.superclass.initComponent.call(this);
 	}
 });
