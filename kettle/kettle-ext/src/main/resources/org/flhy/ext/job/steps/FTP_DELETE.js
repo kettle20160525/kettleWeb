@@ -136,11 +136,11 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 			 }});
 		
 		var wWildcard= new Ext.form.TextField({fieldLabel: '通配符（正则表达式）', flex: 1,anchor: '-10',value: cell.getAttribute('wildcard')});
-		var wRemoteDirectory = new Ext.form.TextField({fieldLabel: '远程目录',flex: 1, anchor: '-10',value: cell.getAttribute('remoteDirectory')});
+		var wRemoteDirectory = new Ext.form.TextField({fieldLabel: '远程目录',flex: 1, anchor: '-10',value: cell.getAttribute('ftpdirectory')});
 		var wcheckbutton = new Ext.Button({xtype: 'button', text: '检查文件夹', handler: function() {
 			me.onSure(false);
 			Ext.Ajax.request({
-				url: GetUrl('job/ftpputdirtest.do'),
+				url: GetUrl('job/ftpdirtest.do'),
 				method: 'POST',
 				params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 				success: function(response) {
@@ -217,7 +217,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 				serverPort: wServerport.getValue(),
 				username: wUsername.getValue(),
 				password: wPassword.getValue(),
-				ftps_connection_type: wftpscConnectionType.getValue() ? "Y" : "N",
+				ftps_connection_type: wftpscConnectionType.getValue(),
 				useproxy:wUseproxy.getValue() ? "Y" : "N",
 				timeout: wTimeout.getValue(),
 				activeConnection: wActiveConnection.getValue() ? "Y" : "N",
@@ -232,7 +232,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 				copyprevious: wCopyprevious.getValue() ? "Y" : "N",
 				success_condition: wSuccess_condition.getValue(),
 				nr_limit_success:wNr_limit_success.getValue(),
-				remoteDirectory: wRemoteDirectory.getValue(),
+				ftpdirectory: wRemoteDirectory.getValue(),
 				socksproxy_host: wSocksProxyHost.getValue(),
 				socksproxy_port: wSocksProxyPort.getValue(),
 				socksproxy_username: wSocksProxyUsername.getValue(),
@@ -258,7 +258,7 @@ FTPdeleteDialog = Ext.extend(KettleTabDialog, {
 					xtype: 'button', text: '测试连接', handler: function() {
 						me.onSure(false);
 						Ext.Ajax.request({
-							url: GetUrl('job/ftpputtest.do'),
+							url: GetUrl('job/ftpdirtest.do'),
 							method: 'POST',
 							params: {graphXml: getActiveGraph().toXml(), stepName: cell.getAttribute('label')},
 							success: function(response) {
