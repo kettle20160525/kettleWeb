@@ -429,21 +429,27 @@ public class SystemMainController {
 	
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/fileexplorer")
-	protected void fileexplorer(@RequestParam String path) throws Exception {
+	protected void fileexplorer(@RequestParam String path, @RequestParam boolean includeFile, @RequestParam String fileExt) throws Exception {
 		JSONArray jsonArray = new JSONArray();
 		if(StringUtils.hasText(path)) {
 			File[] files = new File(path).listFiles();
-			for(File file : files) {
-				if(file.isHidden())
-					continue;
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("id", file.getAbsolutePath());
-				jsonObject.put("text", file.getName());
-				if(file.isFile()) {
-					jsonObject.put("leaf", true);
-					jsonArray.add(jsonArray.size(), jsonObject);
-				} else {
-					jsonArray.add(0, jsonObject);
+			if(files != null) {
+				for(File file : files) {
+					if(file.isHidden())
+						continue;
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("id", file.getAbsolutePath());
+					jsonObject.put("text", file.getName());
+					if(file.isFile()) {
+						if(!includeFile)
+							continue;
+						if(!"*".equalsIgnoreCase(fileExt) && file.getName().endsWith(fileExt)) {
+							jsonObject.put("leaf", true);
+							jsonArray.add(jsonArray.size(), jsonObject);
+						}
+					} else {
+						jsonArray.add(0, jsonObject);
+					}
 				}
 			}
 		} else {

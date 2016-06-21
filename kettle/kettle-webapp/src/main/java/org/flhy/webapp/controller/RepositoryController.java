@@ -263,17 +263,17 @@ public class RepositoryController {
 	 */
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/explorer")
-	protected void explorer() throws KettleException, IOException {
+	protected void explorer(@RequestParam boolean includeElement, @RequestParam String type) throws KettleException, IOException {
 		JSONArray nodes = new JSONArray();
 		
 		Repository repository = App.getInstance().getRepository();
 		RepositoryDirectoryInterface repositoryDirectory = repository.loadRepositoryDirectoryTree();
-		browser(repository, repositoryDirectory.findRoot(), nodes);
+		browser(repository, repositoryDirectory.findRoot(), nodes, includeElement, type);
 		
 		JsonUtils.response(nodes);
 	}
 	
-	private void browser(Repository repository, RepositoryDirectoryInterface dir, ArrayList list) throws KettleException {
+	private void browser(Repository repository, RepositoryDirectoryInterface dir, ArrayList list, boolean includeElement, String type) throws KettleException {
 		HashMap<String, Object> node = new HashMap<String, Object>();
 		node.put("id", "directory_" + dir.getObjectId().getId());
 		node.put("objectId", dir.getObjectId().getId());
@@ -285,33 +285,40 @@ public class RepositoryController {
 		
 		List<RepositoryDirectoryInterface> directorys = dir.getChildren();
 		for(RepositoryDirectoryInterface child : directorys)
-			browser(repository, child, children);
+			browser(repository, child, children, includeElement, type);
 		
-		List<RepositoryElementMetaInterface> elements = repository.getTransformationObjects(dir.getObjectId(), false);
-		if(elements != null) {
-			for(RepositoryElementMetaInterface e : elements) {
-				HashMap<String, Object> leaf = new HashMap<String, Object>();
-				leaf.put("id", "transaction_" + e.getObjectId().getId());
-				leaf.put("objectId", e.getObjectId().getId());
-				leaf.put("text", e.getName());
-				leaf.put("iconCls", "trans");
-				leaf.put("leaf", true);
-				children.add(leaf);
+		if(includeElement) {
+			if(RepositoryObjectType.TRANSFORMATION.getTypeDescription().equals(type) || "all".equalsIgnoreCase(type)) {
+				List<RepositoryElementMetaInterface> elements = repository.getTransformationObjects(dir.getObjectId(), false);
+				if(elements != null) {
+					for(RepositoryElementMetaInterface e : elements) {
+						HashMap<String, Object> leaf = new HashMap<String, Object>();
+						leaf.put("id", "transaction_" + e.getObjectId().getId());
+						leaf.put("objectId", e.getObjectId().getId());
+						leaf.put("text", e.getName());
+						leaf.put("iconCls", "trans");
+						leaf.put("leaf", true);
+						children.add(leaf);
+					}
+				}
+			}
+			
+			if(RepositoryObjectType.JOB.getTypeDescription().equals(type) || "all".equalsIgnoreCase(type)) {
+				List<RepositoryElementMetaInterface> elements = repository.getJobObjects(dir.getObjectId(), false);
+				if(elements != null) {
+					for(RepositoryElementMetaInterface e : elements) {
+						HashMap<String, Object> leaf = new HashMap<String, Object>();
+						leaf.put("id", "job_" + e.getObjectId().getId());
+						leaf.put("objectId", e.getObjectId().getId());
+						leaf.put("text", e.getName());
+						leaf.put("iconCls", "job");
+						leaf.put("leaf", true);
+						children.add(leaf);
+					}
+				}
 			}
 		}
 		
-		elements = repository.getJobObjects(dir.getObjectId(), false);
-		if(elements != null) {
-			for(RepositoryElementMetaInterface e : elements) {
-				HashMap<String, Object> leaf = new HashMap<String, Object>();
-				leaf.put("id", "job_" + e.getObjectId().getId());
-				leaf.put("objectId", e.getObjectId().getId());
-				leaf.put("text", e.getName());
-				leaf.put("iconCls", "job");
-				leaf.put("leaf", true);
-				children.add(leaf);
-			}
-		}
 	}
 	
 	/**

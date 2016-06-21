@@ -1,15 +1,15 @@
-FileExplorerWindow = Ext.extend(Ext.Window, {
+RepositoryExplorerWindow = Ext.extend(Ext.Window, {
 	width: 400,
 	height: 500,
 	layout: 'border',
 	modal: true,
-	title: '文件浏览器',
-	includeFile: false,
-	fileExt: '*',
+	title: '资源库浏览',
+	includeElement: true,
+	type: 'transformation',	//job
 	
 	initComponent: function() {
 		var loader = new Ext.tree.TreeLoader({
-			dataUrl: GetUrl('system/fileexplorer.do'),
+			dataUrl: GetUrl('repository/explorer.do'),
 		});
 		var tree = new Ext.tree.TreePanel({
 			region: 'center',
@@ -26,8 +26,12 @@ FileExplorerWindow = Ext.extend(Ext.Window, {
 		});
 		
 		var ok = function() {
-			if(!Ext.isEmpty(textfield.getValue()))
-				this.fireEvent('ok', textfield.getValue());
+			if(!Ext.isEmpty(textfield.getValue())) {
+				var path = textfield.getValue();
+				var directory = path.substring(0, path.lastIndexOf('/') + 1);
+				var name = path.substring(path.lastIndexOf('/') + 1);
+				this.fireEvent('ok', directory, name);
+			}
 		};
 		
 		this.items = [tree, {
@@ -43,21 +47,16 @@ FileExplorerWindow = Ext.extend(Ext.Window, {
 		}];
 		
 		loader.on('beforeload', function(l, node) {
-			if(node == tree.getRootNode())
-				loader.baseParams.path = '';
-			else
-				loader.baseParams.path = node.id;
-			
-			l.baseParams.includeFile = this.includeFile;
-			l.baseParams.fileExt = this.fileExt;
+			l.baseParams.includeElement = this.includeElement;
+			l.baseParams.type = this.type;
 		}, this);
 		
-		FileExplorerWindow.superclass.initComponent.call(this);
+		RepositoryExplorerWindow.superclass.initComponent.call(this);
 		this.addEvents('ok');
 		
 		tree.on('click', function(node) {
 			if(node && node != tree.getRootNode())
-				textfield.setValue(node.id);
+				textfield.setValue(node.attributes.objectId);
 		});
 	}
 });

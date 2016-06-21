@@ -224,6 +224,8 @@ KettleEditorGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 		
 		var menu = new Ext.menu.Menu({
 			items: [{
+				text: '插入', scope: this, handler: this.insert
+			}, {
 				text: '当前行前面插入', scope: this, handler: this.insertBefore
 			}, {
 				text: '当前行后面插入', scope: this, handler: this.insertAfter
@@ -252,6 +254,14 @@ KettleEditorGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 	},
 	
 	menuAdd: Ext.emptyFn,
+	
+	insert: function() {
+		var store = this.getStore();
+		
+		this.stopEditing();
+        store.insert(0, new store.recordType(this.getDefaultValue()));
+        this.startEditing(0, 1);	// 0 is rowindex
+	},
 	
 	insertBefore: function() {
 		var sm = this.getSelectionModel();
@@ -339,3 +349,5 @@ KettleEditorGrid = Ext.extend(Ext.grid.EditorGridPanel, {
 });
 
 Ext.reg('KettleEditorGrid', KettleEditorGrid);
+
+

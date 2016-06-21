@@ -253,6 +253,8 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 						beforeload: function(l) {
 							var el = repository.getEl();
 							el.mask('资源库信息加载中...', 'x-mask-loading');
+							l.baseParams.type = 'all';
+							l.baseParams.includeElement = true;
 						},
 						load: function(l, n) {
 							n.firstChild.expand();
