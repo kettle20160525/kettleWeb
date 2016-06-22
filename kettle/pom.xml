@@ -11,11 +11,28 @@
 	</modules>
 
 	<dependencies>
+	
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
 			<version>2.9.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.7R3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.trilead</groupId>
+			<artifactId>trilead-ssh2</artifactId>
+			<version>1.0.0-build220</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ftp4che</groupId>
+			<artifactId>ftp4che</artifactId>
+			<version>0.7.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.pentaho.di</groupId>
 			<artifactId>kettle-core</artifactId>
@@ -166,7 +183,7 @@
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.17</version>
+			<version>5.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-pool</groupId>
@@ -183,22 +200,8 @@
 			<artifactId>edtftpj</artifactId>
 			<version>2.1.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.mozilla</groupId>
-			<artifactId>rhino</artifactId>
-			<version>1.7R3</version>
-		</dependency>
-		<dependency>
-            <groupId>com.trilead</groupId>
-           <artifactId>trilead-ssh2</artifactId>
-            <version>build213</version>
-        </dependency>
-        <dependency>
-			<groupId>org.ftp4che</groupId>
-			<artifactId>ftp4che</artifactId>
-			<version>0.7.1</version>
-		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
