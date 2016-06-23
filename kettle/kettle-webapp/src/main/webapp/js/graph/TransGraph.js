@@ -129,6 +129,42 @@ TransGraph = Ext.extend(BaseGraph, {
 				var stepFieldsDialog = new StepFieldsDialog({before: false});
 				stepFieldsDialog.show();
 			}, null, null, true);
+			menu.addSeparator(null);
+			menu.addItem('集群', null, function(){
+				var listBox = new ListBox({
+					store: me.getClusterSchemaStore(),
+					displayField: 'name',
+					valueField: 'name'
+				});
+				var win = new Ext.Window({
+					width: 200,
+					height: 300,
+					title: '集群选择',
+					layout: 'fit',
+					modal: true,
+					items: listBox,
+					bbar: ['->', {
+						text: '确定', handler: function() {
+							if(!Ext.isEmpty(listBox.getValue())) {
+								graph.getModel().beginUpdate();
+						        try
+						        {
+									var edit = new mxCellAttributeChange(cell, 'cluster_schema', listBox.getValue());
+					            	graph.getModel().execute(edit);
+						        } finally
+						        {
+						            graph.getModel().endUpdate();
+						        }
+								
+								me.showCluster(cell);
+								win.close();
+							}
+						}
+					}]
+				});
+				
+				win.show();
+			}, null, null, true);
 		}
 	},
 	
@@ -204,10 +240,10 @@ TransGraph = Ext.extend(BaseGraph, {
 	
 	cellAdded: function(graph, child) {
 		if(!isNaN(child.getAttribute('copies'))) {
-			this.showCopies(graph, child);
+			this.showCopies(child);
 		}
 		if(child.getAttribute('cluster_schema')) {
-			this.showCluster(graph, child);
+			this.showCluster(child);
 		}		
 	},
 	
@@ -233,7 +269,8 @@ TransGraph = Ext.extend(BaseGraph, {
 		});
 	},
 	
-	showCopies: function(graph, cell) {
+	showCopies: function(cell) {
+		var graph = this.getGraph();
 		var overlays = graph.getCellOverlays(cell) || [];
 		for(var i=0; i<overlays.length; i++) {
 			var overlay = overlays[i];
@@ -258,7 +295,8 @@ TransGraph = Ext.extend(BaseGraph, {
 		}
 	},
 	
-	showCluster: function(graph, cell) {
+	showCluster: function(cell) {
+		var graph = this.getGraph();
 		var overlays = graph.getCellOverlays(cell) || [];
 		for(var i=0; i<overlays.length; i++) {
 			var overlay = overlays[i];
@@ -276,7 +314,7 @@ TransGraph = Ext.extend(BaseGraph, {
 					var w = parseInt(response.responseText);
 					
 					var offset = new mxPoint(0, -10);
-					var overlay = new mxCellOverlay(new mxImage('system/text2image.do?text=X' + cluster_schema, w, 12), 'update: ', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, offset);
+					var overlay = new mxCellOverlay(new mxImage('system/text2image.do?text=' + cluster_schema, w, 12), 'update: ', mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, offset);
 					graph.addCellOverlay(cell, overlay);
 				}
 			});

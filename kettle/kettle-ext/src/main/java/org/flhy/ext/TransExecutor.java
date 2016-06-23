@@ -1,5 +1,6 @@
 package org.flhy.ext;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -13,11 +14,14 @@ import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
+import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.logging.KettleLogLayout;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.KettleLoggingEvent;
+import org.pentaho.di.core.logging.LogChannel;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LogMessage;
 import org.pentaho.di.core.logging.LoggingRegistry;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -26,6 +30,7 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransAdapter;
 import org.pentaho.di.trans.TransExecutionConfiguration;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.cluster.TransSplitter;
 import org.pentaho.di.trans.step.RowAdapter;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
@@ -61,6 +66,9 @@ public class TransExecutor implements Runnable {
 	
 	private boolean finished = false;
 
+
+	private ArrayList<String> clusterLogIds = new ArrayList<String>();
+	
 	@Override
 	public void run() {
 		try {
@@ -123,6 +131,64 @@ public class TransExecutor implements Runnable {
 					Thread.sleep(500);
 				}
 			} else if(executionConfiguration.isExecutingClustered()) {
+//				clusterLog = new LogChannel( this, null );
+				TransSplitter transSplitter = new TransSplitter( transMeta );
+				transSplitter.splitOriginalTransformation();
+				
+				SlaveServer masterServer = transSplitter.getMasterServer();
+				clusterLogIds.add(masterServer.getLogChannel().getLogChannelId());
+				SlaveServer[] slaves = transSplitter.getSlaveTargets();
+				
+				for (String var : Const.INTERNAL_TRANS_VARIABLES) {
+					executionConfiguration.getVariables().put(var, transMeta.getVariable(var));
+				}
+				for (String var : Const.INTERNAL_JOB_VARIABLES) {
+					executionConfiguration.getVariables().put(var, transMeta.getVariable(var));
+				}
+
+				// Parameters override the variables.
+				// For the time being we're passing the parameters over the wire
+				// as variables...
+				//
+				TransMeta ot = transSplitter.getOriginalTransformation();
+				for (String param : ot.listParameters()) {
+					String value = Const.NVL(ot.getParameterValue(param), Const.NVL(ot.getParameterDefault(param), ot.getVariable(param)));
+					if (!Const.isEmpty(value)) {
+						executionConfiguration.getVariables().put(param, value);
+					}
+				}
+
+				try {
+					Trans.executeClustered(transSplitter, executionConfiguration);
+				} catch (Exception e) {
+					// Something happened posting the transformation to the
+					// cluster.
+					// We need to make sure to de-allocate ports and so on for
+					// the next try...
+					// We don't want to suppress original exception here.
+					try {
+						Trans.cleanupCluster(App.getInstance().getLog(), transSplitter);
+					} catch (Exception ee) {
+						throw new Exception("Error executing transformation and error to clenaup cluster", e);
+					}
+					// we still have execution error but cleanup ok here...
+					throw e;
+				}
+
+				if (executionConfiguration.isClusterPosting()) {
+					// Now add monitors for the master and all the slave servers
+					//
+					if (masterServer != null) {
+						// spoon.addSpoonSlave( masterServer );
+						for (int i = 0; i < slaves.length; i++) {
+							// spoon.addSpoonSlave( slaves[i] );
+							clusterLogIds.add(slaves[i].getLogChannel().getLogChannelId());
+						}
+					}
+				}
+				
+				Trans.monitorClusteredTransformation(App.getInstance().getLog(), transSplitter, null);
+				Result result = Trans.getClusteredTransformationResult(App.getInstance().getLog(), transSplitter, null);
 				
 			}
 			
@@ -240,7 +306,7 @@ public class TransExecutor implements Runnable {
     			}
     			jsonArray.add(childArray);
     		}
-    	} else {
+    	} else if(executionConfiguration.isExecutingRemotely()) {
     		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
 			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
 			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
@@ -272,12 +338,24 @@ public class TransExecutor implements Runnable {
 	             sb.append(line).append("\n");
 			 }
 			 return sb.toString();
-    	} else {
+    	} else if(executionConfiguration.isExecutingRemotely()) {
     		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
 			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
 			return transStatus.getLoggingString();
+    	} else if(executionConfiguration.isExecutingClustered()) {
+    		StringBuffer sb = new StringBuffer();
+			KettleLogLayout logLayout = new KettleLogLayout( true );
+//			List<String> childIds = LoggingRegistry.getInstance().getLogChannelChildren( clusterLog.getLogChannelId() );
+			List<KettleLoggingEvent> logLines = KettleLogStore.getLogBufferFromTo( clusterLogIds, true, -1, KettleLogStore.getLastBufferLineNr() );
+			 for ( int i = 0; i < logLines.size(); i++ ) {
+	             KettleLoggingEvent event = logLines.get( i );
+	             String line = logLayout.format( event ).trim();
+	             sb.append(line).append("\n");
+			 }
+			 return sb.toString();
     	}
 		
+		return "";
 	}
 	
 	public JSONArray getStepStatus() throws Exception {
@@ -317,7 +395,7 @@ public class TransExecutor implements Runnable {
 					jsonObject.put("stepStatus", errCount);
 				}
 			}
-    	} else {
+    	} else if(executionConfiguration.isExecutingRemotely()) {
     		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
 			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
 			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
