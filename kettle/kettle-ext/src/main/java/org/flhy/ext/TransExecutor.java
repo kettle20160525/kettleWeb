@@ -20,8 +20,6 @@ import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.logging.KettleLogLayout;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.KettleLoggingEvent;
-import org.pentaho.di.core.logging.LogChannel;
-import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LogMessage;
 import org.pentaho.di.core.logging.LoggingRegistry;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -37,6 +35,7 @@ import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepStatus;
 import org.pentaho.di.www.SlaveServerTransStatus;
+import org.springframework.util.StringUtils;
 
 public class TransExecutor implements Runnable {
 
@@ -45,6 +44,9 @@ public class TransExecutor implements Runnable {
 	private TransMeta transMeta = null;
 	private Trans trans = null;
 	private Map<StepMeta, String> stepLogMap = new HashMap<StepMeta, String>();
+	
+	
+	private TransSplitter transSplitter = null;
 	
 	private TransExecutor(TransExecutionConfiguration transExecutionConfiguration, TransMeta transMeta) {
 		this.executionId = UUID.randomUUID().toString().replaceAll("-", "");
@@ -67,8 +69,6 @@ public class TransExecutor implements Runnable {
 	private boolean finished = false;
 
 
-	private ArrayList<String> clusterLogIds = new ArrayList<String>();
-	
 	@Override
 	public void run() {
 		try {
@@ -131,13 +131,8 @@ public class TransExecutor implements Runnable {
 					Thread.sleep(500);
 				}
 			} else if(executionConfiguration.isExecutingClustered()) {
-//				clusterLog = new LogChannel( this, null );
-				TransSplitter transSplitter = new TransSplitter( transMeta );
+				transSplitter = new TransSplitter( transMeta );
 				transSplitter.splitOriginalTransformation();
-				
-				SlaveServer masterServer = transSplitter.getMasterServer();
-				clusterLogIds.add(masterServer.getLogChannel().getLogChannelId());
-				SlaveServer[] slaves = transSplitter.getSlaveTargets();
 				
 				for (String var : Const.INTERNAL_TRANS_VARIABLES) {
 					executionConfiguration.getVariables().put(var, transMeta.getVariable(var));
@@ -175,20 +170,17 @@ public class TransExecutor implements Runnable {
 					throw e;
 				}
 
-				if (executionConfiguration.isClusterPosting()) {
-					// Now add monitors for the master and all the slave servers
-					//
-					if (masterServer != null) {
-						// spoon.addSpoonSlave( masterServer );
-						for (int i = 0; i < slaves.length; i++) {
-							// spoon.addSpoonSlave( slaves[i] );
-							clusterLogIds.add(slaves[i].getLogChannel().getLogChannelId());
-						}
-					}
-				}
+//				if (executionConfiguration.isClusterPosting()) {
+//					if (masterServer != null) {
+//						// spoon.addSpoonSlave( masterServer );
+//						for (int i = 0; i < slaves.length; i++) {
+//							// spoon.addSpoonSlave( slaves[i] );
+//						}
+//					}
+//				}
 				
 				Trans.monitorClusteredTransformation(App.getInstance().getLog(), transSplitter, null);
-				Result result = Trans.getClusteredTransformationResult(App.getInstance().getLog(), transSplitter, null);
+//				Result result = Trans.getClusteredTransformationResult(App.getInstance().getLog(), transSplitter, null);
 				
 			}
 			
@@ -320,6 +312,38 @@ public class TransExecutor implements Runnable {
 				}
 				jsonArray.add(childArray);
 			}
+    	} else if(executionConfiguration.isExecutingClustered()) {
+    		SlaveServer masterServer = transSplitter.getMasterServer();
+			SlaveServer[] slaves = transSplitter.getSlaveTargets();
+			Map<TransMeta, String> carteMap = transSplitter.getCarteObjectMap();
+			
+			SlaveServerTransStatus transStatus = masterServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getMaster()), 0);
+			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
+			for (int i = 0; i < stepStatusList.size(); i++) {
+				StepStatus stepStatus = stepStatusList.get(i);
+				String[] fields = stepStatus.getTransLogFields();
+	
+				JSONArray childArray = new JSONArray();
+				for (int f = 1; f < fields.length; f++) {
+					childArray.add(fields[f]);
+				}
+				jsonArray.add(childArray);
+			}
+			
+			for (SlaveServer slaveServer : slaves) {
+				transStatus = slaveServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getSlaveTransMap().get(slaveServer)), 0);
+				stepStatusList = transStatus.getStepStatusList();
+				for (int i = 0; i < stepStatusList.size(); i++) {
+					StepStatus stepStatus = stepStatusList.get(i);
+					String[] fields = stepStatus.getTransLogFields();
+
+					JSONArray childArray = new JSONArray();
+					for (int f = 1; f < fields.length; f++) {
+						childArray.add(fields[f]);
+					}
+					jsonArray.add(childArray);
+				}
+			}
     	}
     	
     	return jsonArray;
@@ -343,16 +367,20 @@ public class TransExecutor implements Runnable {
 			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
 			return transStatus.getLoggingString();
     	} else if(executionConfiguration.isExecutingClustered()) {
-    		StringBuffer sb = new StringBuffer();
-			KettleLogLayout logLayout = new KettleLogLayout( true );
-//			List<String> childIds = LoggingRegistry.getInstance().getLogChannelChildren( clusterLog.getLogChannelId() );
-			List<KettleLoggingEvent> logLines = KettleLogStore.getLogBufferFromTo( clusterLogIds, true, -1, KettleLogStore.getLastBufferLineNr() );
-			 for ( int i = 0; i < logLines.size(); i++ ) {
-	             KettleLoggingEvent event = logLines.get( i );
-	             String line = logLayout.format( event ).trim();
-	             sb.append(line).append("\n");
-			 }
-			 return sb.toString();
+    		SlaveServer masterServer = transSplitter.getMasterServer();
+			SlaveServer[] slaves = transSplitter.getSlaveTargets();
+			Map<TransMeta, String> carteMap = transSplitter.getCarteObjectMap();
+			
+			SlaveServerTransStatus transStatus = masterServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getMaster()), 0);
+			String log = transStatus.getLoggingString();
+			for(SlaveServer slaveServer : slaves) {
+				 transStatus = slaveServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getSlaveTransMap().get(slaveServer)), 0);
+				 if(StringUtils.hasText(transStatus.getLoggingString())) {
+					 log += transStatus.getLoggingString();
+				 }
+			}
+			
+			return log;
     	}
 		
 		return "";
@@ -416,6 +444,72 @@ public class TransExecutor implements Runnable {
 				}
 	
 			}
+    	} else if(executionConfiguration.isExecutingClustered()) {
+    		SlaveServer masterServer = transSplitter.getMasterServer();
+			SlaveServer[] slaves = transSplitter.getSlaveTargets();
+			Map<TransMeta, String> carteMap = transSplitter.getCarteObjectMap();
+			
+			SlaveServerTransStatus transStatus = masterServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getMaster()), 0);
+			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
+			for (int i = 0; i < stepStatusList.size(); i++) {
+				StepStatus stepStatus = stepStatusList.get(i);
+				Integer index = stepIndex.get(stepStatus.getStepname());
+				if(index == null) {
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("stepName", stepStatus.getStepname());
+					jsonObject.put("stepStatus", stepStatus.getErrors());
+					
+					stepIndex.put(stepStatus.getStepname(), jsonArray.size());
+					jsonArray.add(jsonObject);
+				} else {
+					JSONObject jsonObject = jsonArray.getJSONObject(index);
+					int errCount = (int) (stepStatus.getErrors() + jsonObject.optInt("stepStatus"));
+					jsonObject.put("stepStatus", errCount);
+				}
+			}
+			
+			for (SlaveServer slaveServer : slaves) {
+				transStatus = slaveServer.getTransStatus(transMeta.getName(), carteMap.get(transSplitter.getSlaveTransMap().get(slaveServer)), 0);
+				stepStatusList = transStatus.getStepStatusList();
+				for (int i = 0; i < stepStatusList.size(); i++) {
+					StepStatus stepStatus = stepStatusList.get(i);
+					Integer index = stepIndex.get(stepStatus.getStepname());
+					if(index == null) {
+						JSONObject jsonObject = new JSONObject();
+						jsonObject.put("stepName", stepStatus.getStepname());
+						jsonObject.put("stepStatus", stepStatus.getErrors());
+						
+						stepIndex.put(stepStatus.getStepname(), jsonArray.size());
+						jsonArray.add(jsonObject);
+					} else {
+						JSONObject jsonObject = jsonArray.getJSONObject(index);
+						int errCount = (int) (stepStatus.getErrors() + jsonObject.optInt("stepStatus"));
+						jsonObject.put("stepStatus", errCount);
+					}
+				}
+			}
+    		
+    		
+//    		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
+//			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
+//			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
+//        	for (int i = 0; i < stepStatusList.size(); i++) {
+//				StepStatus stepStatus = stepStatusList.get(i);
+//				Integer index = stepIndex.get(stepStatus.getStepname());
+//				if(index == null) {
+//					JSONObject jsonObject = new JSONObject();
+//					jsonObject.put("stepName", stepStatus.getStepname());
+//					jsonObject.put("stepStatus", stepStatus.getErrors());
+//					
+//					stepIndex.put(stepStatus.getStepname(), jsonArray.size());
+//					jsonArray.add(jsonObject);
+//				} else {
+//					JSONObject jsonObject = jsonArray.getJSONObject(index);
+//					int errCount = (int) (stepStatus.getErrors() + jsonObject.optInt("stepStatus"));
+//					jsonObject.put("stepStatus", errCount);
+//				}
+//	
+//			}
     	}
 		
 		return jsonArray;
