@@ -7,10 +7,11 @@
   <created_user>-</created_user>
   <created_date>2016&#x2f;06&#x2f;15 19&#x3a;17&#x3a;53.597</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;21 22&#x3a;08&#x3a;15.700</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;22 11&#x3a;21&#x3a;13.160</modified_date>
     <parameters>
     </parameters>
     <slaveservers>
+         <slaveserver><name>localhost</name><hostname>127.0.0.1</hostname><port>8080</port><webAppName/><username>master</username><password>Encrypted 2be98afc86aa7f2e4cb79a371cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master><sslMode>N</sslMode></slaveserver>
     </slaveservers>
 <job-log-table><connection/>
 <schema/>
@@ -57,12 +58,12 @@
       <description/>
       <type>FTP_DELETE</type>
       <protocol>FTP</protocol>
-      <servername>10.128.21.67</servername>
-      <port>2121</port>
-      <username>CRM4GBUS6003720151120</username>
-      <password>Encrypted 43524f8adfed9d3991c2d4f84efc208fc7fe8b</password>
-      <ftpdirectory>&#x2f;upload&#x2f;test&#x2f;</ftpdirectory>
-      <wildcard/>
+      <servername>192.168.14.69</servername>
+      <port>21</port>
+      <username>ftp</username>
+      <password>Encrypted 2be98afc86aa7f2e4cb79ce10be94bbca</password>
+      <ftpdirectory>&#x2f;124&#x2f;</ftpdirectory>
+      <wildcard>.&#x2b;&#x5c;.sql</wildcard>
       <timeout>0</timeout>
       <active>N</active>
       <useproxy>N</useproxy>
