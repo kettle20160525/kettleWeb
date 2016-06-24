@@ -1,6 +1,5 @@
 package org.flhy.ext;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -14,7 +13,6 @@ import org.flhy.ext.utils.JSONArray;
 import org.flhy.ext.utils.JSONObject;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
-import org.pentaho.di.core.Result;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.logging.KettleLogLayout;
@@ -488,28 +486,6 @@ public class TransExecutor implements Runnable {
 					}
 				}
 			}
-    		
-    		
-//    		SlaveServer remoteSlaveServer = executionConfiguration.getRemoteServer();
-//			SlaveServerTransStatus transStatus = remoteSlaveServer.getTransStatus(transMeta.getName(), carteObjectId, 0);
-//			List<StepStatus> stepStatusList = transStatus.getStepStatusList();
-//        	for (int i = 0; i < stepStatusList.size(); i++) {
-//				StepStatus stepStatus = stepStatusList.get(i);
-//				Integer index = stepIndex.get(stepStatus.getStepname());
-//				if(index == null) {
-//					JSONObject jsonObject = new JSONObject();
-//					jsonObject.put("stepName", stepStatus.getStepname());
-//					jsonObject.put("stepStatus", stepStatus.getErrors());
-//					
-//					stepIndex.put(stepStatus.getStepname(), jsonArray.size());
-//					jsonArray.add(jsonObject);
-//				} else {
-//					JSONObject jsonObject = jsonArray.getJSONObject(index);
-//					int errCount = (int) (stepStatus.getErrors() + jsonObject.optInt("stepStatus"));
-//					jsonObject.put("stepStatus", errCount);
-//				}
-//	
-//			}
     	}
 		
 		return jsonArray;
