@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>ccc</name>
+    <name>txtFileSplit</name>
     <description/>
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
     <directory>&#x2f;</directory>
     <parameters>
     </parameters>
@@ -65,46 +66,25 @@
          <slaveserver><name>localhost</name><hostname>127.0.0.1</hostname><port>8080</port><webAppName/><username>master</username><password>Encrypted 2be98afc86aa7f2e4cb79a371cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master><sslMode>N</sslMode></slaveserver>
     </slaveservers>
     <clusterschemas>
-        <clusterschema>
-          <name>tty</name>
-          <base_port>40000</base_port>
-          <sockets_buffer_size>2000</sockets_buffer_size>
-          <sockets_flush_interval>5000</sockets_flush_interval>
-          <sockets_compressed>Y</sockets_compressed>
-          <dynamic>N</dynamic>
-          <slaveservers>
-            <name>localhost</name>
-          </slaveservers>
-        </clusterschema>
-        <clusterschema>
-          <name>bb</name>
-          <base_port>40000</base_port>
-          <sockets_buffer_size>2000</sockets_buffer_size>
-          <sockets_flush_interval>5000</sockets_flush_interval>
-          <sockets_compressed>Y</sockets_compressed>
-          <dynamic>N</dynamic>
-          <slaveservers>
-          </slaveservers>
-        </clusterschema>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2016&#x2f;06&#x2f;01 22&#x3a;27&#x3a;15.365</created_date>
+  <created_date>2016&#x2f;05&#x2f;30 22&#x3a;04&#x3a;46.784</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;07 19&#x3a;35&#x3a;15.471</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;13 23&#x3a;08&#x3a;46.790</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
   <connection>
-    <name>fjtdp</name>
-    <server>192.168.14.69</server>
-    <type>ORACLE</type>
-    <access>Native</access>
-    <database>fjtdp</database>
+    <name>SampleData</name>
+    <server/>
+    <type>H2</type>
+    <access>JNDI</access>
+    <database>SampleData</database>
     <port>1521</port>
-    <username>platform</username>
-    <password>Encrypted 2be98afc86aa7f290af09a87ada9efb8b</password>
+    <username/>
+    <password>Encrypted </password>
     <servername/>
     <data_tablespace/>
     <index_tablespace/>
@@ -117,18 +97,226 @@
       <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>N</attribute></attribute>
       <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
       <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
-      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>N</attribute></attribute>
-      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>N</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
       <attribute><code>USE_POOLING</code><attribute>Y</attribute></attribute>
     </attributes>
   </connection>
   <order>
-  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x8868;&#x8f93;&#x51fa;</to><enabled>Y</enabled> </hop>
-  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x66f4;&#x65b0;</to><enabled>Y</enabled> </hop>
-  <hop> <from>fjtdp69 - &#x8868;&#x8f93;&#x5165;</from><to>&#x63d2;&#x5165; &#x2f; &#x66f4;&#x65b0;</to><enabled>Y</enabled> </hop>
+  <hop> <from>&#x8868;&#x8f93;&#x5165;</from><to>&#x589e;&#x52a0;&#x5e8f;&#x5217;</to><enabled>Y</enabled> </hop>
+  <hop> <from>&#x589e;&#x52a0;&#x5e8f;&#x5217;</from><to>JavaScript&#x4ee3;&#x7801;</to><enabled>Y</enabled> </hop>
+  <hop> <from>JavaScript&#x4ee3;&#x7801;</from><to>&#x6587;&#x672c;&#x6587;&#x4ef6;&#x8f93;&#x51fa;</to><enabled>Y</enabled> </hop>
   </order>
   <step>
-    <name>fjtdp69 - &#x8868;&#x8f93;&#x5165;</name>
+    <name>&#x6587;&#x672c;&#x6587;&#x4ef6;&#x8f93;&#x51fa;</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <separator>&#x3b;</separator>
+    <enclosure>&#x22;</enclosure>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>Y</header>
+    <footer>N</footer>
+    <format>DOS</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>Y</fileNameInField>
+    <fileNameField>fileSub</fileNameField>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name/>
+      <is_command>N</is_command>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>Y</do_not_open_new_file_init>
+      <extention>txt</extention>
+      <append>Y</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery>0</splitevery>
+    </file>
+    <fields>
+      <field>
+        <name>CUSTOMERNUMBER</name>
+        <type>Integer</type>
+        <format>&#x23;&#x3b;-&#x23;</format>
+        <currency/>
+        <decimal>.</decimal>
+        <group>,</group>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>9</length>
+        <precision>0</precision>
+      </field>
+      <field>
+        <name>CUSTOMERNAME</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>CONTACTLASTNAME</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>CONTACTFIRSTNAME</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>PHONE</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>ADDRESSLINE1</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>ADDRESSLINE2</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>CITY</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>STATE</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>POSTALCODE</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>15</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>COUNTRY</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>50</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>SALESREPEMPLOYEENUMBER</name>
+        <type>Integer</type>
+        <format>&#x23;&#x3b;-&#x23;</format>
+        <currency/>
+        <decimal>.</decimal>
+        <group>,</group>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>9</length>
+        <precision>0</precision>
+      </field>
+      <field>
+        <name>CREDITLIMIT</name>
+        <type>Integer</type>
+        <format>&#x23;&#x3b;-&#x23;</format>
+        <currency/>
+        <decimal>.</decimal>
+        <group>,</group>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>17</length>
+        <precision>0</precision>
+      </field>
+    </fields>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>464</xloc>
+      <yloc>224</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>&#x8868;&#x8f93;&#x5165;</name>
     <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
@@ -138,24 +326,24 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>fjtdp</connection>
-    <sql>select &#xa;	USERID,&#xa;	USERNAME,&#xa;	USERALIAS,&#xa;	PASSWORD,&#xa;	ISENABLED,&#xa;	BEGINTIME,&#xa;	ENDTIME,&#xa;	MAC,&#xa;	ISADMIN,&#xa;	EMPLOYEEID,&#xa;	WELCOMEURL,&#xa;	ISPROHIBITED,&#xa;	FAILURENUMBER,&#xa;	LASTLOGINTIME,&#xa;	ISREMIND,&#xa;	REMINDTIME,&#xa;	REMINDCYCLE,&#xa;	IPADDRESS,&#xa;	MACADDRESS,&#xa;	BOUNDTYPE,&#xa;	ISNEWUSER,&#xa;	PLAINTEXTPASSWORD,&#xa;	TELEPHONE,&#xa;	REMARK,&#xa;	MOBILEPHONE,&#xa;	OFFICEPHONE,&#xa;	EMAILADDRESS,&#xa;	ORGANSHORTNAME,&#xa;	SEX,&#xa;	BIRTHDAY,&#xa;	NATIONALITY,&#xa;	NATIVEPLACE,&#xa;	POLICITALSTATUS,&#xa;	JOB,&#xa;	POST,&#xa;	TITLE,&#xa;	SKILLLEVEL,&#xa;	IDNUMBER,&#xa;	WORKTIME,&#xa;	EDUCATION,&#xa;	DEGREE,&#xa;	MAJOR,&#xa;	GRADUATECOLLEGES,&#xa;	HIGHESTEDUCATION,&#xa;	HIGHESTDEGREE,&#xa;	HIGHESTMAJOR,&#xa;	HOMEPHONE,&#xa;	PICTURE,&#xa;	ISHOLDER,&#xa;	USERTYPE,&#xa;	DISPATCHDEPTID,&#xa;	DISPATCHORGANID&#xa; from PLATFORM.T_TBP_USER</sql>
-    <limit>0</limit>
+    <connection>SampleData</connection>
+    <sql>SELECT&#xd;&#xa;  CUSTOMERNUMBER&#xd;&#xa;, CUSTOMERNAME&#xd;&#xa;, CONTACTLASTNAME&#xd;&#xa;, CONTACTFIRSTNAME&#xd;&#xa;, PHONE&#xd;&#xa;, ADDRESSLINE1&#xd;&#xa;, ADDRESSLINE2&#xd;&#xa;, CITY&#xd;&#xa;, STATE&#xd;&#xa;, POSTALCODE&#xd;&#xa;, COUNTRY&#xd;&#xa;, SALESREPEMPLOYEENUMBER&#xd;&#xa;, CREDITLIMIT&#xd;&#xa;FROM CUSTOMERS&#xd;&#xa;</sql>
+    <limit>10</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
     <variables_active>N</variables_active>
     <lazy_conversion_active>N</lazy_conversion_active>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>100</xloc>
-      <yloc>170</yloc>
+      <xloc>96</xloc>
+      <yloc>144</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>&#x63d2;&#x5165; &#x2f; &#x66f4;&#x65b0;</name>
-    <type>InsertUpdate</type>
+    <name>&#x589e;&#x52a0;&#x5e8f;&#x5217;</name>
+    <type>Sequence</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -164,35 +352,27 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>fjtdp</connection>
-    <commit>100</commit>
-    <update_bypassed>N</update_bypassed>
-    <lookup>
-      <schema>PLATFORM</schema>
-      <table>JIABAN</table>
-      <key>
-        <name>USERALIAS</name>
-        <field>APPLYNO</field>
-        <condition>&#x3d;</condition>
-        <name2/>
-      </key>
-      <value>
-        <name>APPLYNO</name>
-        <rename>USERNAME</rename>
-        <update>Y</update>
-      </value>
-    </lookup>
+      <valuename>rownum</valuename>
+      <use_database>N</use_database>
+      <connection>SampleData</connection>
+      <schema/>
+      <seqname>SEQ_</seqname>
+      <use_counter>Y</use_counter>
+      <counter_name/>
+      <start_at>1</start_at>
+      <increment_by>1</increment_by>
+      <max_value>999999999</max_value>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>250</xloc>
-      <yloc>290</yloc>
+      <xloc>240</xloc>
+      <yloc>128</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>&#x66f4;&#x65b0;</name>
-    <type>Update</type>
+    <name>JavaScript&#x4ee3;&#x7801;</name>
+    <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -201,276 +381,21 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>fjtdp</connection>
-    <skip_lookup>N</skip_lookup>
-    <commit>100</commit>
-    <use_batch>N</use_batch>
-    <error_ignored>N</error_ignored>
-    <ignore_flag_field/>
-    <lookup>
-      <schema>PLATFORM</schema>
-      <table>T_TBP_DICTCODE</table>
-      <key>
-        <name>ISADMIN</name>
-        <field>CODE</field>
-        <condition>&#x3d;</condition>
-        <name2/>
-        </key>
-      <value>
-        <name>ISADMIN</name>
-        <rename>ISADMIN</rename>
-        </value>
-      <value>
-        <name>USERID</name>
-        <rename>USERID</rename>
-        </value>
-      <value>
-        <name>USERNAME</name>
-        <rename>USERNAME</rename>
-        </value>
-      <value>
-        <name>USERALIAS</name>
-        <rename>USERALIAS</rename>
-        </value>
-      <value>
-        <name>PASSWORD</name>
-        <rename>PASSWORD</rename>
-        </value>
-      <value>
-        <name>ISENABLED</name>
-        <rename>ISENABLED</rename>
-        </value>
-      <value>
-        <name>BEGINTIME</name>
-        <rename>BEGINTIME</rename>
-        </value>
-      <value>
-        <name>ENDTIME</name>
-        <rename>ENDTIME</rename>
-        </value>
-      <value>
-        <name>MAC</name>
-        <rename>MAC</rename>
-        </value>
-      <value>
-        <name>ISADMIN</name>
-        <rename>ISADMIN</rename>
-        </value>
-      <value>
-        <name>EMPLOYEEID</name>
-        <rename>EMPLOYEEID</rename>
-        </value>
-      <value>
-        <name>WELCOMEURL</name>
-        <rename>WELCOMEURL</rename>
-        </value>
-      <value>
-        <name>ISPROHIBITED</name>
-        <rename>ISPROHIBITED</rename>
-        </value>
-      <value>
-        <name>FAILURENUMBER</name>
-        <rename>FAILURENUMBER</rename>
-        </value>
-      <value>
-        <name>LASTLOGINTIME</name>
-        <rename>LASTLOGINTIME</rename>
-        </value>
-      <value>
-        <name>ISREMIND</name>
-        <rename>ISREMIND</rename>
-        </value>
-      <value>
-        <name>REMINDTIME</name>
-        <rename>REMINDTIME</rename>
-        </value>
-      <value>
-        <name>REMINDCYCLE</name>
-        <rename>REMINDCYCLE</rename>
-        </value>
-      <value>
-        <name>IPADDRESS</name>
-        <rename>IPADDRESS</rename>
-        </value>
-      <value>
-        <name>MACADDRESS</name>
-        <rename>MACADDRESS</rename>
-        </value>
-      <value>
-        <name>BOUNDTYPE</name>
-        <rename>BOUNDTYPE</rename>
-        </value>
-      <value>
-        <name>ISNEWUSER</name>
-        <rename>ISNEWUSER</rename>
-        </value>
-      <value>
-        <name>PLAINTEXTPASSWORD</name>
-        <rename>PLAINTEXTPASSWORD</rename>
-        </value>
-      <value>
-        <name>TELEPHONE</name>
-        <rename>TELEPHONE</rename>
-        </value>
-      <value>
-        <name>REMARK</name>
-        <rename>REMARK</rename>
-        </value>
-      <value>
-        <name>MOBILEPHONE</name>
-        <rename>MOBILEPHONE</rename>
-        </value>
-      <value>
-        <name>OFFICEPHONE</name>
-        <rename>OFFICEPHONE</rename>
-        </value>
-      <value>
-        <name>EMAILADDRESS</name>
-        <rename>EMAILADDRESS</rename>
-        </value>
-      <value>
-        <name>ORGANSHORTNAME</name>
-        <rename>ORGANSHORTNAME</rename>
-        </value>
-      <value>
-        <name>SEX</name>
-        <rename>SEX</rename>
-        </value>
-      <value>
-        <name>BIRTHDAY</name>
-        <rename>BIRTHDAY</rename>
-        </value>
-      <value>
-        <name>NATIONALITY</name>
-        <rename>NATIONALITY</rename>
-        </value>
-      <value>
-        <name>NATIVEPLACE</name>
-        <rename>NATIVEPLACE</rename>
-        </value>
-      <value>
-        <name>POLICITALSTATUS</name>
-        <rename>POLICITALSTATUS</rename>
-        </value>
-      <value>
-        <name>JOB</name>
-        <rename>JOB</rename>
-        </value>
-      <value>
-        <name>POST</name>
-        <rename>POST</rename>
-        </value>
-      <value>
-        <name>TITLE</name>
-        <rename>TITLE</rename>
-        </value>
-      <value>
-        <name>SKILLLEVEL</name>
-        <rename>SKILLLEVEL</rename>
-        </value>
-      <value>
-        <name>IDNUMBER</name>
-        <rename>IDNUMBER</rename>
-        </value>
-      <value>
-        <name>WORKTIME</name>
-        <rename>WORKTIME</rename>
-        </value>
-      <value>
-        <name>EDUCATION</name>
-        <rename>EDUCATION</rename>
-        </value>
-      <value>
-        <name>DEGREE</name>
-        <rename>DEGREE</rename>
-        </value>
-      <value>
-        <name>MAJOR</name>
-        <rename>MAJOR</rename>
-        </value>
-      <value>
-        <name>GRADUATECOLLEGES</name>
-        <rename>GRADUATECOLLEGES</rename>
-        </value>
-      <value>
-        <name>HIGHESTEDUCATION</name>
-        <rename>HIGHESTEDUCATION</rename>
-        </value>
-      <value>
-        <name>HIGHESTDEGREE</name>
-        <rename>HIGHESTDEGREE</rename>
-        </value>
-      <value>
-        <name>HIGHESTMAJOR</name>
-        <rename>HIGHESTMAJOR</rename>
-        </value>
-      <value>
-        <name>HOMEPHONE</name>
-        <rename>HOMEPHONE</rename>
-        </value>
-      <value>
-        <name>PICTURE</name>
-        <rename>PICTURE</rename>
-        </value>
-      <value>
-        <name>ISHOLDER</name>
-        <rename>ISHOLDER</rename>
-        </value>
-      <value>
-        <name>USERTYPE</name>
-        <rename>USERTYPE</rename>
-        </value>
-      <value>
-        <name>DISPATCHDEPTID</name>
-        <rename>DISPATCHDEPTID</rename>
-        </value>
-      <value>
-        <name>DISPATCHORGANID</name>
-        <rename>DISPATCHORGANID</rename>
-        </value>
-      </lookup>
-     <cluster_schema/>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#x2f;&#x2f;Script here&#xd;&#xa;var limit &#x3d; 4&#x3b;	&#x2f;&#x2f;&#x5206;&#x5272;&#x5927;&#x5c0f;&#xd;&#xa;var fileSub &#x3d; num2str&#x28;ceil&#x28;rownum&#x2f;limit&#x29;&#x29;&#x3b;&#xd;&#xa;fileSub &#x3d; &#x22;C&#x3a;&#x2f;file_&#x22; &#x2b; fileSub</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>fileSub</name>
+        <rename>fileSub</rename>
+        <type>String</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>250</xloc>
-      <yloc>170</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>&#x8868;&#x8f93;&#x51fa;</name>
-    <type>TableOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <connection>fjtdp</connection>
-    <schema>PLATFORM</schema>
-    <table>T_TBP_ORGAN</table>
-    <commit>1000</commit>
-    <truncate>N</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>N</specify_fields>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <tablename_in_field>Y</tablename_in_field>
-    <tablename_field/>
-    <tablename_in_table>Y</tablename_in_table>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields>
-    </fields>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>250</xloc>
-      <yloc>50</yloc>
+      <xloc>304</xloc>
+      <yloc>224</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

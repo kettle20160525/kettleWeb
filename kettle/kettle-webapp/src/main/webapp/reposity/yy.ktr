@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>test</name>
+    <name>yy</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -62,60 +61,25 @@
     <partitionschemas>
     </partitionschemas>
     <slaveservers>
-         <slaveserver><name>master</name><hostname>127.0.0.1</hostname><port>9090</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master><sslMode>N</sslMode></slaveserver>
-         <slaveserver><name>slave1</name><hostname>127.0.0.1</hostname><port>9091</port><webAppName/><username>cluster</username><password>Encrypted 2be98afc86aa7f2e4cb1aa265cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>N</master><sslMode>N</sslMode></slaveserver>
          <slaveserver><name>localhost</name><hostname>127.0.0.1</hostname><port>8080</port><webAppName/><username>master</username><password>Encrypted 2be98afc86aa7f2e4cb79a371cd86aac8</password><proxy_hostname/><proxy_port/><non_proxy_hosts/><master>Y</master><sslMode>N</sslMode></slaveserver>
     </slaveservers>
     <clusterschemas>
-        <clusterschema>
-          <name>xCluster1</name>
-          <base_port>40000</base_port>
-          <sockets_buffer_size>2000</sockets_buffer_size>
-          <sockets_flush_interval>5000</sockets_flush_interval>
-          <sockets_compressed>Y</sockets_compressed>
-          <dynamic>N</dynamic>
-          <slaveservers>
-            <name>master</name>
-            <name>slave1</name>
-          </slaveservers>
-        </clusterschema>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2016&#x2f;05&#x2f;30 22&#x3a;04&#x3a;46.784</created_date>
+  <created_date>2016&#x2f;06&#x2f;16 22&#x3a;22&#x3a;05.354</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2016&#x2f;06&#x2f;23 11&#x3a;14&#x3a;04.414</modified_date>
+  <modified_date>2016&#x2f;06&#x2f;16 22&#x3a;39&#x3a;44.860</modified_date>
     <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA&#x3d;</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
-    <notepad>
-      <note>&#x8be5;&#x793a;&#x4f8b;&#x8fd0;&#x884c;&#x5728;&#x96c6;&#x7fa4;&#x6a21;&#x5f0f;&#x4e0b;</note>
-      <xloc>108</xloc>
-      <yloc>68</yloc>
-      <width>142</width>
-      <heigth>26</heigth>
-      <fontname>&#x5fae;&#x8f6f;&#x96c5;&#x9ed1;</fontname>
-      <fontsize>9</fontsize>
-      <fontbold>N</fontbold>
-      <fontitalic>N</fontitalic>
-      <fontcolorred>0</fontcolorred>
-      <fontcolorgreen>0</fontcolorgreen>
-      <fontcolorblue>0</fontcolorblue>
-      <backgroundcolorred>255</backgroundcolorred>
-      <backgroundcolorgreen>205</backgroundcolorgreen>
-      <backgroundcolorblue>112</backgroundcolorblue>
-      <bordercolorred>100</bordercolorred>
-      <bordercolorgreen>100</bordercolorgreen>
-      <bordercolorblue>100</bordercolorblue>
-      <drawshadow>Y</drawshadow>
-    </notepad>
   </notepads>
   <order>
-  <hop> <from>&#x751f;&#x6210;&#x8bb0;&#x5f55;</from><to>&#x589e;&#x52a0;&#x6821;&#x9a8c;&#x5217;</to><enabled>Y</enabled> </hop>
+  <hop> <from>&#x83b7;&#x53d6;&#x7cfb;&#x7edf;&#x4fe1;&#x606f;</from><to>JavaScript&#x4ee3;&#x7801;</to><enabled>Y</enabled> </hop>
   </order>
   <step>
-    <name>&#x589e;&#x52a0;&#x6821;&#x9a8c;&#x5217;</name>
-    <type>CheckSum</type>
+    <name>JavaScript&#x4ee3;&#x7801;</name>
+    <type>ScriptValueMod</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -124,29 +88,34 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-      <checksumtype>CRC32</checksumtype>
-      <resultfieldName>ss</resultfieldName>
-      <resultType>string</resultType>
-      <compatibilityMode>N</compatibilityMode>
-    <fields>
-      <field>
-        <name>id</name>
-      </field>
-      <field>
-        <name>Date</name>
-      </field>
-    </fields>
-     <cluster_schema>xCluster1</cluster_schema>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>      <jsScript>        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>&#x2f;&#x2f;Script here&#xa;&#xa;var year &#x3d; year&#x28;aa&#x29;&#x3b;&#xa;var month &#x3d; month&#x28;aa&#x29;&#x3b;&#xa;</jsScript_script>
+      </jsScript>    </jsScripts>    <fields>      <field>        <name>month</name>
+        <rename/>
+        <type>Number</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>      <field>        <name>year</name>
+        <rename/>
+        <type>Number</type>
+        <length>-1</length>
+        <precision>-1</precision>
+        <replace>N</replace>
+      </field>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>288</xloc>
-      <yloc>272</yloc>
+      <xloc>249</xloc>
+      <yloc>221</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>&#x751f;&#x6210;&#x8bb0;&#x5f55;</name>
-    <type>RowGenerator</type>
+    <name>&#x83b7;&#x53d6;&#x7cfb;&#x7edf;&#x4fe1;&#x606f;</name>
+    <type>SystemInfo</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -157,39 +126,14 @@
            </partitioning>
     <fields>
       <field>
-        <name>id</name>
-        <type>Integer</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif>1</nullif>
-        <length>-1</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-      <field>
-        <name>name</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif>zzz</nullif>
-        <length>-1</length>
-        <precision>-1</precision>
-        <set_empty_string>N</set_empty_string>
-      </field>
-    </fields>
-    <limit>10</limit>
-    <never_ending>N</never_ending>
-    <interval_in_ms>5000</interval_in_ms>
-    <row_time_field>now</row_time_field>
-    <last_time_field>FiveSecondsAgo</last_time_field>
+        <name>aa</name>
+        <type>system date &#x28;variable&#x29;</type>
+        </field>
+      </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>192</xloc>
-      <yloc>144</yloc>
+      <xloc>135</xloc>
+      <yloc>148</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
