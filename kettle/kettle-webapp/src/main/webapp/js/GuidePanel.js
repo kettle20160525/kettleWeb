@@ -1,6 +1,7 @@
 GuidePanel = Ext.extend(Ext.TabPanel, {
 	activeTab: 0,
 	plain: true,
+	
 	initComponent: function() {
 		var me = this;
 		
@@ -47,32 +48,50 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 			}
 		};
 		
-	    var repository = new Ext.tree.TreePanel({
+	    var repository = this.repository = new Ext.tree.TreePanel({
 			title: '仓库',
 			root: new Ext.tree.TreeNode({id: 'place'}),
 			tbar: [{
-				text: '连接资源库', handler: function() {
-					var dialog = new RepositoriesDialog();
-					dialog.on('loginSuccess', function() {
-						dialog.close();
-						repository.getRootNode().removeAll(true);
-						repository.getRootNode().reload();
-					});
-					dialog.show();
+				text: '新建',
+				menu: {
+					items: [{
+						iconCls: 'trans', text: '新建转换', scope: this, handler: this.newTrans
+					},{
+						iconCls: 'job', text: '新建任务', scope: this, handler: this.newJob
+					}, '-', {
+						text: '新建目录', scope: this, handler: this.newDir
+					}, '-', {
+						text: '打开', scope: this, handler: this.openFile
+					}]
 				}
 			}, {
-				text: '断开资源库', handler: function() {
-					Ext.Ajax.request({
-						url: GetUrl('repository/logout.do'),
-						method: 'POST',
-						success: function(response) {
-							var reply = Ext.decode(response.responseText);
-							if(reply.success) {
+				text: '资源库管理',
+				menu: {
+					items: [{
+						text: '连接资源库', handler: function() {
+							var dialog = new RepositoriesDialog();
+							dialog.on('loginSuccess', function() {
+								dialog.close();
 								repository.getRootNode().removeAll(true);
 								repository.getRootNode().reload();
-							}
+							});
+							dialog.show();
 						}
-					});
+					}, {
+						text: '断开资源库', handler: function() {
+							Ext.Ajax.request({
+								url: GetUrl('repository/logout.do'),
+								method: 'POST',
+								success: function(response) {
+									var reply = Ext.decode(response.responseText);
+									if(reply.success) {
+										repository.getRootNode().removeAll(true);
+										repository.getRootNode().reload();
+									}
+								}
+							});
+						}
+					}]
 				}
 			}],
 			enableDD: true,
@@ -85,108 +104,13 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    
 	    var menu = new Ext.menu.Menu({
 			items: [{
-				text: '打开', handler: function() {
-					var sm = repository.getSelectionModel();
-					var node = sm.getSelectedNode();
-					if(node && node.isLeaf()) {
-			    		var type = node.attributes.iconCls == 'job' ? 1 : 0;
-			    		me.openFile(node.attributes.objectId, type);
-					}
-				}
+				text: '打开', scope: this, handler: this.openFile
 			},'-',{
-                text: '新建目录', handler: function() {
-                	var sm = repository.getSelectionModel();
-					var node = sm.getSelectedNode();
-					if(node && !node.isLeaf()) {
-						Ext.Msg.prompt('系统提示', '请输入目录名称:', function(btn, text){
-						    if (btn == 'ok' && text != ''){
-						    	Ext.Ajax.request({
-									url: GetUrl('repository/createDir.do'),
-									method: 'POST',
-									params: {dir: node.attributes.objectId, name: text},
-									success: function(response) {
-										decodeResponse(response, function(resObj) {
-											var child = new Ext.tree.TreeNode({
-												id: "directory_" + resObj.message,
-												objectId: resObj.message,
-												text: text,
-												children:[]
-											});
-											node.appendChild(child);
-										});
-									},
-									failure: failureResponse
-							   });
-						    	
-						    }
-						});
-					}
-                }
+                text: '新建目录', scope: this, handler: this.newDir
             }, {
-                iconCls: 'trans',
-                text: '新建转换', handler: function() {
-                	var sm = repository.getSelectionModel();
-					var node = sm.getSelectedNode();
-					if(node && !node.isLeaf()) {
-						Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
-						    if (btn == 'ok' && text != ''){
-						    	Ext.Ajax.request({
-									url: GetUrl('repository/createTrans.do'),
-									method: 'POST',
-									params: {dir: node.attributes.objectId, transName: text},
-									success: function(response) {
-										decodeResponse(response, function(resObj) {
-											var child = new Ext.tree.TreeNode({
-												id: "transaction_" + resObj.message,
-												objectId: resObj.message,
-												text: text,
-												iconCls: 'trans',
-												leaf: true
-											});
-											node.appendChild(child);
-											
-											me.openFile(resObj.message, 0);
-										});
-									},
-									failure: failureResponse
-							   });
-						    	
-						    }
-						});
-					}
-                }
+                iconCls: 'trans', text: '新建转换', scope: this, handler: this.newTrans
             }, {
-                iconCls: 'job', text: '新建任务', handler: function() {
-                	var sm = repository.getSelectionModel();
-					var node = sm.getSelectedNode();
-					if(node && !node.isLeaf()) {
-						Ext.Msg.prompt('系统提示', '请输入任务名称:', function(btn, text){
-						    if (btn == 'ok' && text != ''){
-						    	Ext.Ajax.request({
-									url: GetUrl('repository/createJob.do'),
-									method: 'POST',
-									params: {dir: node.attributes.objectId, jobName: text},
-									success: function(response) {
-										decodeResponse(response, function(resObj) {
-											var child = new Ext.tree.TreeNode({
-												id: "job_" + resObj.message,
-												objectId: resObj.message,
-												text: text,
-												iconCls: 'job',
-												leaf: true
-											});
-											node.appendChild(child);
-											
-											me.openFile(resObj.message, 1);
-										});
-									},
-									failure: failureResponse
-							   });
-						    	
-						    }
-						});
-					}
-                }
+                iconCls: 'job', text: '新建任务', scope: this, handler: this.newJob
             }, '-', {
             	text: '重命名'
             }, {
@@ -279,35 +203,163 @@ GuidePanel = Ext.extend(Ext.TabPanel, {
 	    GuidePanel.superclass.initComponent.call(this);
 	},
 	
+	newTrans: function() {
+		var repository = this.repository, me = this;
+		var sm = repository.getSelectionModel();
+		var node = sm.getSelectedNode();
+		if(node && !node.isLeaf()) {
+			Ext.Msg.prompt('系统提示', '请输入转换名称:', function(btn, text){
+			    if (btn == 'ok' && text != ''){
+			    	Ext.Ajax.request({
+						url: GetUrl('repository/createTrans.do'),
+						method: 'POST',
+						params: {dir: node.attributes.objectId, transName: text},
+						success: function(response) {
+							decodeResponse(response, function(resObj) {
+								var child = new Ext.tree.TreeNode({
+									id: "transaction_" + resObj.message,
+									objectId: resObj.message,
+									text: text,
+									iconCls: 'trans',
+									leaf: true
+								});
+								node.appendChild(child);
+								
+								me.openFile(resObj.message, 0);
+							});
+						},
+						failure: failureResponse
+				   });
+			    	
+			    }
+			});
+		} else {
+			Ext.Msg.show({
+			   title: '系统提示',
+			   msg: '请选择资源库中的一个目录!',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.WARNING
+			});
+		}
+	},
+	
+	newJob: function() {
+		var repository = this.repository, me = this;
+		var sm = repository.getSelectionModel();
+		var node = sm.getSelectedNode();
+		if(node && !node.isLeaf()) {
+			Ext.Msg.prompt('系统提示', '请输入任务名称:', function(btn, text){
+			    if (btn == 'ok' && text != ''){
+			    	Ext.Ajax.request({
+						url: GetUrl('repository/createJob.do'),
+						method: 'POST',
+						params: {dir: node.attributes.objectId, jobName: text},
+						success: function(response) {
+							decodeResponse(response, function(resObj) {
+								var child = new Ext.tree.TreeNode({
+									id: "job_" + resObj.message,
+									objectId: resObj.message,
+									text: text,
+									iconCls: 'job',
+									leaf: true
+								});
+								node.appendChild(child);
+								
+								me.openFile(resObj.message, 1);
+							});
+						},
+						failure: failureResponse
+				   });
+			    	
+			    }
+			});
+		} else {
+			Ext.Msg.show({
+			   title: '系统提示',
+			   msg: '请选择资源库中的一个目录!',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.WARNING
+			});
+		}
+	},
+	
+	newDir: function() {
+		var repository = this.repository;
+		var sm = repository.getSelectionModel();
+		var node = sm.getSelectedNode();
+		if(node && !node.isLeaf()) {
+			Ext.Msg.prompt('系统提示', '请输入目录名称:', function(btn, text){
+			    if (btn == 'ok' && text != ''){
+			    	Ext.Ajax.request({
+						url: GetUrl('repository/createDir.do'),
+						method: 'POST',
+						params: {dir: node.attributes.objectId, name: text},
+						success: function(response) {
+							decodeResponse(response, function(resObj) {
+								var child = new Ext.tree.TreeNode({
+									id: "directory_" + resObj.message,
+									objectId: resObj.message,
+									text: text,
+									children:[]
+								});
+								node.appendChild(child);
+							});
+						},
+						failure: failureResponse
+				   });
+			    	
+			    }
+			});
+		} else {
+			Ext.Msg.show({
+			   title: '系统提示',
+			   msg: '请选择资源库中的一个目录!',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.WARNING
+			});
+		}
+	},
+	
 	openFile: function(objectId, type) {
-		Ext.getBody().mask('正在加载，请稍后...');
-		
-		Ext.Ajax.request({
-			url: GetUrl('repository/open.do'),
-			params: {objectId: objectId, type: type},
-			method: 'POST',
-			success: function(response, opts) {
-				try {
-					var resObj = Ext.decode(response.responseText);
-					var graphPanel = Ext.create({xtype: resObj.GraphType});
-					var tabPanel = Ext.getCmp('TabPanel');
-					tabPanel.add(graphPanel);
-					tabPanel.setActiveTab(graphPanel.getId());
-					
-					var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
-					var decoder = new mxCodec(xmlDocument);
-					var node = xmlDocument.documentElement;
-					
-					var graph = graphPanel.getGraph();
-					decoder.decode(node, graph.getModel());
-					
-					var cell = graph.getDefaultParent();
-					graphPanel.setTitle(cell.getAttribute('name'));
-				} finally {
-					Ext.getBody().unmask();
-				}
-			},
-			failure: failureResponse
-		});
+		var repository = this.repository;
+		var sm = repository.getSelectionModel();
+		var node = sm.getSelectedNode();
+		if(node && node.isLeaf()) {
+    		Ext.getBody().mask('正在加载，请稍后...');
+    		Ext.Ajax.request({
+    			url: GetUrl('repository/open.do'),
+    			params: {objectId: node.attributes.objectId, type: node.attributes.iconCls == 'job' ? 1 : 0},
+    			method: 'POST',
+    			success: function(response, opts) {
+    				try {
+    					var resObj = Ext.decode(response.responseText);
+    					var graphPanel = Ext.create({xtype: resObj.GraphType});
+    					var tabPanel = Ext.getCmp('TabPanel');
+    					tabPanel.add(graphPanel);
+    					tabPanel.setActiveTab(graphPanel.getId());
+    					
+    					var xmlDocument = mxUtils.parseXml(decodeURIComponent(resObj.graphXml));
+    					var decoder = new mxCodec(xmlDocument);
+    					var node = xmlDocument.documentElement;
+    					
+    					var graph = graphPanel.getGraph();
+    					decoder.decode(node, graph.getModel());
+    					
+    					var cell = graph.getDefaultParent();
+    					graphPanel.setTitle(cell.getAttribute('name'));
+    				} finally {
+    					Ext.getBody().unmask();
+    				}
+    			},
+    			failure: failureResponse
+    		});
+		} else {
+			Ext.Msg.show({
+			   title: '系统提示',
+			   msg: '请选择资源库中的一个对象!',
+			   buttons: Ext.Msg.OK,
+			   icon: Ext.MessageBox.WARNING
+			});
+		}
 	}
 });
