@@ -26,6 +26,7 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobExecutionConfiguration;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.ftp.JobEntryFTP;
 import org.pentaho.di.job.entries.ftpdelete.JobEntryFTPDelete;
 import org.pentaho.di.job.entries.ftpput.JobEntryFTPPUT;
 import org.pentaho.di.job.entries.sftp.JobEntrySFTP;
@@ -241,7 +242,50 @@ public class JobGraphController {
 		JsonUtils.fail(BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.ErrorConnect.Title.Bad" ), 
 				 BaseMessages.getString( JobEntrySFTP.class, "JobSFTP.ErrorConnect.NOK", sftp.getServerName(), info) + Const.CR);
 	}
-	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST,value="/ftpDownlond")
+	protected void ftpDownlond(@RequestParam String graphXml,@RequestParam String stepName) throws Exception{
+		GraphCodec codec = (GraphCodec) PluginFactory.getBean(GraphCodec.JOB_CODEC);
+		JobMeta jobmeta = (JobMeta) codec.decode(graphXml);
+		
+		JobEntryCopy jobEntryCopy = jobmeta.findJobEntry(stepName);
+		JobEntryFTP ftp = (JobEntryFTP) jobEntryCopy.getEntry();
+		
+		String info = "";
+		FTPClient ftpClient = null;
+		try{
+			String servername = jobmeta.environmentSubstitute(ftp.getServerName());
+			String port = jobmeta.environmentSubstitute(ftp.getPort());
+			String username = jobmeta.environmentSubstitute(ftp.getUserName());
+			String password = jobmeta.environmentSubstitute(ftp.getPassword());
+			
+			ftpClient = new FTPClient(servername,Integer.parseInt(port));
+			
+			String proxyHost = jobmeta.environmentSubstitute(ftp.getProxyHost());
+			String proxyPort = jobmeta.environmentSubstitute(ftp.getProxyPort());
+			String proxyUsername = jobmeta.environmentSubstitute(ftp.getProxyUsername());
+			String proxtPassword = jobmeta.environmentSubstitute(ftp.getProxyPassword());
+			
+			ftpClient.login(username, password);
+			
+			JsonUtils.success(BaseMessages.getString(JobEntryFTP.class,"JobFTP.Connected.Title.Ok"),
+					BaseMessages.getString(JobEntryFTP.class,"JobFTP.Connected.OK",ftp.getUserName()+Const.CR));
+
+			return;
+		}catch(Exception e){
+			if(ftpClient!=null){
+				try{
+				ftpClient.quit();
+				}catch(Exception ex){
+					
+				}
+				ftpClient= null;
+			}
+			info = e.getMessage();
+		}
+		JsonUtils.fail(BaseMessages.getString( JobEntryFTP.class, "JobFTP.ErrorConnect.Title.Bad" ), 
+				 BaseMessages.getString( JobEntryFTP.class, "JobFTP.ErrorConnect.NOK", ftp.getServerName(), info) + Const.CR);
+	}
 	@ResponseBody
 	@RequestMapping(method=RequestMethod.POST, value="/ftptest")
 	protected void ftpputtest(@RequestParam String graphXml, @RequestParam String stepName) throws Exception {
