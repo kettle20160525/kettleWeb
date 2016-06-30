@@ -9,8 +9,17 @@ import org.flhy.ext.utils.JSONObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.row.ValueMeta;
+import org.pentaho.di.core.util.EnvUtil;
+import org.pentaho.di.core.xml.XMLHandler;
+import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileFilter;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.BaseFileInputField;
+import org.pentaho.di.trans.steps.fileinput.BaseFileInputStepMeta;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileField;
+import org.pentaho.di.trans.steps.textfileoutput.TextFileOutputMeta;
+//import org.pentaho.di.trans.steps.textfileinput.TextFileInputMeta;
 import org.pentaho.metastore.api.IMetaStore;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,97 +38,109 @@ public class TextFileInput  extends AbstractStep {
 	public void decode(StepMetaInterface stepMetaInterface, mxCell cell, List<DatabaseMeta> databases, IMetaStore metaStore) throws Exception {
 		TextFileInputMeta textFileInputMeta = (TextFileInputMeta) stepMetaInterface;
 		
-		JSONArray jsonArray = JSONArray.fromObject(cell.getAttribute("fileName"));
-		String[] fileName = new String[jsonArray.size()];
-		String[] filemask = new String[jsonArray.size()];
-		String[] excludeFileMask = new String[jsonArray.size()];
-		String[] fileRequired = new String[jsonArray.size()];
-
-		for (int i = 0; i < jsonArray.size(); i++) {
+		String fileName = cell.getAttribute("fileName");
+		JSONArray jsonArray = JSONArray.fromObject(fileName);
+		for(int i=0; i<jsonArray.size(); i++) {
 			JSONObject jsonObject = jsonArray.getJSONObject(i);
-			fileName[i] = jsonObject.optString("fileName");
-			filemask[i] = jsonObject.optString("filemask");
-			excludeFileMask[i] = jsonObject.optString("excludeFileMask");
-			fileRequired[i] = jsonObject.optString("fileRequired");
+			textFileInputMeta.inputFiles.fileName[i] = jsonObject.optString("fileName" );
+			textFileInputMeta.inputFiles.fileMask[i] = jsonObject.optString("filemask") ;
+			textFileInputMeta.inputFiles.excludeFileMask[i] = jsonObject.optString("excludeFileMask") ;
+			textFileInputMeta.inputFiles.fileRequired[i] = jsonObject.optString("fileRequired") ;
+			textFileInputMeta.inputFiles.includeSubFolders[i] = jsonObject.optString("includeSubFolders"  );
 		}
-		textFileInputMeta.setFileName(fileName);
-//		textFileInputMeta.setFileMask(filemask);
-//		textFileInputMeta.setExcludeFileMask(excludeFileMask);
-//		textFileInputMeta.setFileRequired(fileRequired);
-//		textFileInputMeta.setFileType(cell.getAttribute("fileType"));
-//		textFileInputMeta.setSeparator(cell.getAttribute("separator"));
-//		textFileInputMeta.setEnclosure(cell.getAttribute("enclosure;"));
-//		textFileInputMeta.setEscapeCharacter(cell.getAttribute("escapeCharacter"));
-//		textFileInputMeta.setBreakInEnclosureAllowed("Y".equalsIgnoreCase(cell.getAttribute("breakInEnclosureAllowed")));
-//		textFileInputMeta.setHeader("Y".equalsIgnoreCase(cell.getAttribute("header")));
-//		textFileInputMeta.setNrHeaderLines(Integer.parseInt(cell.getAttribute("nrHeaderLines")));
-//		textFileInputMeta.setFooter("Y".equalsIgnoreCase(cell.getAttribute("footer")));
-//		textFileInputMeta.setNrFooterLines(Integer.parseInt(cell.getAttribute("nrFooterLines")));
-//		textFileInputMeta.setLineWrapped("Y".equalsIgnoreCase(cell.getAttribute("lineWrapped")));
-//		textFileInputMeta.setNrWraps(Integer.parseInt(cell.getAttribute("nrWraps")));
-//		textFileInputMeta.setNrLinesDocHeader(Integer.parseInt(cell.getAttribute("nrLinesDocHeader")));
-//		textFileInputMeta.setNrLinesPerPage(Integer.parseInt(cell.getAttribute("nrLinesPerPage")));
-//		textFileInputMeta.setFileCompression(cell.getAttribute("fileCompression"));
-//		textFileInputMeta.setNoEmptyLines("Y".equalsIgnoreCase(cell.getAttribute("noEmptyLines")));
-//		textFileInputMeta.setIncludeFilename("Y".equalsIgnoreCase(cell.getAttribute("includeFilename")));
-//		textFileInputMeta.setFilenameField(cell.getAttribute("filenameField"));
-//		textFileInputMeta.setIncludeRowNumber("Y".equalsIgnoreCase(cell.getAttribute("includeRowNumber;")));
-//		textFileInputMeta.setRowNumberField(cell.getAttribute("rowNumberByFile"));
-//		textFileInputMeta.setRowNumberField(cell.getAttribute("rowNumberField"));
-//		textFileInputMeta.setFileFormat(cell.getAttribute("fileFormat"));
-//		textFileInputMeta.setInputFields(Integer.parseInt(cell.getAttribute("inputFields")));
-//		textFileInputMeta.setIncludeSubFolder(Integer.parseInt(cell.getAttribute("includeSubFolders")));
-//	
-//		textFileInputMeta.setFilter("Y".equalsIgnoreCase(cell.getAttribute("filter")));
-//		textFileInputMeta.setEncoding(cell.getAttribute("encoding"));
-//		textFileInputMeta.setErrorIgnored("Y".equalsIgnoreCase(cell.getAttribute("errorIgnored"));
-//		textFileInputMeta.setErrorCountField(cell.getAttribute("errorCountField"));
-//		textFileInputMeta.setErrorFieldsField(cell.getAttribute("errorFieldsField"));
-//		textFileInputMeta.setErrorTextField(cell.getAttribute("errorTextField;"));
-//		textFileInputMeta.setWarningFilesDestinationDirectory(cell.getAttribute("warningFilesDestinationDirectory"));
-//		textFileInputMeta.setWarningFilesExtension(cell.getAttribute("warningFilesExtension"));
-//		textFileInputMeta.setErrorFilesDestinationDirectory(cell.getAttribute("errorFilesDestinationDirectory"));
-//		textFileInputMeta.setErrorLineFilesExtension(cell.getAttribute("errorFilesExtension"));
-//		textFileInputMeta.setLineNumberFilesExtension(cell.getAttribute("lineNumberFilesExtension;"));
-//		textFileInputMeta.setDateFormatLenient("Y".equalsIgnoreCase(cell.getAttribute("dateFormatLenient")));
-//		textFileInputMeta.setDateFormatLocale("Y".equalsIgnoreCase(cell.getAttribute("dateFormatLocale")));
-//		textFileInputMeta.setErrorLineSkipped("Y".equalsIgnoreCase(cell.getAttribute("errorLineSkipped")));
-//		textFileInputMeta.setAcceptingFilenames("Y".equalsIgnoreCase(cell.getAttribute("acceptingFilenames")));
-//		textFileInputMeta.setPassingThruFields("Y".equalsIgnoreCase(cell.getAttribute("passingThruFields;")));
-//		textFileInputMeta.setAcceptingField(cell.getAttribute("acceptingField"));
-//		textFileInputMeta.setAcceptingStepName(cell.getAttribute("acceptingStepName"));
-//		textFileInputMeta.setAcceptingStep("Y".equalsIgnoreCase(cell.getAttribute("acceptingStep")));
-//		textFileInputMeta.setAddResultFile("Y".equalsIgnoreCase(cell.getAttribute("isaddresult")));
-//		textFileInputMeta.setShortFileNameField(cell.getAttribute("shortFileFieldName;"));
-//		textFileInputMeta.setPathField(cell.getAttribute("pathFieldName"));
-//		textFileInputMeta.setisHiddenField("Y".equalsIgnoreCase(cell.getAttribute("hiddenFieldName")));
-//		textFileInputMeta.setLastModificationDateField(cell.getAttribute("lastModificationTimeFieldName"));
-//		textFileInputMeta.setUriField(cell.getAttribute("uriNameFieldName"));
-//		textFileInputMeta.setRootUriField(cell.getAttribute("rootUriNameFieldName"));
-//		textFileInputMeta.setExtensionField((cell.getAttribute("extensionFieldName")));
-//		textFileInputMeta.setSizeField(cell.getAttribute("sizeFieldName"));
-//		textFileInputMeta.setSkipBadFiles("Y".equalsIgnoreCase(cell.getAttribute("skipBadFiles")));
-//		textFileInputMeta.setFileErrorField(cell.getAttribute("fileErrorField"));
-//		textFileInputMeta.setFileErrorMessageField(cell.getAttribute("fileErrorMessageField"));
-//		String fields = cell.getAttribute("fields");
-//		TextFileField[] outputFields = new TextFileField[jsonArray.size()];
-//		for(int i=0; i<jsonArray.size(); i++) {
-//			JSONObject jsonObject = jsonArray.getJSONObject(i);
-//			TextFileField field = new TextFileField();
-//	        field.setName( jsonObject.optString("name" ) );
-//	        field.setType( jsonObject.optString("type" ) );
-//	        field.setFormat( jsonObject.optString("format" ) );
-//	        field.setCurrencySymbol( jsonObject.optString("currency" ) );
-//	        field.setDecimalSymbol( jsonObject.optString("decimal" ) );
-//	        field.setGroupingSymbol( jsonObject.optString("group" ) );
-//	        field.setTrimType( ValueMeta.getTrimTypeByCode( jsonObject.optString("trim_type" ) ) );
-//	        field.setNullString( jsonObject.optString("nullif" ) );
-//	        field.setLength( Const.toInt( jsonObject.optString("length" ), -1 ) );
-//	        field.setPrecision( Const.toInt( jsonObject.optString("precision" ), -1 ) );
-//	        
-//	        outputFields[i] = field;
-//		}
-//		textFileInputMeta.setOutputFields(outputFields);
+		
+		String filter = cell.getAttribute("filter");
+		JSONArray filterjsonArray = JSONArray.fromObject(filter);
+		TextFileFilter[] filterFields = new TextFileFilter[filterjsonArray.size()];
+		for(int i=0; i<filterjsonArray.size(); i++) {
+			JSONObject jsonObject = filterjsonArray.getJSONObject(i);
+			TextFileFilter filterField = new TextFileFilter();
+			filterField.setFilterString( jsonObject.optString("filterString" ) );
+			filterField.setFilterPosition( Const.toInt(jsonObject.optString("filterPosition" ),0) );
+			filterField.setFilterLastLine("Y".equalsIgnoreCase( jsonObject.optString("filterLastLine" ) ));
+			filterField.setFilterPositive( "Y".equalsIgnoreCase(jsonObject.optString("filterPositive" ) ));
+	        filterFields[i] = filterField;
+		}
+		textFileInputMeta.setFilter(filterFields);
+		
+		String fields = cell.getAttribute("inputFields");
+        JSONArray fieldsjsonArray = JSONArray.fromObject(fields);
+        BaseFileInputField[] filefields = new BaseFileInputField[fieldsjsonArray.size()];
+		for(int i=0; i<fieldsjsonArray.size(); i++) {
+			JSONObject jsonObject = fieldsjsonArray.getJSONObject(i);
+			BaseFileInputField field = new BaseFileInputField();
+
+			field.setName( jsonObject.optString("name" ) );
+			field.setType( Const.toInt(jsonObject.optString("type" ),0) );
+			field.setFormat( jsonObject.optString("format" ) );
+			field.setPosition( Const.toInt(jsonObject.optString("position" ),0) );
+			field.setLength( Const.toInt(jsonObject.optString("length" ),-1) );
+			field.setPrecision( Const.toInt(jsonObject.optString("precision" ),-1) );
+			field.setCurrencySymbol( jsonObject.optString("currency" ));
+			field.setDecimalSymbol( jsonObject.optString("decimal" ) );
+			field.setGroupSymbol( jsonObject.optString("group" ));
+			field.setTrimType( Const.toInt(jsonObject.optString("trim_type" ),0) );
+			field.setNullString( jsonObject.optString("nullif" ));
+			field.setIfNullValue( jsonObject.optString("ifnull" ));
+			field.setRepeated( "Y".equalsIgnoreCase(jsonObject.optString("repeat" ) ));
+			filefields[i] = field;
+		}
+		textFileInputMeta.inputFiles.inputFields=filefields;
+		textFileInputMeta.content.fileType=cell.getAttribute("fileType");
+		textFileInputMeta.content.separator=cell.getAttribute("separator");
+		textFileInputMeta.content.enclosure=cell.getAttribute("enclosure;");
+		textFileInputMeta.content.escapeCharacter=cell.getAttribute("escapeCharacter");
+		textFileInputMeta.content.breakInEnclosureAllowed=("Y".equalsIgnoreCase(cell.getAttribute("breakInEnclosureAllowed")));
+		textFileInputMeta.content.header=("Y".equalsIgnoreCase(cell.getAttribute("header")));
+		textFileInputMeta.content.nrHeaderLines=(Integer.parseInt(cell.getAttribute("nrHeaderLines")));
+		textFileInputMeta.content.footer=("Y".equalsIgnoreCase(cell.getAttribute("footer")));
+		textFileInputMeta.content.nrFooterLines=(Integer.parseInt(cell.getAttribute("nrFooterLines")));
+		textFileInputMeta.content.lineWrapped=("Y".equalsIgnoreCase(cell.getAttribute("lineWrapped")));
+		textFileInputMeta.content.layoutPaged=("Y".equalsIgnoreCase(cell.getAttribute("layoutPaged")));
+
+		textFileInputMeta.content.nrWraps=(Integer.parseInt(cell.getAttribute("nrWraps")));
+		textFileInputMeta.content.nrLinesDocHeader=(Integer.parseInt(cell.getAttribute("nrLinesDocHeader")));
+		textFileInputMeta.content.nrLinesPerPage=(Integer.parseInt(cell.getAttribute("nrLinesPerPage")));
+		textFileInputMeta.content.fileCompression=(cell.getAttribute("fileCompression"));
+		textFileInputMeta.content.noEmptyLines=("Y".equalsIgnoreCase(cell.getAttribute("noEmptyLines")));
+		textFileInputMeta.content.includeFilename=("Y".equalsIgnoreCase(cell.getAttribute("includeFilename")));
+		textFileInputMeta.content.filenameField=(cell.getAttribute("filenameField"));
+		textFileInputMeta.content.includeRowNumber=("Y".equalsIgnoreCase(cell.getAttribute("includeRowNumber;")));
+		textFileInputMeta.content.rowNumberByFile=("Y".equalsIgnoreCase(cell.getAttribute("rowNumberByFile")));
+		textFileInputMeta.content.rowNumberField=(cell.getAttribute("rowNumberField"));
+		textFileInputMeta.content.fileFormat=(cell.getAttribute("fileFormat"));
+		textFileInputMeta.content.rowLimit=(Const.toInt(cell.getAttribute("rowLimit"),0));
+
+	
+		textFileInputMeta.content.encoding=cell.getAttribute("encoding");
+		textFileInputMeta.errorHandling.errorIgnored=("Y".equalsIgnoreCase(cell.getAttribute("errorIgnored")));
+		textFileInputMeta.setErrorCountField(cell.getAttribute("errorCountField"));
+		textFileInputMeta.setErrorFieldsField(cell.getAttribute("errorFieldsField"));
+		textFileInputMeta.setErrorTextField(cell.getAttribute("errorTextField;"));
+		textFileInputMeta.errorHandling.warningFilesDestinationDirectory=(cell.getAttribute("warningFilesDestinationDirectory"));
+		textFileInputMeta.errorHandling.warningFilesExtension=(cell.getAttribute("warningFilesExtension"));
+		textFileInputMeta.errorHandling.errorFilesDestinationDirectory=(cell.getAttribute("errorFilesDestinationDirectory"));
+		textFileInputMeta.errorHandling.errorFilesExtension=(cell.getAttribute("errorFilesExtension"));
+		textFileInputMeta.errorHandling.lineNumberFilesExtension=(cell.getAttribute("lineNumberFilesExtension;"));
+		textFileInputMeta.content.dateFormatLenient=("Y".equalsIgnoreCase(cell.getAttribute("dateFormatLenient")));
+		textFileInputMeta.content.dateFormatLocale=( EnvUtil.createLocale(cell.getAttribute("dateFormatLocale")));
+		textFileInputMeta.setErrorLineSkipped("Y".equalsIgnoreCase(cell.getAttribute("errorLineSkipped")));
+		textFileInputMeta.inputFiles.acceptingFilenames=("Y".equalsIgnoreCase(cell.getAttribute("acceptingFilenames")));
+		textFileInputMeta.inputFiles.passingThruFields=("Y".equalsIgnoreCase(cell.getAttribute("passingThruFields;")));
+		textFileInputMeta.inputFiles.acceptingField=(cell.getAttribute("acceptingField"));
+		textFileInputMeta.inputFiles.acceptingStepName=(cell.getAttribute("acceptingStepName"));
+		textFileInputMeta.inputFiles.isaddresult=("Y".equalsIgnoreCase(cell.getAttribute("isaddresult")));
+		textFileInputMeta.additionalOutputFields.shortFilenameField=(cell.getAttribute("shortFileFieldName;"));
+		textFileInputMeta.additionalOutputFields.pathField=(cell.getAttribute("pathFieldName"));
+		textFileInputMeta.additionalOutputFields.hiddenField=(cell.getAttribute("hiddenFieldName"));
+		textFileInputMeta.additionalOutputFields.lastModificationField=(cell.getAttribute("lastModificationTimeFieldName"));
+		textFileInputMeta.additionalOutputFields.uriField=(cell.getAttribute("uriNameFieldName"));
+		textFileInputMeta.additionalOutputFields.rootUriField=(cell.getAttribute("rootUriNameFieldName"));
+		textFileInputMeta.additionalOutputFields.extensionField=((cell.getAttribute("extensionFieldName")));
+		textFileInputMeta.additionalOutputFields.sizeField=(cell.getAttribute("sizeFieldName"));
+		textFileInputMeta.errorHandling.skipBadFiles=("Y".equalsIgnoreCase(cell.getAttribute("skipBadFiles")));
+		textFileInputMeta.errorHandling.fileErrorField=(cell.getAttribute("fileErrorField"));
+		textFileInputMeta.errorHandling.fileErrorMessageField=(cell.getAttribute("fileErrorMessageField"));
 	}
 
 	@Override
@@ -128,92 +149,112 @@ public class TextFileInput  extends AbstractStep {
 		Document doc = mxUtils.createDocument();
 		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
-//		e.setAttribute("fileName", textFileInputMeta.getFileName());
-//		e.setAttribute("filemask", textFileInputMeta.getFileMask() ? "Y" : "N");
-//		e.setAttribute("excludeFileMask", textFileInputMeta.getExludeFileMask() ? "Y" : "N");
-//		e.setAttribute("fileRequired", textFileInputMeta.getFileRequired() ? "Y" : "N");
-//		e.setAttribute("fileType", textFileInputMeta.getFileType() ? "Y" : "N");
-//		e.setAttribute("separator", textFileInputMeta.getSeparator() ? "Y" : "N");
-//		e.setAttribute("enclosure", textFileInputMeta.getEnclosure());
-//		e.setAttribute("escapeCharacter", textFileInputMeta.getEscapeCharacter());
-//		e.setAttribute("breakInEnclosureAllowed", textFileInputMeta.isBreakInEnclosureAllowed() ? "Y" : "N");
-//		e.setAttribute("header", textFileInputMeta.hasHeader() ? "Y" : "N");
-//		e.setAttribute("nrHeaderLines", textFileInputMeta.getNrHeaderLines() ? "Y" : "N");
-//		e.setAttribute("footer", textFileInputMeta.hasFooter() ? "Y" : "N");
-//		e.setAttribute("nrFooterLines", textFileInputMeta.getNrFooterLines() ? "Y" : "N");
-//		e.setAttribute("lineWrapped", textFileInputMeta.isLineWrapped());
-//		e.setAttribute("nrWraps", textFileInputMeta.getNrWraps() ? "Y" : "N");
-//		
-//		e.setAttribute("layoutPaged", textFileInputMeta.isLayoutPaged() ? "Y" : "N");
-//		e.setAttribute("nrLinesDocHeader", textFileInputMeta.getNrLinesDocHeader());
-//		e.setAttribute("nrLinesPerPage", textFileInputMeta.getNrLinesPerPage());
-//		e.setAttribute("fileCompression", textFileInputMeta.getFileCompression() ? "Y" : "N");
-//		e.setAttribute("noEmptyLines", textFileInputMeta.noEmptyLines() ? "Y" : "N");
-//		e.setAttribute("includeFilename;", textFileInputMeta.includeFilename() ? "Y" : "N");
-//		e.setAttribute("filenameField", textFileInputMeta.getFilenameField() ? "Y" : "N");
-//		e.setAttribute("includeRowNumber", textFileInputMeta.includeRowNumber());
-//		e.setAttribute("rowNumberByFile", textFileInputMeta.isRowNumberByFile());
-//		e.setAttribute("rowNumberField", textFileInputMeta.getRowNumberField());
-//		e.setAttribute("fileFormat", textFileInputMeta.getFileFormat() ? "Y" : "N");
-//		e.setAttribute("rowLimit", textFileInputMeta.getRowLimit() ? "Y" : "N");
-////		e.setAttribute("TextFileInputField", textFileInputMeta.gette() + "");
-//		e.setAttribute("includeSubFolders", textFileInputMeta.getIncludeSubFolders());
-//		
-////		e.setAttribute("filter", textFileInputMeta.getFilter() ? "Y" : "N");
-//		e.setAttribute("encoding", textFileInputMeta.getEncoding());
-//		e.setAttribute("errorIgnored", textFileInputMeta.isErrorIgnored());
-//		e.setAttribute("errorCountField", textFileInputMeta.getErrorCountField() ? "Y" : "N");
-//		e.setAttribute("errorTextField", textFileInputMeta.getErrorTextField() ? "Y" : "N");
-//		e.setAttribute("warningFilesDestinationDirectory;", textFileInputMeta.getWarningFilesDestinationDirectory() ? "Y" : "N");
-//		e.setAttribute("warningFilesExtension", textFileInputMeta.getWarningFilesExtension()() ? "Y" : "N");
-//		e.setAttribute("errorFilesDestinationDirectory", textFileInputMeta.getErrorFilesDestinationDirectory());
-//		e.setAttribute("errorFilesExtension", textFileInputMeta.setErrorLineFilesExtension());
-//		e.setAttribute("lineNumberFilesDestinationDirectory", textFileInputMeta.getLineNumberFilesDestinationDirectory());
-//		e.setAttribute("lineNumberFilesExtension", textFileInputMeta.getLineNumberFilesExtension() ? "Y" : "N");
-//		e.setAttribute("dateFormatLenient", textFileInputMeta.isDateFormatLenient() ? "Y" : "N");
-//		e.setAttribute("dateFormatLocale", textFileInputMeta.getDateFormatLocale() + "");
-//		e.setAttribute("errorLineSkipped", textFileInputMeta.isErrorLineSkipped());
-//		
-//		
-//		e.setAttribute("acceptingFilenames;", textFileInputMeta.isAcceptingFilenames()() ? "Y" : "N");
-//		e.setAttribute("passingThruFields", textFileInputMeta.isPassingThruFields());
-//		e.setAttribute("acceptingField", textFileInputMeta.getAcceptingField());
-//		e.setAttribute("acceptingStepName", textFileInputMeta.getAcceptingStepName());
-//		e.setAttribute("acceptingStep", textFileInputMeta.getAcceptingStep() ? "Y" : "N");
-//		e.setAttribute("isaddresult", textFileInputMeta.isAddResultFile()) ? "Y" : "N");
-//		e.setAttribute("shortFileFieldName", textFileInputMeta.getShortFileNameField() + "");
-//		e.setAttribute("pathFieldName", textFileInputMeta.getPathField());
-//		
-//		e.setAttribute("hiddenFieldName", textFileInputMeta.isHiddenField());
-//		e.setAttribute("lastModificationTimeFieldName", textFileInputMeta.getLastModificationDateField() ? "Y" : "N");
-//		e.setAttribute("uriNameFieldName", textFileInputMeta.getUriField() ? "Y" : "N");
-//		e.setAttribute("rootUriNameFieldName", textFileInputMeta.getRootUriField() + "");
-//		e.setAttribute("extensionFieldName", textFileInputMeta.getExtensionField());
-//		
-//		
-//		
-//		TextFileField[] outputFields = textFileInputMeta.getOutputFields();
-//		if(outputFields != null) {
-//			JSONArray jsonArray = new JSONArray();
-//			for(TextFileField field : outputFields) {
-//				JSONObject jsonObject = new JSONObject();
-//				jsonObject.put("name", field.getName());
-//				jsonObject.put("type", field.getTypeDesc());
-//				jsonObject.put("format", field.getFormat());
-//				jsonObject.put("currencyType", field.getCurrencySymbol());
-//				jsonObject.put("decimal", field.getDecimalSymbol());
-//				jsonObject.put("group", field.getGroupingSymbol());
-//				jsonObject.put("nullif", field.getNullString());
-//				jsonObject.put("trim_type", field.getTrimTypeDesc());
-//				if(field.getLength() != -1)
-//					jsonObject.put("length", field.getLength());
-//				if(field.getPrecision() != -1)
-//					jsonObject.put("precision", field.getPrecision());
-//				
-//				jsonArray.add(jsonObject);
-//			}
-//			e.setAttribute("fields", jsonArray.toString());
-//		}
+		e.setAttribute("fileName", textFileInputMeta.inputFiles.fileName.toString());
+		e.setAttribute("filemask", textFileInputMeta.inputFiles.fileMask.toString());
+		e.setAttribute("excludeFileMask", textFileInputMeta.inputFiles.excludeFileMask.toString());
+		e.setAttribute("fileRequired", textFileInputMeta.inputFiles.excludeFileMask.toString());
+		e.setAttribute("fileRequired", textFileInputMeta.inputFiles.excludeFileMask.toString());
+		e.setAttribute("includeSubFolders", textFileInputMeta.inputFiles.includeSubFolders.toString());
+		e.setAttribute("fileType", 	textFileInputMeta.content.fileType );
+		e.setAttribute("separator", textFileInputMeta.content.separator);
+		e.setAttribute("enclosure", textFileInputMeta.content.enclosure);
+		e.setAttribute("escapeCharacter",textFileInputMeta.content.escapeCharacter);
+		e.setAttribute("breakInEnclosureAllowed", textFileInputMeta.content.breakInEnclosureAllowed ? "Y" : "N");
+		e.setAttribute("header", textFileInputMeta.content.header ? "Y" : "N");
+		e.setAttribute("nrHeaderLines",textFileInputMeta.content.nrHeaderLines +"");
+		e.setAttribute("footer", textFileInputMeta.content.footer ? "Y" : "N");
+		e.setAttribute("nrFooterLines", textFileInputMeta.content.nrFooterLines+"" );
+		e.setAttribute("lineWrapped", textFileInputMeta.content.lineWrapped  ? "Y" : "N");
+		e.setAttribute("nrWraps", textFileInputMeta.content.lineWrapped ? "Y" : "N");
+		
+		e.setAttribute("layoutPaged", textFileInputMeta.content.layoutPaged ? "Y" : "N");
+		e.setAttribute("nrLinesDocHeader", textFileInputMeta.content.nrLinesDocHeader +"");
+		e.setAttribute("nrLinesPerPage", textFileInputMeta.content.nrLinesPerPage+"");
+		e.setAttribute("fileCompression", textFileInputMeta.content.fileCompression );
+		e.setAttribute("noEmptyLines", textFileInputMeta.content.noEmptyLines ? "Y" : "N");
+		e.setAttribute("includeFilename", textFileInputMeta.content.includeFilename ? "Y" : "N");
+		e.setAttribute("filenameField", textFileInputMeta.content.filenameField );
+		e.setAttribute("includeRowNumber", textFileInputMeta.content.includeRowNumber ? "Y" : "N");
+		e.setAttribute("rowNumberByFile", textFileInputMeta.content.rowNumberByFile ? "Y" : "N");
+		e.setAttribute("rowNumberField", textFileInputMeta.content.rowNumberByFile ? "Y" : "N");
+		e.setAttribute("fileFormat", textFileInputMeta.content.fileFormat );
+		e.setAttribute("rowLimit", textFileInputMeta.content.rowLimit +"");
+//		e.setAttribute("TextFileInputField", textFileInputMeta.gette() + "");
+		
+//		e.setAttribute("filter", textFileInputMeta.getFilter() ? "Y" : "N");
+		e.setAttribute("encoding", textFileInputMeta.getEncoding());
+		e.setAttribute("errorIgnored", textFileInputMeta.errorHandling.errorIgnored ? "Y" : "N");
+		e.setAttribute("errorCountField", textFileInputMeta.getErrorCountField());
+		e.setAttribute("errorTextField", textFileInputMeta.getErrorTextField());
+		e.setAttribute("warningFilesDestinationDirectory", textFileInputMeta.errorHandling.warningFilesDestinationDirectory );
+		e.setAttribute("warningFilesExtension", textFileInputMeta.errorHandling.warningFilesExtension);
+		e.setAttribute("errorFilesDestinationDirectory", textFileInputMeta.errorHandling.errorFilesDestinationDirectory);
+		e.setAttribute("errorFilesExtension", textFileInputMeta.errorHandling.errorFilesExtension);
+		e.setAttribute("lineNumberFilesDestinationDirectory", textFileInputMeta.errorHandling.lineNumberFilesDestinationDirectory);
+		e.setAttribute("lineNumberFilesExtension", textFileInputMeta.errorHandling.lineNumberFilesExtension);
+		e.setAttribute("dateFormatLenient", textFileInputMeta.content.dateFormatLenient ? "Y" : "N");
+		e.setAttribute("dateFormatLocale", textFileInputMeta.content.dateFormatLocale.toString());
+		e.setAttribute("errorLineSkipped", textFileInputMeta.isErrorLineSkipped() ? "Y" : "N");
+		
+		
+		e.setAttribute("acceptingFilenames", textFileInputMeta.inputFiles.acceptingFilenames  ? "Y" : "N");
+		e.setAttribute("passingThruFields", textFileInputMeta.inputFiles.passingThruFields  ? "Y" : "N");
+		e.setAttribute("acceptingField", textFileInputMeta.inputFiles.acceptingField);
+		e.setAttribute("acceptingStepName", textFileInputMeta.inputFiles.acceptingStepName);
+		e.setAttribute("acceptingStep", textFileInputMeta.inputFiles.acceptingStepName );
+		e.setAttribute("isaddresult", textFileInputMeta.inputFiles.isaddresult  ? "Y" : "N");
+		e.setAttribute("shortFileFieldName", textFileInputMeta.additionalOutputFields.shortFilenameField);
+		e.setAttribute("pathFieldName", textFileInputMeta.additionalOutputFields.pathField);
+		
+		e.setAttribute("hiddenFieldName", textFileInputMeta.additionalOutputFields.hiddenField);
+		e.setAttribute("lastModificationTimeFieldName", textFileInputMeta.additionalOutputFields.lastModificationField);
+		e.setAttribute("uriNameFieldName", textFileInputMeta.additionalOutputFields.uriField);
+		e.setAttribute("rootUriNameFieldName", textFileInputMeta.additionalOutputFields.rootUriField);
+		e.setAttribute("extensionFieldName", textFileInputMeta.additionalOutputFields.extensionField);
+		
+		
+		
+		
+		TextFileFilter[] filters = textFileInputMeta.getFilter();
+		if(filters != null) {
+			JSONArray filterjsonArray = new JSONArray();
+			for(TextFileFilter filter : filters) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("filterString", filter.getFilterString());
+				jsonObject.put("filterPosition", filter.getFilterPosition());
+				jsonObject.put("filterLastLine", filter.isFilterLastLine());
+				jsonObject.put("filterPositive", filter.isFilterPositive());
+				
+				filterjsonArray.add(jsonObject);
+			}
+			e.setAttribute("filter", filterjsonArray.toString());
+		};
+
+		BaseFileInputField[] inputFields = textFileInputMeta.inputFiles.inputFields;
+		if(inputFields != null) {
+			JSONArray inputFieldsjsonArray = new JSONArray();
+			for(BaseFileInputField inputField : inputFields) {
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("name", inputField.getName());
+				jsonObject.put("position", inputField.getPosition());
+				jsonObject.put("type", inputField.getTypeDesc());
+				jsonObject.put("format", inputField.getFormat());
+				jsonObject.put("currencySymbol", inputField.getCurrencySymbol());
+				jsonObject.put("decimalSymbol", inputField.getDecimalSymbol());
+				jsonObject.put("groupSymbol", inputField.getGroupSymbol());
+				jsonObject.put("nullString", inputField.getNullString());
+				jsonObject.put("ifNullValue", inputField.getIfNullValue());
+				jsonObject.put("trimtype", inputField.getTrimTypeDesc());
+				jsonObject.put("repeat", inputField.isRepeated());
+				if(inputField.getLength() != -1)
+					jsonObject.put("length", inputField.getLength());
+				if(inputField.getPrecision() != -1)
+					jsonObject.put("precision", inputField.getPrecision());
+				
+				inputFieldsjsonArray.add(jsonObject);
+			}
+			e.setAttribute("inputFields", inputFieldsjsonArray.toString());
+		}
 		
 		return e;
 	}
