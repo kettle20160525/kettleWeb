@@ -14,19 +14,22 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 			fields: ['fileName', 'filemask', 'excludeFileMask', 'excludeFileMask', 'fileRequired', 'includeSubFolders'],
 			data: Ext.decode(cell.getAttribute('fileName') || Ext.encode([]))
 		});
-		var fileNamegrid = new Ext.grid.EditorGridPanel({
-//			title: '选中的文件',
+		var fileNamegrid = new KettleEditorGrid({
+			title: '选中的文件',
 			fieldLabel: '选中的文件',
+			height:300,
 			region: 'center',
-			disabled: true,
+			disabled: false,
 //			tbar: [{
 //				text: '新增参数'
 //			}, {
 //				text: '删除参数'
 //			}],
-			columns: [{
-				header: '#', dataIndex: 'password', width: 80, editor: new Ext.form.TextField()
-			},{
+			columns: [
+//			   {
+//				header: '#', dataIndex: '', width: 80, editor: new Ext.form.TextField()
+//			},
+			{
 				header: '文件/目录', dataIndex: 'fileName', width: 100, editor: new Ext.form.TextField()
 			},{
 				header: '通配符', dataIndex: 'filemask', width: 100, editor: new Ext.form.TextField()
@@ -150,9 +153,143 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		var wUriField = new Ext.form.TextField({fieldLabel: 'Uri字段', flex: 1,anchor: '-10', value: cell.getAttribute('uriField')});
 		var wRootUriField = new Ext.form.TextField({fieldLabel: 'Root uri字段', flex: 1,anchor: '-10', value: cell.getAttribute('rootUriField')});
 
-		var store = new Ext.data.JsonStore({
-			fields: ['name', 'type', 'format', 'length', 'precision', 'currency', 'decimal', 'group', 'trim_type', 'nullif'],
-			data: Ext.decode(cell.getAttribute('fields') || Ext.encode([]))
+		var fieldStore = new Ext.data.JsonStore({
+			fields: ['name', 'type', 'format', 'position','length', 'precision', 'currency', 'decimal', 'group', 'trim_type', 'nullif','ifnull','repeat'],
+			data: Ext.decode(cell.getAttribute('inputFields') || Ext.encode([]))
+		});
+		
+		var fieldsgrid = new KettleEditorGrid({
+			region: 'center',
+			title: '字段',
+			menuAdd: function(menu) {
+				menu.insert(0, {
+					text: '获取变量', scope: this, handler: function() {
+						me.onSure();
+						
+						getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(st) {
+							store.loadData(st.toJson());
+						});
+					}
+				});
+			},
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '名称', dataIndex: 'name', width: 50, editor: new Ext.form.TextField({
+	                allowBlank: false
+	            })
+			},{
+				header: '类型', dataIndex: 'type', width: 50, editor: new Ext.form.ComboBox({
+			        store: Ext.StoreMgr.get('valueMetaStore'),
+			        displayField: 'name',
+			        valueField: 'name',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '格式', dataIndex: 'format', width: 50, editor: new Ext.form.ComboBox({
+			        store: Ext.StoreMgr.get('valueFormatStore'),
+			        displayField:'name',
+			        valueField:'name',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '位置', dataIndex: 'position', width: 50, editor: new Ext.form.NumberField()
+			},{
+				header: '长度', dataIndex: 'length', width: 50, editor: new Ext.form.NumberField()
+			},{
+				header: '精度', dataIndex: 'precision', width: 50, editor: new Ext.form.TextField()
+			},{
+				header: '货币', dataIndex: 'currency', width: 50, editor: new Ext.form.TextField()
+			},{
+				header: '小数', dataIndex: 'decimal', width: 50, editor: new Ext.form.TextField()
+			},{
+				header: '分组', dataIndex: 'group', width: 50, editor: new Ext.form.TextField()
+			},{
+				header: 'Null if', dataIndex: 'nullif', width: 80, editor: new Ext.form.TextField()
+			},{
+				header: '默认', dataIndex: 'ifnull', width: 50, editor: new Ext.form.TextField()
+			},{
+				header: '去除空字符串方式', dataIndex: 'trim_type', width: 100, renderer: function(v)
+				{
+					if(v == 'none') 
+						return '不去掉空格'; 
+					else if(v == 'left') 
+						return '去掉左空格';
+					else if(v == 'right') 
+						return '去掉右空格';
+					else if(v == 'both') 
+						return '去掉左右两端空格';
+					return v;
+				}, editor: new Ext.form.ComboBox({
+			        store: new Ext.data.JsonStore({
+			        	fields: ['value', 'text'],
+			        	data: [{value: 'none', text: '不去掉空格'},
+			        	       {value: 'left', text: '去掉左空格'},
+			        	       {value: 'right', text: '去掉右空格'},
+			        	       {value: 'both', text: '去掉左右两端空格'}]
+			        }),
+			        displayField: 'text',
+			        valueField: 'value',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '重复', dataIndex: 'repeat', width: 50, editor: new Ext.form.TextField()
+
+			}],
+			store: fieldStore
+		});
+		
+		var filterStore  = new Ext.data.JsonStore({
+			idProperty: 'filter',
+			fields: ['filterString', 'filterPosition', 'filterLastLine', 'filterPositive'],
+			data: Ext.decode(cell.getAttribute('filter') || Ext.encode([]))
+		});
+		
+		
+		var  filterGrid = new KettleEditorGrid({
+			xtype:'KettleEditorGrid',
+			region: 'center',
+			title: '过滤',
+			menuAdd: function(menu) {
+				menu.insert(0, {
+					text: '获取变量', scope: this, handler: function() {
+						me.onSure();
+						getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(st) {
+							store.loadData(st.toJson());
+						});
+					}
+				});
+			},
+			columns: [new Ext.grid.RowNumberer(), {
+				header: '过滤器字符串', dataIndex: 'filterString', width: 150, editor: new Ext.form.TextField({
+	                allowBlank: false
+	            })
+			},{header: '过滤器位置', dataIndex: 'filterPosition', width: 100, editor: new Ext.form.ComboBox({
+			        store: Ext.StoreMgr.get('valueFormatStore'),
+			        displayField:'name',
+			        valueField:'name',
+			        typeAhead: true,
+			        mode: 'local',
+			        forceSelection: true,
+			        triggerAction: 'all',
+			        selectOnFocus:true
+			    })
+			},{
+				header: '停止在过滤器', dataIndex: 'filterLastLine', width: 150, editor: new Ext.form.NumberField()
+			},{
+				header: '积极匹配', dataIndex: 'filterPositive', width: 100, editor: new Ext.form.TextField()
+			}],
+			store: filterStore
 		});
 		
 		this.getValues = function(){
@@ -193,21 +330,32 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 			    dateFormatLocale: wDateFormatLocale.getValue(),
 			    addresult: wAddresult.getValue() ? "Y" : "N",
 
-			    
+			    errorIgnored: wErrorIgnored.getValue() ? "Y" : "N",
+				skipBadFiles: wSkipBadFiles.getValue() ? "Y" : "N",
+				fileErrorField: wFileErrorField.getValue(),
+				fileErrorMessageField: wFileErrorMessageField.getValue(),
+				errorLineSkipped: wErrorLineSkipped.getValue()  ? "Y" : "N",
+				errorCountField: wErrorCountField.getValue(),
+				errorFieldsField: wErrorFieldsField.getValue(),
+				errorTextField: wErrorTextField.getValue(),
+				warningFilesDestinationDirectory: wWarningFilesDestinationDirectory.getValue(),
+				errorFilesDestinationDirectory: wErrorFilesDestinationDirectory.getValue() ? "Y" : "N",
+				lineNumberFilesDestinationDirectory: wLineNumberFilesDestinationDirectory.getValue() ? "Y" : "N",
+				warningFilesExtension: wWarningFilesExtension.getValue(),
+				errorFilesExtension: wErrorFilesExtension.getValue(),
+				lineNumberFilesExtension: wLineNumberFilesExtension.getValue(),
+				shortFilenameField: wShortFilenameField.getValue(),
+				extensionField: wExtensionField.getValue(),
+			    pathField: wPathField.getValue(),
+			    sizeField: wSizeField.getValue(),
+			    hiddenField: wHiddenField.getValue(),
+			    lastModificationField: wLastModificationField.getValue(),
+			    uriField: wUriField.getValue(),
+			    rootUriField: wRootUriField.getValue(),
+			    filterStore: Ext.encode(filterStore.toJson()),
+			    fieldStore: Ext.encode(fieldStore.toJson()),
+			    fileNameStore: Ext.encode(fileNameStore.toJson())
 
- 
-				enclosure_forced: wEnclForced.getValue() ? "Y" : "N",
-				enclosure_fix_disabled: wDisableEnclosureFix.getValue() ? "Y" : "N",
-				header: wHeader.getValue() ? "Y" : "N",
-				footer: wFooter.getValue() ? "Y" : "N",
-				format: wFormat.getValue(),
-				compression: wCompression.getValue(),
-				encoding: wEncoding.getValue(),
-				pad: wPad.getValue() ? "Y" : "N",
-				fast_dump: wFastDump.getValue() ? "Y" : "N",
-				splitevery: wSplitEvery.getValue(),
-				endedLine: wEndedLine.getValue(),
-				fields: Ext.encode(store.toJson())
 			};
 		};
 		
@@ -392,89 +540,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 					});
 					dialog.show();
 				}}]
-			}]},{
-			xtype:'KettleEditorGrid',
-			region: 'center',
-			title: '字段',
-			menuAdd: function(menu) {
-				menu.insert(0, {
-					text: '获取变量', scope: this, handler: function() {
-						me.onSure();
-						getActiveGraph().inputOutputFields(cell.getAttribute('label'), true, function(st) {
-							store.loadData(st.toJson());
-						});
-					}
-				});
-			},
-			columns: [new Ext.grid.RowNumberer(), {
-				header: '名称', dataIndex: 'name', width: 100, editor: new Ext.form.TextField({
-	                allowBlank: false
-	            })
-			},{
-				header: '类型', dataIndex: 'type', width: 100, editor: new Ext.form.ComboBox({
-			        store: Ext.StoreMgr.get('valueMetaStore'),
-			        displayField: 'name',
-			        valueField: 'name',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: '格式', dataIndex: 'format', width: 150, editor: new Ext.form.ComboBox({
-			        store: Ext.StoreMgr.get('valueFormatStore'),
-			        displayField:'name',
-			        valueField:'name',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: '长度', dataIndex: 'length', width: 50, editor: new Ext.form.NumberField()
-			},{
-				header: '精度', dataIndex: 'precision', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '货币', dataIndex: 'currency', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '小数', dataIndex: 'decimal', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '分组', dataIndex: 'group', width: 100, editor: new Ext.form.TextField()
-			},{
-				header: '去除空字符串方式', dataIndex: 'trim_type', width: 100, renderer: function(v)
-				{
-					if(v == 'none') 
-						return '不去掉空格'; 
-					else if(v == 'left') 
-						return '去掉左空格';
-					else if(v == 'right') 
-						return '去掉右空格';
-					else if(v == 'both') 
-						return '去掉左右两端空格';
-					return v;
-				}, editor: new Ext.form.ComboBox({
-			        store: new Ext.data.JsonStore({
-			        	fields: ['value', 'text'],
-			        	data: [{value: 'none', text: '不去掉空格'},
-			        	       {value: 'left', text: '去掉左空格'},
-			        	       {value: 'right', text: '去掉右空格'},
-			        	       {value: 'both', text: '去掉左右两端空格'}]
-			        }),
-			        displayField: 'text',
-			        valueField: 'value',
-			        typeAhead: true,
-			        mode: 'local',
-			        forceSelection: true,
-			        triggerAction: 'all',
-			        selectOnFocus:true
-			    })
-			},{
-				header: 'Null', dataIndex: 'nullif', width: 80, editor: new Ext.form.TextField()
-			}],
-			store: store
-		},{
+			}]},filterGrid,fieldsgrid,{
 			xtype: 'KettleForm',
 			title: '其他输出字段',
 			bodyStyle: 'padding: 10px 0px',
