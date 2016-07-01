@@ -149,11 +149,10 @@ public class TextFileInput  extends AbstractStep {
 		Document doc = mxUtils.createDocument();
 		Element e = doc.createElement(PropsUI.TRANS_STEP_NAME);
 		
-		e.setAttribute("fileName", textFileInputMeta.inputFiles.fileName.toString());
+//		e.setAttribute("fileName", textFileInputMeta.inputFiles.fileName.toString());
 		e.setAttribute("filemask", textFileInputMeta.inputFiles.fileMask.toString());
 		e.setAttribute("excludeFileMask", textFileInputMeta.inputFiles.excludeFileMask.toString());
-		e.setAttribute("fileRequired", textFileInputMeta.inputFiles.excludeFileMask.toString());
-		e.setAttribute("fileRequired", textFileInputMeta.inputFiles.excludeFileMask.toString());
+		e.setAttribute("fileRequired", textFileInputMeta.inputFiles.fileRequired.toString());
 		e.setAttribute("includeSubFolders", textFileInputMeta.inputFiles.includeSubFolders.toString());
 		e.setAttribute("fileType", 	textFileInputMeta.content.fileType );
 		e.setAttribute("separator", textFileInputMeta.content.separator);
@@ -163,13 +162,13 @@ public class TextFileInput  extends AbstractStep {
 		e.setAttribute("header", textFileInputMeta.content.header ? "Y" : "N");
 		e.setAttribute("nrHeaderLines",textFileInputMeta.content.nrHeaderLines +"");
 		e.setAttribute("footer", textFileInputMeta.content.footer ? "Y" : "N");
-		e.setAttribute("nrFooterLines", textFileInputMeta.content.nrFooterLines+"" );
+		e.setAttribute("nrFooterLines", textFileInputMeta.content.nrFooterLines + "" );
 		e.setAttribute("lineWrapped", textFileInputMeta.content.lineWrapped  ? "Y" : "N");
 		e.setAttribute("nrWraps", textFileInputMeta.content.lineWrapped ? "Y" : "N");
 		
 		e.setAttribute("layoutPaged", textFileInputMeta.content.layoutPaged ? "Y" : "N");
 		e.setAttribute("nrLinesDocHeader", textFileInputMeta.content.nrLinesDocHeader +"");
-		e.setAttribute("nrLinesPerPage", textFileInputMeta.content.nrLinesPerPage+"");
+		e.setAttribute("nrLinesPerPage", textFileInputMeta.content.nrLinesPerPage + "");
 		e.setAttribute("fileCompression", textFileInputMeta.content.fileCompression );
 		e.setAttribute("noEmptyLines", textFileInputMeta.content.noEmptyLines ? "Y" : "N");
 		e.setAttribute("includeFilename", textFileInputMeta.content.includeFilename ? "Y" : "N");
