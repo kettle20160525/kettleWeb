@@ -1,6 +1,7 @@
 TextFileInputDialog = Ext.extend(KettleTabDialog, {
 	width: 700,
-	height: 650,
+	height: 600,
+	showPreview:true,
 	title: '文本文件输入',
 	initComponent: function() {
 		var me = this,  graph = getActiveGraph().getGraph(),  cell = graph.getSelectionCell();
@@ -9,13 +10,33 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		var wFileMask = new Ext.form.TextField({fieldLabel: '规则表达式', flex: 1,anchor: '-10',value: cell.getAttribute('fileMask')});
 		var wExcludeFileMask = new Ext.form.TextField({fieldLabel: '正则表达式（排除）', anchor: '-10',flex: 1,value: cell.getAttribute('excludeFileMask')});
 		
-		var fileNameStore = this.store = new Ext.data.JsonStore({
+		var wfindbutton = new Ext.Button({
+			text: '浏览...', 
+			disabled:true,
+			handler: function() {
+			var dialog = new FileExplorerWindow();
+			dialog.on('ok', function(path) {
+				wFilename.setValue(path);
+				dialog.close();
+			});
+			dialog.show();
+		}});
+		var waddfilebutton = new Ext.Button({
+			text: '增加', 
+			disabled:true,
+			handler: function() {
+				var store = fileNamegrid.getStore();
+				fileNamegrid.stopEditing();
+		        store.insert(0, new store.recordType(fileNamegrid.getDefaultValue()));
+		        fileNamegrid.startEditing(0, 1);	
+		   }});
+		
+		var fileNameStore  = new Ext.data.JsonStore({
 			idProperty: 'fileName',
 			fields: ['fileName', 'filemask', 'excludeFileMask', 'excludeFileMask', 'fileRequired', 'includeSubFolders'],
 			data: Ext.decode(cell.getAttribute('fileName') || Ext.encode([]))
 		});
 		var fileNamegrid = new KettleEditorGrid({
-			title: '选中的文件',
 			fieldLabel: '选中的文件',
 			height:300,
 			region: 'center',
@@ -42,7 +63,37 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 			}],
 			store: fileNameStore
 		});
-		var wAcceptingFilenames = new Ext.form.Checkbox({fieldLabel: '从以前步骤接受文件名', checked: cell.getAttribute('acceptingFilenames') == 'Y'});
+		var wAcceptingFilenames = new Ext.form.Checkbox({
+			fieldLabel: '从以前步骤接受文件名', 
+			checked: cell.getAttribute('acceptingFilenames') == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wFilename.setDisabled(true);
+						wFileMask.setDisabled(true);
+						wExcludeFileMask.setDisabled(true);
+						wfindbutton.setDisabled(true);
+						waddfilebutton.setDisabled(true);
+						fileNamegrid.setDisabled(true);
+						wPassingThruFields.setDisabled(false);
+						wAcceptingField.setDisabled(false);
+						wAcceptingStepName.setDisabled(false);
+
+					}else{
+						wFilename.setDisabled(false);
+						wFileMask.setDisabled(false);
+						wExcludeFileMask.setDisabled(false);
+						wfindbutton.setDisabled(false);
+						fileNamegrid.setDisabled(false);
+						waddfilebutton.setDisabled(true);
+						wPassingThruFields.setDisabled(true);
+						wAcceptingField.setDisabled(true);
+						wAcceptingStepName.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wPassingThruFields = new Ext.form.Checkbox({fieldLabel: '从以前步骤接受字段名', checked: cell.getAttribute('passingThruFields') == 'Y'});
 		var wAcceptingField = new Ext.form.TextField({fieldLabel: '步骤读取的文件名来自', flex: 1,anchor: '-10',value: cell.getAttribute('acceptingField') });
 		var wAcceptingStepName = new Ext.form.TextField({fieldLabel: '在输入里的字段被当做文件名', flex: 1,anchor: '-10',value: cell.getAttribute('acceptingStepName') });
@@ -62,13 +113,60 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		var wEnclosure = new Ext.form.TextField({fieldLabel: '文本限定符', flex: 1,anchor: '-10',value: cell.getAttribute('enclosure')});
 		var wBreakInEnclosureAllowed = new Ext.form.Checkbox({fieldLabel: '在文本里允许换行',anchor: '-10', checked: cell.getAttribute('breakInEnclosureAllowed') == 'Y'});
 		var wEscapeCharacter = new Ext.form.TextField({fieldLabel: '逃逸字符',flex: 1,anchor: '-10', value: cell.getAttribute('escapeCharacter') });
-		var wHeader = new Ext.form.Checkbox({fieldLabel: '头部',anchor: '-10', checked: cell.getAttribute('header')  == 'Y'});
+		var wHeader = new Ext.form.Checkbox({fieldLabel: '头部',anchor: '-10', 
+			checked: cell.getAttribute('header')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wNrHeaderLines.setDisabled(false);
+					}else{
+						wNrHeaderLines.setDisabled(true);
+			        }
+			    }
+			 }
+			});
 		var wNrHeaderLines = new Ext.form.TextField({fieldLabel: '头部行数',flex: 1,anchor: '0', value: cell.getAttribute('nrHeaderLines') });
-		var wFooter = new Ext.form.Checkbox({fieldLabel: '尾部',anchor: '-10', checked: cell.getAttribute('footer')  == 'Y'});
+		var wFooter = new Ext.form.Checkbox({fieldLabel: '尾部',anchor: '-10', checked: cell.getAttribute('footer')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wNrFooterLines.setDisabled(false);
+					}else{
+						wNrFooterLines.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wNrFooterLines = new Ext.form.TextField({fieldLabel: '尾部行数',flex: 1,anchor: '0', value: cell.getAttribute('nrFooterLines') });
-		var wLineWrapped = new Ext.form.Checkbox({fieldLabel: '包装行',anchor: '-10', checked: cell.getAttribute('lineWrapped')  == 'Y'});
+		var wLineWrapped = new Ext.form.Checkbox({fieldLabel: '包装行',anchor: '-10', checked: cell.getAttribute('lineWrapped')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wNrWraps.setDisabled(false);
+					}else{
+						wNrWraps.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wNrWraps = new Ext.form.TextField({fieldLabel: '以时间包装的行数',anchor: '0',flex: 1, value: cell.getAttribute('nrWraps') });
-		var wLayoutPaged = new Ext.form.Checkbox({fieldLabel: '分页布局（printout）',anchor: '-10', checked: cell.getAttribute('layoutPaged')  == 'Y'});
+		var wLayoutPaged = new Ext.form.Checkbox({fieldLabel: '分页布局（printout）',anchor: '-10', checked: cell.getAttribute('layoutPaged')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wNrLinesPerPage.setDisabled(false);
+						wNrLinesDocHeader.setDisabled(false);
+					}else{
+						wNrLinesPerPage.setDisabled(true);
+						wNrLinesDocHeader.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wNrLinesPerPage = new Ext.form.TextField({fieldLabel: '每页记录行数',anchor: '0', flex: 1,value: cell.getAttribute('nrLinesPerPage') });
 		var wNrLinesDocHeader = new Ext.form.TextField({fieldLabel: '文档头部行',anchor: '0', flex: 1,value: cell.getAttribute('nrLinesDocHeader') });
 		var wFileCompression = new Ext.form.ComboBox({
@@ -84,12 +182,36 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 			value: cell.getAttribute('fileCompression')
 		});
 		var wNoEmptyLines = new Ext.form.Checkbox({fieldLabel: '没有空行', checked: cell.getAttribute('noEmptyLines') == 'Y'});
-		var wIncludeFilename = new Ext.form.Checkbox({fieldLabel: '在输出包含字段名',anchor: '-10', checked: cell.getAttribute('includeFilename')  == 'Y'});
+		var wIncludeFilename = new Ext.form.Checkbox({fieldLabel: '在输出包含字段名',anchor: '-10', checked: cell.getAttribute('includeFilename')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wFilenameField.setDisabled(false);
+					}else{
+						wFilenameField.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wFilenameField = new Ext.form.TextField({fieldLabel: '包含字段名名称',flex: 1,anchor: '0', value: cell.getAttribute('filenameField') });
-		var wIncludeRowNumber = new Ext.form.Checkbox({fieldLabel: '输出包含行数',anchor: '-10', checked: cell.getAttribute('includeRowNumber')  == 'Y'});
+		var wIncludeRowNumber = new Ext.form.Checkbox({fieldLabel: '输出包含行数',anchor: '-10', checked: cell.getAttribute('includeRowNumber')  == 'Y',
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wRowNumberField.setDisabled(false);
+						wRowNumberByFile.setDisabled(false);
+					}else{
+						wRowNumberField.setDisabled(true);
+						wRowNumberByFile.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wRowNumberField = new Ext.form.TextField({fieldLabel: '行数字段名称',flex: 1,anchor: '0', value: cell.getAttribute('rowNumberField') });
-		var wRowNumberByFile = new Ext.form.TextField({fieldLabel: '按文件取行号',flex: 1,anchor: '0', value: cell.getAttribute('rowNumberByFile') });
-		var wFormat = new Ext.form.ComboBox({
+		var wRowNumberByFile = new Ext.form.Checkbox({fieldLabel: '按文件取行号',flex: 1,anchor: '0', value: cell.getAttribute('rowNumberByFile') });
+		var wFileFormat = new Ext.form.ComboBox({
 			fieldLabel: '格式',
 			anchor: '-10',
 			displayField: 'name',
@@ -99,19 +221,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 	        triggerAction: 'all',
 	        selectOnFocus:true,
 			store: Ext.StoreMgr.get('formatMapperLineTerminatorStore'),
-			value: cell.getAttribute('format')
-		});
-		var wEncoding = new Ext.form.ComboBox({
-			fieldLabel: '编码方式',
-			anchor: '-10',
-			displayField: 'name',
-			valueField: 'name',
-			typeAhead: true,
-	        forceSelection: true,
-	        triggerAction: 'all',
-	        selectOnFocus:true,
-			store: Ext.StoreMgr.get('compressionProviderNamesStore'),
-			value: cell.getAttribute('encoding')
+			value: cell.getAttribute('fileFormat')
 		});
 		var wEncoding = new Ext.form.ComboBox({
 			fieldLabel: '编码',
@@ -127,10 +237,65 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		});
 		var wRowLimit = new Ext.form.TextField({fieldLabel: '记录数量限制', flex: 1,anchor: '-10',  value: cell.getAttribute('rowLimit')});
 		var wDateFormatLenient = new Ext.form.Checkbox({fieldLabel: '解析日期的时候是否严格要求',  anchor: '-10', checked: cell.getAttribute('dateFormatLenient') == 'Y'});
-		var wDateFormatLocale = new Ext.form.TextField({fieldLabel: '本地日期格式', flex: 1,anchor: '-10', value: cell.getAttribute('dateFormatLocale')});
+		var wDateFormatLocale = new Ext.form.ComboBox({fieldLabel: '本地日期格式', flex: 1,anchor: '-10', value: cell.getAttribute('dateFormatLocale')});
 		var wAddresult = new Ext.form.Checkbox({fieldLabel: '添加文件名', anchor: '-10', checked: cell.getAttribute('addresult') == 'Y'});
-		var wErrorIgnored = new Ext.form.Checkbox({fieldLabel: '忽略错误', flex: 1,anchor: '-10', checked: cell.getAttribute('errorIgnored')});
-		var wSkipBadFiles = new Ext.form.Checkbox({fieldLabel: '忽略错误文件', flex: 1,anchor: '-10', checked: cell.getAttribute('skipBadFiles')});
+		var wErrorIgnored = new Ext.form.Checkbox({fieldLabel: '忽略错误', flex: 1,anchor: '-10', checked: cell.getAttribute('errorIgnored'),
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wSkipBadFiles.setDisabled(false);
+//						wFileErrorField.setDisabled(false);
+//						wFileErrorMessageField.setDisabled(false);
+						wErrorLineSkipped.setDisabled(false);
+						wErrorCountField.setDisabled(false);
+						wErrorFieldsField.setDisabled(false);
+						wErrorTextField.setDisabled(false);
+						wWarningFilesDestinationDirectory.setDisabled(false);
+						wErrorFilesDestinationDirectory.setDisabled(false);
+						wLineNumberFilesDestinationDirectory.setDisabled(false);
+						wWarningFilesExtension.setDisabled(false);
+						wErrorFilesExtension.setDisabled(false);
+						wLineNumberFilesExtension.setDisabled(false);
+						wWarningFilesFindButton.setDisabled(false);
+						wLineNumberFindButton.setDisabled(false);
+						wErrorFilesFindButton.setDisabled(false);
+					}else{
+						wSkipBadFiles.setDisabled(true);
+						wFileErrorField.setDisabled(true);
+						wFileErrorMessageField.setDisabled(true);
+						wErrorLineSkipped.setDisabled(true);
+						wErrorCountField.setDisabled(true);
+						wErrorFieldsField.setDisabled(true);
+						wErrorTextField.setDisabled(true);
+						wWarningFilesDestinationDirectory.setDisabled(true);
+						wErrorFilesDestinationDirectory.setDisabled(true);
+						wLineNumberFilesDestinationDirectory.setDisabled(true);
+						wWarningFilesExtension.setDisabled(true);
+						wErrorFilesExtension.setDisabled(true);
+						wLineNumberFilesExtension.setDisabled(true);
+						wWarningFilesFindButton.setDisabled(true);
+						wLineNumberFindButton.setDisabled(true);
+						wErrorFilesFindButton.setDisabled(true);
+
+			        }
+			    }
+			 }
+		   });
+		var wSkipBadFiles = new Ext.form.Checkbox({fieldLabel: '忽略错误文件', flex: 1,anchor: '-10', checked: cell.getAttribute('skipBadFiles'),
+			listeners:{
+				'check':function(checked){
+					if(checked.checked)
+				   {
+						wFileErrorField.setDisabled(false);
+						wFileErrorMessageField.setDisabled(false);
+					}else{
+						wFileErrorField.setDisabled(true);
+						wFileErrorMessageField.setDisabled(true);
+			        }
+			    }
+			 }
+		});
 		var wFileErrorField = new Ext.form.TextField({fieldLabel: '错误文件字段名', flex: 1,anchor: '-10', value: cell.getAttribute('fileErrorField')});
 		var wFileErrorMessageField = new Ext.form.TextField({fieldLabel: '文件错误信息字段名', flex: 1,anchor: '-10', value: cell.getAttribute('fileErrorMessageField')});
 		var wErrorLineSkipped = new Ext.form.Checkbox({fieldLabel: '跳过错误行', flex: 1,anchor: '-10', checked: cell.getAttribute('errorLineSkipped')});
@@ -143,6 +308,34 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		var wWarningFilesExtension = new Ext.form.TextField({fieldLabel: '扩展名', flex: 1,anchor: '-10', value: cell.getAttribute('warningFilesExtension')});
 		var wErrorFilesExtension = new Ext.form.TextField({fieldLabel: '扩展名', flex: 1,anchor: '-10', value: cell.getAttribute('errorFilesExtension')});
 		var wLineNumberFilesExtension = new Ext.form.TextField({fieldLabel: '扩展名', flex: 1,anchor: '-10', value: cell.getAttribute('lineNumberFilesExtension')});
+		var wWarningFilesFindButton = new Ext.Button({ text: '浏览(B)',
+			handler: function() {
+			var dialog = new FileExplorerWindow();
+			dialog.on('ok', function(path) {
+				wWarningFilesDestinationDirectory.setValue(path);
+				dialog.close();
+			});
+			dialog.show();
+		}});
+		var  wErrorFilesFindButton = new Ext.Button({ text: '浏览(B)',
+			handler: function() {
+			var dialog = new FileExplorerWindow();
+			dialog.on('ok', function(path) {
+				wErrorFilesDestinationDirectory.setValue(path);
+				dialog.close();
+			});
+			dialog.show();
+		}});
+		var wLineNumberFindButton = new Ext.Button({ text: '浏览(B)',
+			handler: function() {
+			var dialog = new FileExplorerWindow();
+			dialog.on('ok', function(path) {
+				wLineNumberFilesDestinationDirectory.setValue(path);
+				dialog.close();
+			});
+			dialog.show();
+		}});
+		
 		
 		var wShortFilenameField = new Ext.form.TextField({fieldLabel: '文件名字段', flex: 1,anchor: '-10', value: cell.getAttribute('shortFilenameField')});
 		var wExtensionField = new Ext.form.TextField({fieldLabel: '扩展名字段', flex: 1,anchor: '-10', value: cell.getAttribute('extensionField')});
@@ -294,7 +487,6 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		
 		this.getValues = function(){
 			return {
-				file_name: wFilename.getValue(),
 				acceptingFilenames: wAcceptingFilenames.getValue() ? "Y" : "N",
 				passingThruFields: wPassingThruFields.getValue() ? "Y" : "N",
 				acceptingField: wAcceptingField.getValue(),
@@ -320,10 +512,8 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 			    filenameField: wFilenameField.getValue(),
 			    includeRowNumber: wIncludeRowNumber.getValue() ? "Y" : "N",
 			    rowNumberField: wRowNumberField.getValue(),
-			    includeRowNumber: wIncludeRowNumber.getValue() ? "Y" : "N",
-			    rowNumberField: wRowNumberField.getValue(),
 			    rowNumberByFile: wRowNumberByFile.getValue() ? "Y" : "N",
-			    format: wFormat.getValue(),
+			    fileFormat: wFileFormat.getValue(),
 			    encoding: wEncoding.getValue(),
 			    rowLimit: wRowLimit.getValue(),
 			    dateFormatLenient: wDateFormatLenient.getValue() ? "Y" : "N",
@@ -362,23 +552,14 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		this.tabItems = [{
 			xtype: 'KettleForm',
 			title: '文件',
+			autoScroll: true,
 			bodyStyle: 'padding: 10px 0px',
 			labelWidth: 170,
 			items: [{
 				xtype: 'compositefield',
 				fieldLabel: '文件名称',
 				anchor: '-10',
-				flex: 1,
-				items: [wFilename, {
-					xtype: 'button', text: '浏览..', handler: function() {
-						var dialog = new FileExplorerWindow();
-						dialog.on('ok', function(path) {
-							wFilename.setValue(path);
-							dialog.close();
-						});
-						dialog.show();
-					}
-				}]
+				items: [wFilename, waddfilebutton,wfindbutton]
 			},wFileMask,wExcludeFileMask,fileNamegrid,{
 				xtype: 'fieldset',
 				title: '从上一步骤获取文件',
@@ -401,20 +582,6 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 					}
 				}]
 			},wEnclosure, wBreakInEnclosureAllowed, wEscapeCharacter,{
-				xtype: 'compositefield',
-				fieldLabel: '文件名称',
-				anchor: '-10',
-				items: [wFilename, {
-					xtype: 'button', text: '浏览..', handler: function() {
-						var dialog = new FileExplorerWindow();
-						dialog.on('ok', function(path) {
-							wFilename.setValue(path);
-							dialog.close();
-						});
-						dialog.show();
-					}
-				}]
-			},{
 				xtype: 'compositefield',
 				fieldLabel: '头部',
 				anchor: '-10',
@@ -479,7 +646,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		            labelWidth: 80, 
 		            border:false,
 		            items: [wRowNumberField,wRowNumberByFile]} ]
-			},wFormat,wEncoding,wRowLimit,wDateFormatLenient,wDateFormatLocale,{
+			},wFileFormat,wEncoding,wRowLimit,wDateFormatLenient,wDateFormatLocale,{
 				xtype: 'fieldset',
 				title: '结果文件名',
 				items: [wAddresult]
@@ -499,14 +666,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		            flex: 1,
 		            labelWidth: 50, 
 		            border:false,
-		            items: [wWarningFilesExtension]},{	xtype: 'button', text: '浏览(B)', handler: function() {
-					var dialog = new FileExplorerWindow();
-					dialog.on('ok', function(path) {
-						wWarningFilesDestinationDirectory.setValue(path);
-						dialog.close();
-					});
-					dialog.show();
-				}}]
+		            items: [wWarningFilesExtension]},wWarningFilesFindButton]
 			},{xtype: 'compositefield',
 				fieldLabel: '错误文件目录',
 				anchor: '-10',
@@ -515,14 +675,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		            flex: 1,
 		            labelWidth: 50, 
 		            border:false,
-		            items: [wErrorFilesExtension]},{xtype: 'button', text: '浏览(B)', handler: function() {
-					var dialog = new FileExplorerWindow();
-					dialog.on('ok', function(path) {
-						wErrorFilesDestinationDirectory.setValue(path);
-						dialog.close();
-					});
-					dialog.show();
-				}}]
+		            items: [wErrorFilesExtension]},wErrorFilesFindButton]
 			},{xtype: 'compositefield',
 				fieldLabel: '失败行数文件目录',
 				anchor: '-10',
@@ -532,14 +685,7 @@ TextFileInputDialog = Ext.extend(KettleTabDialog, {
 		            flex: 1,
 		            labelWidth: 50, 
 		            border:false,
-		            items: [wLineNumberFilesExtension]},{	xtype: 'button', text: '浏览(B)', handler: function() {
-					var dialog = new FileExplorerWindow();
-					dialog.on('ok', function(path) {
-						wLineNumberFilesDestinationDirectory.setValue(path);
-						dialog.close();
-					});
-					dialog.show();
-				}}]
+		            items: [wLineNumberFilesExtension]},wLineNumberFindButton]
 			}]},filterGrid,fieldsgrid,{
 			xtype: 'KettleForm',
 			title: '其他输出字段',
