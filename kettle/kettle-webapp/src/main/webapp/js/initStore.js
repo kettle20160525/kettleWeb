@@ -113,6 +113,24 @@ Ext.onReady(function() {
 	}).load();
 	
 	new Ext.data.JsonStore({
+		storeId:'successConditionStore',
+		fields: ['value','text'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/successCondition.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
+		storeId:'successNumberConditionStore',
+		fields: ['value','text'],
+		proxy: new Ext.data.HttpProxy({
+			url: GetUrl('system/successNumberCondition.do'),
+			method: 'POST'
+		})
+	}).load();
+	
+	new Ext.data.JsonStore({
 		storeId: 'databaseAccessMethod',
 		fields: ['value','text'],
 		proxy: new Ext.data.HttpProxy({
@@ -128,5 +146,6 @@ Ext.onReady(function() {
 			system.addAll(Ext.decode(response.responseText));
 		}
 	});
+	
 	
 });

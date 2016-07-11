@@ -40,6 +40,7 @@ import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaPluginType;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.sftp.SFTPClient;
+import org.pentaho.di.job.entries.simpleeval.JobEntrySimpleEval;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.laf.BasePropertyHandler;
 import org.pentaho.di.trans.steps.randomvalue.RandomValueMeta;
@@ -500,5 +501,30 @@ public class SystemMainController {
 		FontMetrics fm = j.getFontMetrics(f);
 		
 		response.getWriter().write(String.valueOf(fm.stringWidth(text)));
+	}
+	
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/successCondition")
+	protected void successCondition() throws Exception{
+		JSONArray jsonArray = new JSONArray();
+		for(int i=0;i<JobEntrySimpleEval.successConditionCode.length;i++){
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("value", JobEntrySimpleEval.successConditionCode[i]);
+			jsonObject.put("text", JobEntrySimpleEval.successConditionDesc[i]);
+			jsonArray.add(jsonObject);
+		}
+		JsonUtils.response(jsonArray);
+	}
+	@ResponseBody
+	@RequestMapping(method=RequestMethod.POST, value="/successNumberCondition")
+	protected void successNumberCondition() throws Exception{
+		JSONArray jsonArray = new JSONArray();
+		for(int i=0;i<JobEntrySimpleEval.successNumberConditionCode.length;i++){
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("value", JobEntrySimpleEval.successNumberConditionCode[i]);
+			jsonObject.put("text", JobEntrySimpleEval.successNumberConditionDesc[i]);
+			jsonArray.add(jsonObject);
+		}
+		JsonUtils.response(jsonArray);
 	}
 }
